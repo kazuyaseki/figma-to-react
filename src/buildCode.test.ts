@@ -8,6 +8,7 @@ test('Frame without children', () => {
   frameNode.visible = true
   frameNode.layoutMode = 'NONE'
   frameNode.fills = []
+  frameNode.strokes = []
 
   expect(buildCode(frameNode, 'styled-components')).toBe(`const Test: React.VFC = () => {
   return (

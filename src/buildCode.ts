@@ -1,78 +1,8 @@
+import { buildTagTree } from './buildTagTree'
 import { kebabize } from './utils/kebabize'
-import { isImageNode } from './utils/isImageNode'
-
-type Property = {
-  name: string
-  value: string
-}
-
-type Tag = {
-  name: string
-  type: 'opening' | 'closing'
-  properties: Property[]
-  level: number
-  node: SceneNode
-  renderTextWithoutTag?: boolean
-  hasChildren: boolean
-}
+import { Tag } from './buildTagTree'
 
 type CssStyle = 'css' | 'styled-components'
-
-const extractTagNames = (tagNameQueue: Tag[], node: SceneNode, level: number) => {
-  if (!node.visible) {
-    return
-  }
-
-  const skipChildrenIndex: number[] = []
-  const renderChildTextWithoutTag = false
-  const properties: Property[] = []
-  const hasChildren = ('children' in node && node.children.length > 0) || node.type === 'TEXT' // text は characters が子供なので除外
-
-  const isImageFrame = isImageNode(node)
-  if (isImageFrame) {
-    properties.push({ name: 'src', value: '' })
-  }
-
-  tagNameQueue.push({
-    node,
-    name: isImageFrame ? 'img' : node.name,
-    type: 'opening',
-    properties,
-    level,
-    hasChildren
-  })
-
-  if ('children' in node && !isImageFrame) {
-    if (renderChildTextWithoutTag) {
-      tagNameQueue.push({
-        node,
-        name: (node.children[0] as TextNode).characters,
-        type: 'opening',
-        properties: [],
-        level: level + 1,
-        renderTextWithoutTag: true,
-        hasChildren
-      })
-    } else {
-      node.children.forEach((child, index) => {
-        if (!skipChildrenIndex.includes(index)) {
-          extractTagNames(tagNameQueue, child, level + 1)
-        }
-      })
-    }
-  }
-
-  if (!isImageFrame && hasChildren) {
-    tagNameQueue.push({
-      node,
-      name: node.name,
-      type: 'closing',
-      properties: [],
-      level,
-      hasChildren
-    })
-  }
-}
 
 function buildSpaces(baseSpaces: number, level: number) {
   let spacesStr = ''
@@ -101,51 +31,58 @@ function guessTagName(name: string) {
   return 'div'
 }
 
-export const buildCode = (node: SceneNode, css: CssStyle) => {
-  const tagNameQueue: Tag[] = []
-  extractTagNames(tagNameQueue, node, 0)
-
-  return `const ${node.name.replace(/\s/g, '')}: React.VFC = () => {
-  return (
-${tagNameQueue.reduce((prev, current, index) => {
-  const isText = current.node.type === 'TEXT'
-
-  let textStyle: BaseStyle | undefined = undefined
-  if (isText) {
-    textStyle = figma.getStyleById((current.node as TextNode).textStyleId as string)
+const getTagName = (tag: Tag, cssStyle: CssStyle) => {
+  if (cssStyle === 'css') {
+    if (tag.isImg) {
+      return 'img'
+    }
+    if (tag.isText) {
+      return 'p'
+    }
+    return guessTagName(tag.name)
   }
+  return tag.isText ? 'Text' : tag.name.replace(/\s/g, '')
+}
 
-  const hasTextStyle = !!textStyle
+const getClassName = (tag: Tag, cssStyle: CssStyle) => {
+  if (cssStyle === 'css') {
+    if (tag.isImg) {
+      return ''
+    }
+    if (tag.isText) {
+      return ' className="text"'
+    }
+    return ` className="${kebabize(tag.name)}"`
+  }
+  return ''
+}
 
-  const isOpeningText = isText && current.type === 'opening'
-  const isClosingText = isText && current.type === 'closing'
+const buildJsxString = (tag: Tag, cssStyle: CssStyle, level: number) => {
+  const spaceString = buildSpaces(4, level)
+  const hasChildren = tag.children.length > 0
 
-  const spaceString = isClosingText ? '' : buildSpaces(4, current.level)
+  const tagName = getTagName(tag, cssStyle)
 
-  const openingBracket = current.renderTextWithoutTag ? '' : '<'
-  const closingSlash = current.type === 'closing' ? '/' : ''
-  const tagName = hasTextStyle ? 'p' : css === 'css' ? (isText ? 'p' : guessTagName(current.name)) : isText ? 'Text' : current.name.replace(/\s/g, '')
-  const className =
-    current.type === 'closing'
-      ? ''
-      : hasTextStyle
-      ? ` className="${textStyle.name}"`
-      : css === 'css'
-      ? isText
-        ? ' className="text"'
-        : ` className="${kebabize(current.name)}"`
-      : ''
-  const properties = current.type === 'opening' ? current.properties.map((prop) => ` ${prop.name}="${prop.value}"`).join() : ''
-  const openingTagSlash = current.hasChildren ? '' : ' /'
-  const closingBracket = current.renderTextWithoutTag ? '' : '>'
-  const textValue = isOpeningText ? current.name : '' /* テキストの場合は中身のテキストを足す */
+  const className = getClassName(tag, cssStyle)
+  const properties = tag.properties.map((prop) => ` ${prop.name}="${prop.value}"`).join('')
 
-  const tag = openingBracket + closingSlash + tagName + className + properties + openingTagSlash + closingBracket + textValue
+  const openingTag = `${spaceString}<${tagName}${className}${properties}${hasChildren && !tag.isText ? `` : ' /'}>`
+  const childTags = hasChildren
+    ? '\n' + tag.children.map((child) => buildJsxString(child, cssStyle, level + 1)).join('\n')
+    : tag.isText
+    ? `\n${buildSpaces(4, level + 1)}${tag.textCharacters}`
+    : ''
+  const closingTag = hasChildren || tag.isText ? `\n${spaceString}</${tagName}>` : ''
 
-  const ending = isOpeningText || index === tagNameQueue.length - 1 ? '' : '\n'
+  return openingTag + childTags + closingTag
+}
 
-  return prev + spaceString + tag + ending
-}, '')}
+export const buildCode = (node: SceneNode, css: CssStyle) => {
+  const tag = buildTagTree(node)
+
+  return `const ${tag.name.replace(/\s/g, '')}: React.VFC = () => {
+  return (
+${buildJsxString(tag, css, 0)}
   )
 }`
 }
