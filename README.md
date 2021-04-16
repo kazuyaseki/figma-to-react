@@ -14,7 +14,7 @@ npm run dev
 Feel free to folk this repositoty, create and publish your own Figma to Vue, Flutter, SwiftUI or whatsoever!
 
 `buildTagTree` method would be useful for such case.
-`buildTagTree` method outputs a `tag` object in the following format which is independent from how the final outcome is structured.
+`buildTagTree` metsod outputs a `tag` object in the following format which is independent from how the final outcome is structured.
 
 ```ts
 export type Tag = {
