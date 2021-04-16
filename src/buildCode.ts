@@ -66,7 +66,7 @@ const buildJsxString = (tag: Tag, cssStyle: CssStyle, level: number) => {
   const className = getClassName(tag, cssStyle)
   const properties = tag.properties.map((prop) => ` ${prop.name}="${prop.value}"`).join('')
 
-  const openingTag = `${spaceString}<${tagName}${className}${properties}${hasChildren && !tag.isText ? `` : ' /'}>`
+  const openingTag = `${spaceString}<${tagName}${className}${properties}${hasChildren || tag.isText ? `` : ' /'}>`
   const childTags = hasChildren
     ? '\n' + tag.children.map((child) => buildJsxString(child, cssStyle, level + 1)).join('\n')
     : tag.isText
