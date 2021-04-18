@@ -19,6 +19,8 @@ const components: ComponentSetting[] = [
       } else {
         tag.properties.push({ name: 'width', value: tag.node.width.toString(), notStringValue: true })
       }
+
+      tag.isComponent = true
       return tag
     }
   }

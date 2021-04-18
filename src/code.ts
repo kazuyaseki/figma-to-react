@@ -40,7 +40,7 @@ figma.ui.onmessage = (msg) => {
   }
   if (msg.type === 'new-css-style-set') {
     figma.clientStorage.setAsync(CSS_STYLE_KEY, msg.cssStyle)
-    const generatedCodeStr = buildCode(selectedNodes[0], msg.cssStyle as CssStyle)
+    const generatedCodeStr = buildCode(selectedNodes[0], msg.cssStyle as CssStyle, figma)
     const cssDatum = extractCssDatum([], selectedNodes[0])
     figma.ui.postMessage({ generatedCodeStr, cssDatum })
   }

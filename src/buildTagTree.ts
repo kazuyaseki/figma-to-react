@@ -1,5 +1,6 @@
 import { CSSData, getCssDataForTag } from './getCssDataForTag'
 import { isImageNode } from './utils/isImageNode'
+
 type Property = {
   name: string
   value: string
@@ -15,6 +16,7 @@ export type Tag = {
   css: CSSData
   children: Tag[]
   node: SceneNode
+  isComponent?: boolean
 }
 
 export const buildTagTree = (node: SceneNode): Tag | null => {

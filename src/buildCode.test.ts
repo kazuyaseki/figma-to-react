@@ -104,7 +104,7 @@ describe('when css style is styled-components', () => {
 
     const textNode = createTextNodeWithDefaultProperties(figma, { name: 'Text', characters })
 
-    expect(buildCode(textNode, 'styled-components')).toBe(`const Text: React.VFC = () => {
+    expect(buildCode(textNode, 'styled-components', figma)).toBe(`const Text: React.VFC = () => {
   return (
     <Text>
       ${characters}
@@ -116,7 +116,7 @@ describe('when css style is styled-components', () => {
   test('render Image node', () => {
     const imageNode = createFrameWithDefaultProperties(figma, { name: 'Image', isImage: true })
 
-    expect(buildCode(imageNode, 'styled-components')).toBe(`const Image: React.VFC = () => {
+    expect(buildCode(imageNode, 'styled-components', figma)).toBe(`const Image: React.VFC = () => {
   return (
     <Image src="" />
   )

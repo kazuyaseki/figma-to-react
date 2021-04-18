@@ -33,7 +33,7 @@ function guessTagName(name: string) {
 }
 
 const getTagName = (tag: Tag, cssStyle: CssStyle) => {
-  if (cssStyle === 'css') {
+  if (cssStyle === 'css' && !tag.isComponent) {
     if (tag.isImg) {
       return 'img'
     }
@@ -46,7 +46,7 @@ const getTagName = (tag: Tag, cssStyle: CssStyle) => {
 }
 
 const getClassName = (tag: Tag, cssStyle: CssStyle) => {
-  if (cssStyle === 'css') {
+  if (cssStyle === 'css' && !tag.isComponent) {
     if (tag.isImg) {
       return ''
     }
@@ -80,7 +80,7 @@ const buildJsxString = (tag: Tag, cssStyle: CssStyle, level: number) => {
   return openingTag + childTags + closingTag
 }
 
-export const buildCode = (node: SceneNode, css: CssStyle, _figma: PluginAPI) => {
+export const buildCode = (node: SceneNode, css: CssStyle, _figma: PluginAPI): string => {
   const tag = modifyTreeForComponent(buildTagTree(node), _figma)
 
   return `const ${tag.name.replace(/\s/g, '')}: React.VFC = () => {
