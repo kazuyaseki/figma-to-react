@@ -1,5 +1,5 @@
 import { buildTagTree } from './buildTagTree'
-import { kebabize } from './utils/kebabize'
+import { kebabize } from './utils/stringUtils'
 import { Tag } from './buildTagTree'
 
 type CssStyle = 'css' | 'styled-components'
