@@ -3,6 +3,7 @@ import { isImageNode } from './utils/isImageNode'
 type Property = {
   name: string
   value: string
+  notStringValue?: boolean
 }
 
 export type Tag = {
@@ -13,6 +14,7 @@ export type Tag = {
   properties: Property[]
   css: CSSData
   children: Tag[]
+  node: SceneNode
 }
 
 export const buildTagTree = (node: SceneNode): Tag | null => {
@@ -41,7 +43,8 @@ export const buildTagTree = (node: SceneNode): Tag | null => {
     isImg,
     css: getCssDataForTag(node),
     properties,
-    children: childTags
+    children: childTags,
+    node
   }
 
   return tag

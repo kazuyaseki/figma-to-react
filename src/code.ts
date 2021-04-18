@@ -18,7 +18,7 @@ async function generate(node: SceneNode, cssStyle?: CssStyle) {
     }
   }
 
-  const generatedCodeStr = buildCode(node, _css)
+  const generatedCodeStr = buildCode(node, _css, figma)
   const cssDatum = extractCssDatum([], node)
 
   figma.ui.postMessage({ generatedCodeStr, cssDatum, cssStyle: _css })

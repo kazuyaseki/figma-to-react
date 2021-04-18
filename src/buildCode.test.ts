@@ -30,7 +30,7 @@ const figma = createFigma({})
 describe('when css style is pure CSS', () => {
   test('Frame without children should render only one tag', () => {
     const frameNode = createFrameWithDefaultProperties(figma)
-    expect(buildCode(frameNode, 'css')).toBe(`const Test: React.VFC = () => {
+    expect(buildCode(frameNode, 'css', figma)).toBe(`const Test: React.VFC = () => {
   return (
     <div className="test" />
   )
@@ -42,7 +42,7 @@ describe('when css style is pure CSS', () => {
     const childNode = createFrameWithDefaultProperties(figma, { name: 'Child' })
     parentNode.appendChild(childNode)
 
-    expect(buildCode(parentNode, 'css')).toBe(`const Parent: React.VFC = () => {
+    expect(buildCode(parentNode, 'css', figma)).toBe(`const Parent: React.VFC = () => {
   return (
     <div className="parent">
       <div className="child" />
@@ -55,7 +55,7 @@ describe('when css style is pure CSS', () => {
     const characters = 'てすと'
     const textNode = createTextNodeWithDefaultProperties(figma, { name: 'Text', characters })
 
-    expect(buildCode(textNode, 'css')).toBe(`const Text: React.VFC = () => {
+    expect(buildCode(textNode, 'css', figma)).toBe(`const Text: React.VFC = () => {
   return (
     <p className="text">
       ${characters}
@@ -67,7 +67,7 @@ describe('when css style is pure CSS', () => {
   test('render Image node', () => {
     const imageNode = createFrameWithDefaultProperties(figma, { name: 'Image', isImage: true })
 
-    expect(buildCode(imageNode, 'css')).toBe(`const Image: React.VFC = () => {
+    expect(buildCode(imageNode, 'css', figma)).toBe(`const Image: React.VFC = () => {
   return (
     <img src="" />
   )
@@ -78,7 +78,7 @@ describe('when css style is pure CSS', () => {
 describe('when css style is styled-components', () => {
   test('Frame without children should render only one tag', () => {
     const frameNode = createFrameWithDefaultProperties(figma)
-    expect(buildCode(frameNode, 'styled-components')).toBe(`const Test: React.VFC = () => {
+    expect(buildCode(frameNode, 'styled-components', figma)).toBe(`const Test: React.VFC = () => {
   return (
     <Test />
   )
@@ -90,7 +90,7 @@ describe('when css style is styled-components', () => {
     const childNode = createFrameWithDefaultProperties(figma, { name: 'Child' })
     parentNode.appendChild(childNode)
 
-    expect(buildCode(parentNode, 'styled-components')).toBe(`const Parent: React.VFC = () => {
+    expect(buildCode(parentNode, 'styled-components', figma)).toBe(`const Parent: React.VFC = () => {
   return (
     <Parent>
       <Child />

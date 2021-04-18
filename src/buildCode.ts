@@ -1,3 +1,4 @@
+import { modifyTreeForComponent } from './modifyTreeForComponent'
 import { buildTagTree } from './buildTagTree'
 import { kebabize } from './utils/stringUtils'
 import { Tag } from './buildTagTree'
@@ -64,7 +65,9 @@ const buildJsxString = (tag: Tag, cssStyle: CssStyle, level: number) => {
   const tagName = getTagName(tag, cssStyle)
 
   const className = getClassName(tag, cssStyle)
-  const properties = tag.properties.map((prop) => ` ${prop.name}="${prop.value}"`).join('')
+  const properties = tag.properties
+    .map((prop) => ` ${prop.name}${prop.value !== null ? `=${prop.notStringValue ? '{' : '"'}${prop.value}${prop.notStringValue ? '}' : '"'}` : ''}`)
+    .join('')
 
   const openingTag = `${spaceString}<${tagName}${className}${properties}${hasChildren || tag.isText ? `` : ' /'}>`
   const childTags = hasChildren
@@ -77,8 +80,8 @@ const buildJsxString = (tag: Tag, cssStyle: CssStyle, level: number) => {
   return openingTag + childTags + closingTag
 }
 
-export const buildCode = (node: SceneNode, css: CssStyle) => {
-  const tag = buildTagTree(node)
+export const buildCode = (node: SceneNode, css: CssStyle, _figma: PluginAPI) => {
+  const tag = modifyTreeForComponent(buildTagTree(node), _figma)
 
   return `const ${tag.name.replace(/\s/g, '')}: React.VFC = () => {
   return (
