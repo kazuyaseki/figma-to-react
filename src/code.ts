@@ -1,5 +1,7 @@
+import { modifyTreeForComponent } from './modifyTreeForComponent'
 import { buildCode } from './buildCode'
 import { extractCssDatum } from './extractCSSDatum'
+import { buildTagTree } from './buildTagTree'
 
 figma.showUI(__html__, { width: 480, height: 440 })
 
@@ -18,7 +20,8 @@ async function generate(node: SceneNode, cssStyle?: CssStyle) {
     }
   }
 
-  const generatedCodeStr = buildCode(node, _css, figma)
+  const tag = modifyTreeForComponent(buildTagTree(node), figma)
+  const generatedCodeStr = buildCode(tag, _css)
   const cssDatum = extractCssDatum([], node)
 
   figma.ui.postMessage({ generatedCodeStr, cssDatum, cssStyle: _css })
@@ -40,8 +43,11 @@ figma.ui.onmessage = (msg) => {
   }
   if (msg.type === 'new-css-style-set') {
     figma.clientStorage.setAsync(CSS_STYLE_KEY, msg.cssStyle)
-    const generatedCodeStr = buildCode(selectedNodes[0], msg.cssStyle as CssStyle, figma)
+
+    const tag = modifyTreeForComponent(buildTagTree(selectedNodes[0]), figma)
+    const generatedCodeStr = buildCode(tag, msg.cssStyle as CssStyle)
     const cssDatum = extractCssDatum([], selectedNodes[0])
+
     figma.ui.postMessage({ generatedCodeStr, cssDatum })
   }
 }

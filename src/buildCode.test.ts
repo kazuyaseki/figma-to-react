@@ -1,5 +1,7 @@
 import { createFigma } from 'figma-api-stub'
 import { buildCode } from './buildCode'
+import { buildTagTree } from './buildTagTree'
+import { modifyTreeForComponent } from './modifyTreeForComponent'
 
 function createFrameWithDefaultProperties(figma: PluginAPI, config?: { name?: string; isImage?: boolean }) {
   const frameNode = figma.createFrame()
@@ -30,7 +32,9 @@ const figma = createFigma({})
 describe('when css style is pure CSS', () => {
   test('Frame without children should render only one tag', () => {
     const frameNode = createFrameWithDefaultProperties(figma)
-    expect(buildCode(frameNode, 'css', figma)).toBe(`const Test: React.VFC = () => {
+
+    const tag = modifyTreeForComponent(buildTagTree(frameNode), figma)
+    expect(buildCode(tag, 'css')).toBe(`const Test: React.VFC = () => {
   return (
     <div className="test" />
   )
@@ -42,7 +46,8 @@ describe('when css style is pure CSS', () => {
     const childNode = createFrameWithDefaultProperties(figma, { name: 'Child' })
     parentNode.appendChild(childNode)
 
-    expect(buildCode(parentNode, 'css', figma)).toBe(`const Parent: React.VFC = () => {
+    const tag = modifyTreeForComponent(buildTagTree(parentNode), figma)
+    expect(buildCode(tag, 'css')).toBe(`const Parent: React.VFC = () => {
   return (
     <div className="parent">
       <div className="child" />
@@ -55,7 +60,8 @@ describe('when css style is pure CSS', () => {
     const characters = 'てすと'
     const textNode = createTextNodeWithDefaultProperties(figma, { name: 'Text', characters })
 
-    expect(buildCode(textNode, 'css', figma)).toBe(`const Text: React.VFC = () => {
+    const tag = modifyTreeForComponent(buildTagTree(textNode), figma)
+    expect(buildCode(tag, 'css')).toBe(`const Text: React.VFC = () => {
   return (
     <p className="text">
       ${characters}
@@ -67,7 +73,8 @@ describe('when css style is pure CSS', () => {
   test('render Image node', () => {
     const imageNode = createFrameWithDefaultProperties(figma, { name: 'Image', isImage: true })
 
-    expect(buildCode(imageNode, 'css', figma)).toBe(`const Image: React.VFC = () => {
+    const tag = modifyTreeForComponent(buildTagTree(imageNode), figma)
+    expect(buildCode(tag, 'css')).toBe(`const Image: React.VFC = () => {
   return (
     <img src="" />
   )
@@ -78,7 +85,9 @@ describe('when css style is pure CSS', () => {
 describe('when css style is styled-components', () => {
   test('Frame without children should render only one tag', () => {
     const frameNode = createFrameWithDefaultProperties(figma)
-    expect(buildCode(frameNode, 'styled-components', figma)).toBe(`const Test: React.VFC = () => {
+
+    const tag = modifyTreeForComponent(buildTagTree(frameNode), figma)
+    expect(buildCode(tag, 'styled-components')).toBe(`const Test: React.VFC = () => {
   return (
     <Test />
   )
@@ -90,7 +99,8 @@ describe('when css style is styled-components', () => {
     const childNode = createFrameWithDefaultProperties(figma, { name: 'Child' })
     parentNode.appendChild(childNode)
 
-    expect(buildCode(parentNode, 'styled-components', figma)).toBe(`const Parent: React.VFC = () => {
+    const tag = modifyTreeForComponent(buildTagTree(parentNode), figma)
+    expect(buildCode(tag, 'styled-components')).toBe(`const Parent: React.VFC = () => {
   return (
     <Parent>
       <Child />
@@ -104,7 +114,8 @@ describe('when css style is styled-components', () => {
 
     const textNode = createTextNodeWithDefaultProperties(figma, { name: 'Text', characters })
 
-    expect(buildCode(textNode, 'styled-components', figma)).toBe(`const Text: React.VFC = () => {
+    const tag = modifyTreeForComponent(buildTagTree(textNode), figma)
+    expect(buildCode(tag, 'styled-components')).toBe(`const Text: React.VFC = () => {
   return (
     <Text>
       ${characters}
@@ -116,7 +127,8 @@ describe('when css style is styled-components', () => {
   test('render Image node', () => {
     const imageNode = createFrameWithDefaultProperties(figma, { name: 'Image', isImage: true })
 
-    expect(buildCode(imageNode, 'styled-components', figma)).toBe(`const Image: React.VFC = () => {
+    const tag = modifyTreeForComponent(buildTagTree(imageNode), figma)
+    expect(buildCode(tag, 'styled-components')).toBe(`const Image: React.VFC = () => {
   return (
     <Image src="" />
   )

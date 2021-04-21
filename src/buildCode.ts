@@ -80,9 +80,7 @@ const buildJsxString = (tag: Tag, cssStyle: CssStyle, level: number) => {
   return openingTag + childTags + closingTag
 }
 
-export const buildCode = (node: SceneNode, css: CssStyle, _figma: PluginAPI): string => {
-  const tag = modifyTreeForComponent(buildTagTree(node), _figma)
-
+export const buildCode = (tag: Tag, css: CssStyle): string => {
   return `const ${tag.name.replace(/\s/g, '')}: React.VFC = () => {
   return (
 ${buildJsxString(tag, css, 0)}
