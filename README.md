@@ -1,6 +1,6 @@
-<p align="center"><img src="publish/icon.png" align="center" alt="Figma to React logo" width="160" height="160"></p>
+<p align="center"><img src="publish/icon.png" align="center" alt="Figma to React logo" width="128" height="128"></p>
 
-<h2 align="center">Figma to React Component</h2>
+<h1 align="center">Figma to React Component</h1>
 
 ### Development
 
