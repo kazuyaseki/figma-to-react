@@ -1,0 +1,16 @@
+name: ci-frontend
+on: [push]
+jobs:
+  build:
+    name: setup
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@main
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '12.x'
+      - name: Lint&Test
+        run: |
+          npm install
+          npm run lint
+          npm run test
