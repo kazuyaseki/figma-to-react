@@ -1,11 +1,9 @@
 import { modifyTreeForComponent } from './modifyTreeForComponent'
 import { buildCode } from './buildCode'
-import { extractCssDatum } from './extractCSSDatum'
 import { buildTagTree } from './buildTagTree'
+import { buildCssString, CssStyle } from './buildCssString'
 
 figma.showUI(__html__, { width: 480, height: 440 })
-
-type CssStyle = 'css' | 'styled-components'
 
 const selectedNodes = figma.currentPage.selection
 const CSS_STYLE_KEY = 'CSS_STYLE_KEY'
@@ -22,9 +20,9 @@ async function generate(node: SceneNode, cssStyle?: CssStyle) {
 
   const tag = modifyTreeForComponent(buildTagTree(node), figma)
   const generatedCodeStr = buildCode(tag, _css)
-  const cssDatum = extractCssDatum([], node)
+  const cssString = buildCssString(tag, _css)
 
-  figma.ui.postMessage({ generatedCodeStr, cssDatum, cssStyle: _css })
+  figma.ui.postMessage({ generatedCodeStr, cssString, cssStyle: _css })
 }
 
 if (selectedNodes.length > 1) {
@@ -46,8 +44,8 @@ figma.ui.onmessage = (msg) => {
 
     const tag = modifyTreeForComponent(buildTagTree(selectedNodes[0]), figma)
     const generatedCodeStr = buildCode(tag, msg.cssStyle as CssStyle)
-    const cssDatum = extractCssDatum([], selectedNodes[0])
+    const cssString = buildCssString(tag, msg.cssStyle as CssStyle)
 
-    figma.ui.postMessage({ generatedCodeStr, cssDatum })
+    figma.ui.postMessage({ generatedCodeStr, cssString })
   }
 }

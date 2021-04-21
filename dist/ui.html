@@ -120,15 +120,6 @@
     }
   }
 
-  const kebabize = (str) => {
-    return str
-      .split('')
-      .map((letter, idx) => {
-        return letter.toUpperCase() === letter ? `${idx !== 0 ? '-' : ''}${letter.toLowerCase()}` : letter
-      })
-      .join('')
-  }
-
   function notifyChangeCssStyle(newStyle) {
     parent.postMessage({ pluginMessage: { type: 'new-css-style-set', cssStyle: newStyle } }, '*')
   }
@@ -141,24 +132,9 @@
     })
 
     const generatedCodeElement = document.getElementById('generated-code')
-    let codeStr = event.data.pluginMessage.generatedCodeStr
-    codeStr += '\n\n'
 
-    const cssDatum = event.data.pluginMessage.cssDatum
+    const codeStr = event.data.pluginMessage.generatedCodeStr + '\n\n' + event.data.pluginMessage.cssString
     const cssStyle = getCssStyle()
-
-    cssDatum.forEach((cssData) => {
-      const cssStr =
-        cssStyle === 'styled-components'
-          ? `const ${cssData.className.replace(/\s/g, '')} = styled.div\`
-${cssData.properties.map((property) => `  ${property.name}: ${property.value};`).join('\n')}
-\`\n`
-          : `.${kebabize(cssData.className)} {
-${cssData.properties.map((property) => `  ${property.name}: ${property.value};`).join('\n')}
-}\n`
-
-      codeStr += cssStr
-    })
 
     generatedCodeElement.innerHTML = insertSyntaxHighlightText(escapeHtml(codeStr))
 

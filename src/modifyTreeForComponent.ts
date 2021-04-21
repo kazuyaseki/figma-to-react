@@ -1,5 +1,4 @@
 import { Tag } from './buildTagTree'
-import { kebabToUpperCamel } from './utils/stringUtils'
 
 type ComponentSetting = {
   name: string

@@ -156,7 +156,7 @@ export const getCssDataForTag = (node: SceneNode): CSSData => {
     const isImage = isImageNode(node)
     return {
       // name Text node as "Text" since name of text node is often the content of the node and is not appropriate as a name
-      className: isImage ? 'Img' : node.type === 'TEXT' ? 'Text' : node.name,
+      className: isImage ? 'img' : node.type === 'TEXT' ? 'text' : node.name,
       properties
     }
   }
