@@ -1,4 +1,4 @@
-import { kebabize } from './utils/stringUtils'
+import { capitalizeFirstLetter, kebabize } from './utils/stringUtils'
 import { Tag } from './buildTagTree'
 
 type CssStyle = 'css' | 'styled-components'
@@ -86,7 +86,7 @@ function buildJsxString(tag: Tag, cssStyle: CssStyle, level: number) {
 }
 
 export function buildCode(tag: Tag, css: CssStyle): string {
-  return `const ${tag.name.replace(/\s/g, '')}: React.VFC = () => {
+  return `const ${capitalizeFirstLetter(tag.name.replace(/\s/g, ''))}: React.VFC = () => {
   return (
 ${buildJsxString(tag, css, 0)}
   )

@@ -63,9 +63,7 @@ describe('when css style is pure CSS', () => {
     const tag = modifyTreeForComponent(buildTagTree(textNode), figma)
     expect(buildCode(tag, 'css')).toBe(`const Text: React.VFC = () => {
   return (
-    <p className="text">
-      ${characters}
-    </p>
+    <p className="text">${characters}</p>
   )
 }`)
   })
@@ -74,7 +72,7 @@ describe('when css style is pure CSS', () => {
     const imageNode = createFrameWithDefaultProperties(figma, { name: 'Image', isImage: true })
 
     const tag = modifyTreeForComponent(buildTagTree(imageNode), figma)
-    expect(buildCode(tag, 'css')).toBe(`const Image: React.VFC = () => {
+    expect(buildCode(tag, 'css')).toBe(`const Img: React.VFC = () => {
   return (
     <img src="" />
   )
@@ -117,9 +115,7 @@ describe('when css style is styled-components', () => {
     const tag = modifyTreeForComponent(buildTagTree(textNode), figma)
     expect(buildCode(tag, 'styled-components')).toBe(`const Text: React.VFC = () => {
   return (
-    <Text>
-      ${characters}
-    </Text>
+    <Text>${characters}</Text>
   )
 }`)
   })
@@ -128,9 +124,9 @@ describe('when css style is styled-components', () => {
     const imageNode = createFrameWithDefaultProperties(figma, { name: 'Image', isImage: true })
 
     const tag = modifyTreeForComponent(buildTagTree(imageNode), figma)
-    expect(buildCode(tag, 'styled-components')).toBe(`const Image: React.VFC = () => {
+    expect(buildCode(tag, 'styled-components')).toBe(`const Img: React.VFC = () => {
   return (
-    <Image src="" />
+    <img src="" />
   )
 }`)
   })
