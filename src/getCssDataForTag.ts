@@ -62,14 +62,20 @@ export function getCssDataForTag(node: SceneNode): CSSData {
         properties.push({ name: 'flex-direction', value: node.layoutMode === 'HORIZONTAL' ? 'row' : 'column' })
         properties.push({ name: 'justify-content', value: justifyContentCssValues[node.primaryAxisAlignItems] })
         properties.push({ name: 'align-items', value: alignItemsCssValues[node.counterAxisAlignItems] })
+
         if (node.paddingTop === node.paddingBottom && node.paddingTop === node.paddingLeft && node.paddingTop === node.paddingRight) {
-          properties.push({ name: 'padding', value: `${node.paddingTop}px` })
+          if (node.paddingTop > 0) {
+            properties.push({ name: 'padding', value: `${node.paddingTop}px` })
+          }
         } else if (node.paddingTop === node.paddingBottom && node.paddingLeft === node.paddingRight) {
           properties.push({ name: 'padding', value: `${node.paddingTop}px ${node.paddingLeft}px` })
         } else {
           properties.push({ name: 'padding', value: `${node.paddingTop}px ${node.paddingRight}px ${node.paddingBottom}px ${node.paddingLeft}px` })
         }
-        properties.push({ name: 'gap', value: node.itemSpacing + 'px' })
+
+        if (node.primaryAxisAlignItems !== 'SPACE_BETWEEN') {
+          properties.push({ name: 'gap', value: node.itemSpacing + 'px' })
+        }
       } else {
         properties.push({ name: 'height', value: Math.floor(node.height) + 'px' })
         properties.push({ name: 'width', value: Math.floor(node.width) + 'px' })
