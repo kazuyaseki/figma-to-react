@@ -1,15 +1,15 @@
-# Figma to React Component
+<p align="center"><img src="publish/icon.png" align="center" alt="Figma to React logo" width="160" height="160"></p>
 
-<img src="publish/icon.png" align="center" alt="Figma to React logo" width="160" height="160">
+<h2 align="center">Figma to React Component</h2>
 
-## Development
+### Development
 
 ```sh
 npm install
 npm run dev
 ```
 
-## For Those of you Who would like to create your own Figma to xxx
+### For Those of you Who would like to create your own Figma to xxx
 
 Feel free to folk this repositoty, create and publish your own Figma to Vue, Flutter, SwiftUI or whatsoever!
 
