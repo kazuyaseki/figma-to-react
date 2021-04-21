@@ -39,7 +39,7 @@ const textDecorationCssValues = {
   STRILETHROUGH: 'line-through'
 }
 
-export const getCssDataForTag = (node: SceneNode): CSSData => {
+export function getCssDataForTag(node: SceneNode): CSSData {
   const properties: CSSData['properties'] = []
 
   // skip vector since it's often displayed with img tag

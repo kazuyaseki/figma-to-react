@@ -1,4 +1,4 @@
-export const kebabize = (str: string): string => {
+export function kebabize(str: string): string {
   return str
     .split('')
     .map((letter, idx) => {
@@ -7,7 +7,7 @@ export const kebabize = (str: string): string => {
     .join('')
 }
 
-export const capitalizeFirstLetter = (str: string): string => {
+export function capitalizeFirstLetter(str: string): string {
   return str.charAt(0).toUpperCase() + str.slice(1)
 }
 

@@ -4,7 +4,7 @@ import { Tag } from './buildTagTree'
 
 export type CssStyle = 'css' | 'styled-components'
 
-const buildArray = (tag: Tag, arr: CSSData[]): CSSData[] => {
+function buildArray(tag: Tag, arr: CSSData[]): CSSData[] {
   arr.push(tag.css)
 
   tag.children.forEach((child) => {
@@ -14,7 +14,7 @@ const buildArray = (tag: Tag, arr: CSSData[]): CSSData[] => {
   return arr
 }
 
-export const buildCssString = (tag: Tag, cssStyle: CssStyle): string => {
+export function buildCssString(tag: Tag, cssStyle: CssStyle): string {
   const cssArray = buildArray(tag, [])
   let codeStr = ''
 

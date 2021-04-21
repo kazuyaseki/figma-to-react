@@ -19,7 +19,7 @@ export type Tag = {
   isComponent?: boolean
 }
 
-export const buildTagTree = (node: SceneNode): Tag | null => {
+export function buildTagTree(node: SceneNode): Tag | null {
   if (!node.visible) {
     return null
   }

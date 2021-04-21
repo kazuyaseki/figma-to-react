@@ -1,4 +1,4 @@
-export const isImageNode = (node: SceneNode) => {
+export function isImageNode(node: SceneNode): boolean {
   // 下部に Vector しか存在しないものは画像と判定する
   if ('children' in node && node.children.length > 0) {
     let hasOnlyVector = true

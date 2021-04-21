@@ -30,7 +30,7 @@ function guessTagName(name: string) {
   return 'div'
 }
 
-const getTagName = (tag: Tag, cssStyle: CssStyle) => {
+function getTagName(tag: Tag, cssStyle: CssStyle) {
   if (cssStyle === 'css' && !tag.isComponent) {
     if (tag.isImg) {
       return 'img'
@@ -43,7 +43,7 @@ const getTagName = (tag: Tag, cssStyle: CssStyle) => {
   return tag.isText ? 'Text' : tag.name.replace(/\s/g, '')
 }
 
-const getClassName = (tag: Tag, cssStyle: CssStyle) => {
+function getClassName(tag: Tag, cssStyle: CssStyle) {
   if (cssStyle === 'css' && !tag.isComponent) {
     if (tag.isImg) {
       return ''
@@ -56,7 +56,7 @@ const getClassName = (tag: Tag, cssStyle: CssStyle) => {
   return ''
 }
 
-const buildJsxString = (tag: Tag, cssStyle: CssStyle, level: number) => {
+function buildJsxString(tag: Tag, cssStyle: CssStyle, level: number) {
   const spaceString = buildSpaces(4, level)
   const hasChildren = tag.children.length > 0
 
@@ -78,7 +78,7 @@ const buildJsxString = (tag: Tag, cssStyle: CssStyle, level: number) => {
   return openingTag + childTags + closingTag
 }
 
-export const buildCode = (tag: Tag, css: CssStyle): string => {
+export function buildCode(tag: Tag, css: CssStyle): string {
   return `const ${tag.name.replace(/\s/g, '')}: React.VFC = () => {
   return (
 ${buildJsxString(tag, css, 0)}

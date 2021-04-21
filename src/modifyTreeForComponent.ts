@@ -25,7 +25,7 @@ const components: ComponentSetting[] = [
   }
 ]
 
-const modify = (tag: Tag, _figma: PluginAPI) => {
+function modify(tag: Tag, _figma: PluginAPI) {
   if (!tag || !tag.node) {
     return tag
   }
@@ -41,7 +41,7 @@ const modify = (tag: Tag, _figma: PluginAPI) => {
   return tag
 }
 
-export const modifyTreeForComponent = (tree: Tag, _figma: PluginAPI) => {
+export function modifyTreeForComponent(tree: Tag, _figma: PluginAPI): Tag {
   const newTag = modify(tree, _figma)
 
   newTag.children.forEach((child, index) => {
