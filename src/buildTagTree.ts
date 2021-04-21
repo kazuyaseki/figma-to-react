@@ -39,7 +39,7 @@ export function buildTagTree(node: SceneNode): Tag | null {
   }
 
   const tag: Tag = {
-    name: node.name,
+    name: isImg ? 'img' : node.name,
     isText: node.type === 'TEXT',
     textCharacters: node.type === 'TEXT' ? node.characters : null,
     isImg,

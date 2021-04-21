@@ -56,24 +56,31 @@ function getClassName(tag: Tag, cssStyle: CssStyle) {
   return ''
 }
 
+function buildPropertyString(prop: Tag['properties'][number]) {
+  return ` ${prop.name}${prop.value !== null ? `=${prop.notStringValue ? '{' : '"'}${prop.value}${prop.notStringValue ? '}' : '"'}` : ''}`
+}
+
+function buildChildTagsString(tag: Tag, cssStyle: CssStyle, level: number) {
+  if (tag.children.length > 0) {
+    return '\n' + tag.children.map((child) => buildJsxString(child, cssStyle, level + 1)).join('\n')
+  }
+  if (tag.isText) {
+    return `${tag.textCharacters}`
+  }
+  return ''
+}
+
 function buildJsxString(tag: Tag, cssStyle: CssStyle, level: number) {
   const spaceString = buildSpaces(4, level)
   const hasChildren = tag.children.length > 0
 
   const tagName = getTagName(tag, cssStyle)
-
   const className = getClassName(tag, cssStyle)
-  const properties = tag.properties
-    .map((prop) => ` ${prop.name}${prop.value !== null ? `=${prop.notStringValue ? '{' : '"'}${prop.value}${prop.notStringValue ? '}' : '"'}` : ''}`)
-    .join('')
+  const properties = tag.properties.map(buildPropertyString).join('')
 
   const openingTag = `${spaceString}<${tagName}${className}${properties}${hasChildren || tag.isText ? `` : ' /'}>`
-  const childTags = hasChildren
-    ? '\n' + tag.children.map((child) => buildJsxString(child, cssStyle, level + 1)).join('\n')
-    : tag.isText
-    ? `\n${buildSpaces(4, level + 1)}${tag.textCharacters}`
-    : ''
-  const closingTag = hasChildren || tag.isText ? `\n${spaceString}</${tagName}>` : ''
+  const childTags = buildChildTagsString(tag, cssStyle, level)
+  const closingTag = hasChildren || tag.isText ? `${!tag.isText ? '\n' + spaceString : ''}</${tagName}>` : ''
 
   return openingTag + childTags + closingTag
 }

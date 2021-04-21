@@ -42,7 +42,7 @@ const textDecorationCssValues = {
 export function getCssDataForTag(node: SceneNode): CSSData {
   const properties: CSSData['properties'] = []
 
-  // skip vector since it's often displayed with img tag
+  // skip vector since it's often displayed as an img tag
   if (node.visible && node.type !== 'VECTOR') {
     if ('opacity' in node && node.opacity < 1) {
       properties.push({ name: 'opacity', value: node.opacity })
