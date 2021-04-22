@@ -4,7 +4,7 @@
 
 ## The Problem
 
-Many Figma to Code tools have one or more problems of the follwings
+Many Figma to Code tools have one or more problems of the follwings:
 
 - It generates for whole Figma file(not by component)
 - need to go outside of Figma to visit service's site
@@ -13,7 +13,6 @@ Many Figma to Code tools have one or more problems of the follwings
 ## Solution
 
 Figma to React Component outputs React code in the plugin UI and can be genrated by selecting certain node.
-
 And its style is derived from Auto Layout properties, thus is responsive.
 
 <img src="publish/readme_demo.png" align="center" alt="How the plugin works" />
