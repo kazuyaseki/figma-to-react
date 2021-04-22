@@ -6,7 +6,7 @@
 
 Many Figma to Code tools have one or more problems of the follwings:
 
-- It generates for whole Figma file(not by component)
+- generates for whole Figma file(not by component)
 - need to go outside of Figma to visit service's site
 - layout style is not responsive, and is absolute positioned to its parent
 
