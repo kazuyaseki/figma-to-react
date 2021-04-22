@@ -2,14 +2,30 @@
 
 <h1 align="center">Figma to React Component</h1>
 
-### Development
+## The Problem
+
+Many Figma to Code tools have one or more problems of the follwings
+
+- It generates for whole Figma file(not by component)
+- need to go outside of Figma to visit service's site
+- layout style is not responsive, and is absolute positioned to its parent
+
+## Solution
+
+Figma to React Component outputs React code in the plugin UI and can be genrated by selecting certain node.
+
+And its style is derived from Auto Layout properties, thus is responsive.
+
+<img src="publish/readme_demo.png" align="center" alt="How the plugin works" />
+
+## Development
 
 ```sh
 npm install
 npm run dev
 ```
 
-### For Those of you Who would like to create your own Figma to xxx
+## For Those of you Who would like to create your own Figma to xxx
 
 Feel free to folk this repositoty, create and publish your own Figma to Vue, Flutter, SwiftUI or whatsoever!
 
