@@ -1,3 +1,4 @@
+import { buildSizeStringByUnit, UnitType } from './buildSizeStringByUnit'
 import { isImageNode } from './utils/isImageNode'
 
 export type CSSData = {
@@ -39,7 +40,7 @@ const textDecorationCssValues = {
   STRILETHROUGH: 'line-through'
 }
 
-export function getCssDataForTag(node: SceneNode): CSSData {
+export function getCssDataForTag(node: SceneNode, unitType: UnitType): CSSData {
   const properties: CSSData['properties'] = []
 
   // skip vector since it's often displayed as an img tag
@@ -52,7 +53,7 @@ export function getCssDataForTag(node: SceneNode): CSSData {
     }
 
     if (node.type === 'FRAME' || node.type === 'INSTANCE' || node.type === 'COMPONENT') {
-      const borderRadiusValue = getBorderRadiusString(node)
+      const borderRadiusValue = getBorderRadiusString(node, unitType)
       if (borderRadiusValue) {
         properties.push({ name: 'border-radius', value: borderRadiusValue })
       }
@@ -65,16 +66,22 @@ export function getCssDataForTag(node: SceneNode): CSSData {
 
         if (node.paddingTop === node.paddingBottom && node.paddingTop === node.paddingLeft && node.paddingTop === node.paddingRight) {
           if (node.paddingTop > 0) {
-            properties.push({ name: 'padding', value: `${node.paddingTop}px` })
+            properties.push({ name: 'padding', value: `${buildSizeStringByUnit(node.paddingTop, unitType)}` })
           }
         } else if (node.paddingTop === node.paddingBottom && node.paddingLeft === node.paddingRight) {
-          properties.push({ name: 'padding', value: `${node.paddingTop}px ${node.paddingLeft}px` })
+          properties.push({ name: 'padding', value: `${buildSizeStringByUnit(node.paddingTop, unitType)}${buildSizeStringByUnit(node.paddingLeft, unitType)}` })
         } else {
-          properties.push({ name: 'padding', value: `${node.paddingTop}px ${node.paddingRight}px ${node.paddingBottom}px ${node.paddingLeft}px` })
+          properties.push({
+            name: 'padding',
+            value: `${buildSizeStringByUnit(node.paddingTop, unitType)} ${buildSizeStringByUnit(node.paddingRight, unitType)} ${buildSizeStringByUnit(
+              node.paddingBottom,
+              unitType
+            )} ${buildSizeStringByUnit(node.paddingLeft, unitType)}`
+          })
         }
 
         if (node.primaryAxisAlignItems !== 'SPACE_BETWEEN') {
-          properties.push({ name: 'gap', value: node.itemSpacing + 'px' })
+          properties.push({ name: 'gap', value: buildSizeStringByUnit(node.itemSpacing, unitType) })
         }
       } else {
         properties.push({ name: 'height', value: Math.floor(node.height) + 'px' })
@@ -88,12 +95,12 @@ export function getCssDataForTag(node: SceneNode): CSSData {
 
       if ((node.strokes as Paint[]).length > 0) {
         const paint = (node.strokes as Paint[])[0]
-        properties.push({ name: 'border', value: `${node.strokeWeight}px solid ${buildColorString(paint)}` })
+        properties.push({ name: 'border', value: `${buildSizeStringByUnit(node.strokeWeight, unitType)} solid ${buildColorString(paint)}` })
       }
     }
 
     if (node.type === 'RECTANGLE') {
-      const borderRadiusValue = getBorderRadiusString(node)
+      const borderRadiusValue = getBorderRadiusString(node, unitType)
       if (borderRadiusValue) {
         properties.push({ name: 'border-radius', value: borderRadiusValue })
       }
@@ -108,7 +115,7 @@ export function getCssDataForTag(node: SceneNode): CSSData {
 
       if ((node.strokes as Paint[]).length > 0) {
         const paint = (node.strokes as Paint[])[0]
-        properties.push({ name: 'border', value: `${node.strokeWeight}px solid ${buildColorString(paint)}` })
+        properties.push({ name: 'border', value: `${buildSizeStringByUnit(node.strokeWeight, unitType)} solid ${buildColorString(paint)}` })
       }
     }
 
@@ -120,17 +127,22 @@ export function getCssDataForTag(node: SceneNode): CSSData {
 
       const letterSpacing = node.letterSpacing as LetterSpacing
       if (letterSpacing.value !== 0) {
-        properties.push({ name: 'letter-spacing', value: letterSpacing.value + (letterSpacing.unit === 'PIXELS' ? 'px' : '%') })
+        properties.push({ name: 'letter-spacing', value: letterSpacing.unit === 'PIXELS' ? buildSizeStringByUnit(letterSpacing.value, unitType) : letterSpacing.value + '%' })
       }
+
+      type LineHeightWithValue = {
+        readonly value: number
+        readonly unit: 'PIXELS' | 'PERCENT'
+      }
+
       properties.push({
         name: 'line-height',
         value:
           (node.lineHeight as LineHeight).unit === 'AUTO'
             ? 'auto'
-            : (node.lineHeight as {
-                readonly value: number
-                readonly unit: 'PIXELS' | 'PERCENT'
-              }).value + ((node.letterSpacing as LetterSpacing).unit === 'PIXELS' ? 'px' : '%')
+            : (node.letterSpacing as LetterSpacing).unit === 'PIXELS'
+            ? buildSizeStringByUnit((node.lineHeight as LineHeightWithValue).value, unitType)
+            : (node.lineHeight as LineHeightWithValue).value + '%'
       })
 
       if (node.textDecoration !== 'NONE') {
@@ -148,7 +160,7 @@ export function getCssDataForTag(node: SceneNode): CSSData {
 
       if ((node.strokes as Paint[]).length > 0) {
         const paint = (node.strokes as Paint[])[0]
-        properties.push({ name: 'border', value: `${node.strokeWeight}px solid ${buildColorString(paint)}` })
+        properties.push({ name: 'border', value: `${buildSizeStringByUnit(node.strokeWeight, unitType)} solid ${buildColorString(paint)}` })
       }
     }
 
@@ -170,12 +182,15 @@ export function getCssDataForTag(node: SceneNode): CSSData {
   return null
 }
 
-function getBorderRadiusString(node: FrameNode | RectangleNode | ComponentNode | InstanceNode) {
+function getBorderRadiusString(node: FrameNode | RectangleNode | ComponentNode | InstanceNode, unitType: UnitType) {
   if (node.cornerRadius !== 0) {
     if (typeof node.cornerRadius !== 'number') {
-      return `${node.topLeftRadius}px ${node.topRightRadius}px ${node.bottomRightRadius}px ${node.bottomLeftRadius}px`
+      return `${buildSizeStringByUnit(node.topLeftRadius, unitType)} ${buildSizeStringByUnit(node.topRightRadius, unitType)} ${buildSizeStringByUnit(
+        node.bottomRightRadius,
+        unitType
+      )} ${buildSizeStringByUnit(node.bottomLeftRadius, unitType)}`
     }
-    return `${node.cornerRadius as number}px`
+    return `${buildSizeStringByUnit(node.cornerRadius, unitType)}`
   }
   return null
 }

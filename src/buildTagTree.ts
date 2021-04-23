@@ -1,3 +1,4 @@
+import { UnitType } from './buildSizeStringByUnit'
 import { CSSData, getCssDataForTag } from './getCssDataForTag'
 import { isImageNode } from './utils/isImageNode'
 
@@ -19,7 +20,7 @@ export type Tag = {
   isComponent?: boolean
 }
 
-export function buildTagTree(node: SceneNode): Tag | null {
+export function buildTagTree(node: SceneNode, unitType: UnitType): Tag | null {
   if (!node.visible) {
     return null
   }
@@ -34,7 +35,7 @@ export function buildTagTree(node: SceneNode): Tag | null {
   const childTags: Tag[] = []
   if ('children' in node && !isImg) {
     node.children.forEach((child) => {
-      childTags.push(buildTagTree(child))
+      childTags.push(buildTagTree(child, unitType))
     })
   }
 
@@ -43,7 +44,7 @@ export function buildTagTree(node: SceneNode): Tag | null {
     isText: node.type === 'TEXT',
     textCharacters: node.type === 'TEXT' ? node.characters : null,
     isImg,
-    css: getCssDataForTag(node),
+    css: getCssDataForTag(node, unitType),
     properties,
     children: childTags,
     node
