@@ -80,7 +80,7 @@ export function getCssDataForTag(node: SceneNode, unitType: UnitType): CSSData {
           })
         }
 
-        if (node.primaryAxisAlignItems !== 'SPACE_BETWEEN') {
+        if (node.primaryAxisAlignItems !== 'SPACE_BETWEEN' && node.itemSpacing > 0) {
           properties.push({ name: 'gap', value: buildSizeStringByUnit(node.itemSpacing, unitType) })
         }
       } else {
