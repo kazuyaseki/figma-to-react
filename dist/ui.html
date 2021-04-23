@@ -3,11 +3,21 @@
 <div class="layout">
   <p id="generated-code" class="jsx"></p>
   <div id="switch-css-format">
-    <input type="radio" id="css" name="css-style" value="css" checked />
+    <input type="radio" name="css-style" id="css" value="css" checked />
     <label for="css">CSS</label>
 
-    <input type="radio" id="styled-components" name="css-style" value="styled-components" />
+    <input type="radio" name="css-style" id="styled-components" value="styled-components" />
     <label for="styled-components">styled-components</label>
+  </div>
+  <div id="switch-unit-type">
+    <input type="radio" name="unit-type" id="px" value="px" checked />
+    <label for="px">px</label>
+
+    <input type="radio" name="unit-type" id="rem" value="rem" />
+    <label for="rem">rem</label>
+
+    <input type="radio" name="unit-type" id="remAs10px" value="remAs10px" />
+    <label for="remAs10px">rem(as 10px)</label>
   </div>
   <div class="button-layout">
     <button id="copy-button" class="copy-button">Copy to clipboard</button>
@@ -46,11 +56,15 @@
     color: #5497c3;
     white-space: pre-wrap;
 
-    max-height: 312px;
+    max-height: 280px;
     overflow: auto;
   }
 
   #switch-css-format {
+    margin-top: 12px;
+  }
+
+  #switch-unit-type {
     margin-top: 12px;
   }
 
@@ -108,20 +122,14 @@
   }
 
   document.getElementsByName('css-style').forEach((r) => r.addEventListener('change', (e) => notifyChangeCssStyle(e.target.value)))
-
-  function getCssStyle() {
-    const radios = document.getElementsByName('css-style')
-
-    for (var i = 0, length = radios.length; i < length; i++) {
-      if (radios[i].checked) {
-        return radios[i].value
-        break
-      }
-    }
-  }
+  document.getElementsByName('unit-type').forEach((r) => r.addEventListener('change', (e) => notifyChangeUnitType(e.target.value)))
 
   function notifyChangeCssStyle(newStyle) {
     parent.postMessage({ pluginMessage: { type: 'new-css-style-set', cssStyle: newStyle } }, '*')
+  }
+
+  function notifyChangeUnitType(newUnitType) {
+    parent.postMessage({ pluginMessage: { type: 'new-unit-type-set', unitType: newUnitType } }, '*')
   }
 
   onmessage = (event) => {
@@ -131,11 +139,14 @@
       }
     })
 
-    const generatedCodeElement = document.getElementById('generated-code')
+    document.getElementsByName('unit-type').forEach((elem) => {
+      if (elem.value === event.data.pluginMessage.unitType) {
+        elem.checked = true
+      }
+    })
 
     const codeStr = event.data.pluginMessage.generatedCodeStr + '\n\n' + event.data.pluginMessage.cssString
-    const cssStyle = getCssStyle()
-
+    const generatedCodeElement = document.getElementById('generated-code')
     generatedCodeElement.innerHTML = insertSyntaxHighlightText(escapeHtml(codeStr))
 
     document.getElementById('copy-button').addEventListener('click', () => {

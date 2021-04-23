@@ -69,7 +69,7 @@ export function getCssDataForTag(node: SceneNode, unitType: UnitType): CSSData {
             properties.push({ name: 'padding', value: `${buildSizeStringByUnit(node.paddingTop, unitType)}` })
           }
         } else if (node.paddingTop === node.paddingBottom && node.paddingLeft === node.paddingRight) {
-          properties.push({ name: 'padding', value: `${buildSizeStringByUnit(node.paddingTop, unitType)}${buildSizeStringByUnit(node.paddingLeft, unitType)}` })
+          properties.push({ name: 'padding', value: `${buildSizeStringByUnit(node.paddingTop, unitType)} ${buildSizeStringByUnit(node.paddingLeft, unitType)}` })
         } else {
           properties.push({
             name: 'padding',
