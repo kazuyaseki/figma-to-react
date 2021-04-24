@@ -48,5 +48,5 @@ export function modifyTreeForComponent(tree: Tag, _figma: PluginAPI): Tag {
     newTag.children[index] = modifyTreeForComponent(child, _figma)
   })
 
-  return tree
+  return newTag
 }
