@@ -1,9 +1,9 @@
 {
   "compilerOptions": {
     "target": "es5",
-    "typeRoots": [
-      "./node_modules/@types",
-      "./node_modules/@figma"
-    ]
+    "module": "es2015",
+    "moduleResolution": "node",
+    "jsx": "react",
+    "typeRoots": ["./node_modules/@types", "./node_modules/@figma"]
   }
 }
