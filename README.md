@@ -2,6 +2,8 @@
 
 <h1 align="center">Figma to React Component</h1>
 
+https://user-images.githubusercontent.com/6080698/116071904-65b61080-a6c9-11eb-8cf3-29778708be50.mov
+
 ## The Problem
 
 Many Figma to Code tools have one or more problems of the follwings:
