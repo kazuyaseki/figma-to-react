@@ -1,6 +1,9 @@
 <p align="center"><img src="publish/icon.png" align="center" alt="Figma to React logo" width="128" height="128"></p>
 
-<a align="center" href="https://github.com/kazuyaseki/figma-to-react/actions/workflows/ci.yml"><img align="center" src="https://github.com/kazuyaseki/figma-to-react/actions/workflows/ci.yml/badge.svg" alt="test" /></a>
+[![test](https://github.com/kazuyaseki/figma-to-react/actions/workflows/ci.yml/badge.svg)](https://github.com/kazuyaseki/figma-to-react/actions/workflows/ci.yml)
+[![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/kazuyaseki/figma-to-react/graphs/commit-activity)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](https://github.com/kazuyaseki/figma-to-react/pulls)
+[![Tweeting](https://img.shields.io/twitter/url/http/shields.io.svg?style=social)](https://twitter.com/intent/tweet?text=Figma%20to%20React%20is%20awesome%20https://github.com/kazuyaseki/figma-to-react/)
 
 <h1 align="center">Figma to React Component</h1>
 
