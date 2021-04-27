@@ -131,3 +131,17 @@ describe('when css style is styled-components', () => {
 }`)
   })
 })
+
+test('render Frame with invisible node', () => {
+  const parentNode = createFrameWithDefaultProperties(figma, { name: 'Parent' })
+  const childNode = createFrameWithDefaultProperties(figma, { name: 'Child' })
+  childNode.visible = false
+  parentNode.appendChild(childNode)
+
+  const tag = modifyTreeForComponent(buildTagTree(parentNode, 'px'), figma)
+  expect(buildCode(tag, 'styled-components')).toBe(`const Parent: React.VFC = () => {
+  return (
+    <Parent />
+  )
+}`)
+})

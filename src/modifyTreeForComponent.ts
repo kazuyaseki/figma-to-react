@@ -44,9 +44,11 @@ function modify(tag: Tag, _figma: PluginAPI) {
 export function modifyTreeForComponent(tree: Tag, _figma: PluginAPI): Tag {
   const newTag = modify(tree, _figma)
 
-  newTag.children.forEach((child, index) => {
-    newTag.children[index] = modifyTreeForComponent(child, _figma)
-  })
+  if (newTag) {
+    newTag.children.forEach((child, index) => {
+      newTag.children[index] = modifyTreeForComponent(child, _figma)
+    })
+  }
 
   return newTag
 }

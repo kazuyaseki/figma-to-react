@@ -61,6 +61,9 @@ function buildPropertyString(prop: Tag['properties'][number]) {
 }
 
 function buildChildTagsString(tag: Tag, cssStyle: CssStyle, level: number) {
+  if (!tag) {
+    return ''
+  }
   if (tag.children.length > 0) {
     return '\n' + tag.children.map((child) => buildJsxString(child, cssStyle, level + 1)).join('\n')
   }
@@ -71,6 +74,9 @@ function buildChildTagsString(tag: Tag, cssStyle: CssStyle, level: number) {
 }
 
 function buildJsxString(tag: Tag, cssStyle: CssStyle, level: number) {
+  if (!tag) {
+    return ''
+  }
   const spaceString = buildSpaces(4, level)
   const hasChildren = tag.children.length > 0
 
