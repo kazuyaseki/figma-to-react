@@ -1,5 +1,7 @@
 <p align="center"><img src="publish/icon.png" align="center" alt="Figma to React logo" width="128" height="128"></p>
 
+[![test](https://github.com/kazuyaseki/figma-to-react/actions/workflows/ci.yml/badge.svg)](https://github.com/kazuyaseki/figma-to-react/actions/workflows/ci.yml)
+
 <h1 align="center">Figma to React Component</h1>
 
 https://user-images.githubusercontent.com/6080698/116072313-de1cd180-a6c9-11eb-8e32-fe9a2f9a79f8.mov
