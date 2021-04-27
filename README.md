@@ -1,8 +1,6 @@
 <p align="center"><img src="publish/icon.png" align="center" alt="Figma to React logo" width="128" height="128"></p>
 
-<div align="center">
-[![test](https://github.com/kazuyaseki/figma-to-react/actions/workflows/ci.yml/badge.svg)](https://github.com/kazuyaseki/figma-to-react/actions/workflows/ci.yml)
-</div>
+<a align="center" href="https://github.com/kazuyaseki/figma-to-react/actions/workflows/ci.yml"><img align="center" src="https://github.com/kazuyaseki/figma-to-react/actions/workflows/ci.yml/badge.svg" alt="test" /></a>
 
 <h1 align="center">Figma to React Component</h1>
 
