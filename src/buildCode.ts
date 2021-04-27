@@ -60,10 +60,7 @@ function buildPropertyString(prop: Tag['properties'][number]) {
   return ` ${prop.name}${prop.value !== null ? `=${prop.notStringValue ? '{' : '"'}${prop.value}${prop.notStringValue ? '}' : '"'}` : ''}`
 }
 
-function buildChildTagsString(tag: Tag, cssStyle: CssStyle, level: number) {
-  if (!tag) {
-    return ''
-  }
+function buildChildTagsString(tag: Tag, cssStyle: CssStyle, level: number): string {
   if (tag.children.length > 0) {
     return '\n' + tag.children.map((child) => buildJsxString(child, cssStyle, level + 1)).join('\n')
   }

@@ -20,7 +20,7 @@ export type Tag = {
   isComponent?: boolean
 }
 
-export function buildTagTree(node: SceneNode, unitType: UnitType): Tag {
+export function buildTagTree(node: SceneNode, unitType: UnitType): Tag | null {
   if (!node.visible) {
     return null
   }
@@ -35,8 +35,9 @@ export function buildTagTree(node: SceneNode, unitType: UnitType): Tag {
   const childTags: Tag[] = []
   if ('children' in node && !isImg) {
     node.children.forEach((child) => {
-      if (child.visible) {
-        childTags.push(buildTagTree(child, unitType))
+      const childTag = buildTagTree(child, unitType)
+      if (childTag) {
+        childTags.push(childTag)
       }
     })
   }

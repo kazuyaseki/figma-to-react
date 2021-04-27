@@ -28,8 +28,13 @@ async function generate(node: SceneNode, config: { cssStyle?: CssStyle; unitType
       unitType = 'px'
     }
   }
+  const originalTagTree = buildTagTree(node, unitType)
+  if (originalTagTree === null) {
+    figma.notify('Please select a visible node')
+    return
+  }
 
-  const tag = modifyTreeForComponent(buildTagTree(node, unitType), figma)
+  const tag = modifyTreeForComponent(originalTagTree, figma)
   const generatedCodeStr = buildCode(tag, cssStyle)
   const cssString = buildCssString(tag, cssStyle)
 

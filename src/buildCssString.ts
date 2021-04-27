@@ -5,10 +5,6 @@ import { Tag } from './buildTagTree'
 export type CssStyle = 'css' | 'styled-components'
 
 function buildArray(tag: Tag, arr: CSSData[]): CSSData[] {
-  if (!tag || !arr) {
-    return
-  }
-
   arr.push(tag.css)
 
   tag.children.forEach((child) => {

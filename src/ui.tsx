@@ -4,7 +4,7 @@ import { CssStyle } from './buildCssString'
 import { UnitType } from './buildSizeStringByUnit'
 import styles from './ui.css'
 
-function escapeHtml(str) {
+function escapeHtml(str: string) {
   str = str.replace(/&/g, '&amp;')
   str = str.replace(/</g, '&lt;')
   str = str.replace(/>/g, '&gt;')
@@ -15,7 +15,7 @@ function escapeHtml(str) {
 
 // I tried to use highlight.js https://highlightjs.readthedocs.io/en/latest/index.html
 // but didn't like the color. so I give it a go for this dirty style💪
-function insertSyntaxHighlightText(text) {
+function insertSyntaxHighlightText(text: string) {
   return text
     .replaceAll('const', 'const <span class="variable-name">')
     .replaceAll(': React.VFC', '</span>: React.VFC')
@@ -53,9 +53,11 @@ const App: React.VFC = () => {
   const textRef = React.useRef<HTMLTextAreaElement>(null)
 
   const copyToClipboard = () => {
-    textRef.current.select()
-    document.execCommand('copy')
-    parent.postMessage({ pluginMessage: { type: 'notify-copy-success' } }, '*')
+    if (textRef.current) {
+      textRef.current.select()
+      document.execCommand('copy')
+      parent.postMessage({ pluginMessage: { type: 'notify-copy-success' } }, '*')
+    }
   }
 
   const notifyChangeCssStyle = (event: React.ChangeEvent<HTMLInputElement>) => {

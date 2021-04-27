@@ -37,7 +37,7 @@ const textVerticalAlignCssValues = {
 
 const textDecorationCssValues = {
   UNDERLINE: 'underline',
-  STRILETHROUGH: 'line-through'
+  STRIKETHROUGH: 'line-through'
 }
 
 export function getCssDataForTag(node: SceneNode, unitType: UnitType): CSSData {
@@ -145,7 +145,7 @@ export function getCssDataForTag(node: SceneNode, unitType: UnitType): CSSData {
             : (node.lineHeight as LineHeightWithValue).value + '%'
       })
 
-      if (node.textDecoration !== 'NONE') {
+      if (node.textDecoration === 'STRIKETHROUGH' || node.textDecoration === 'UNDERLINE') {
         properties.push({ name: 'text-decoration', value: textDecorationCssValues[node.textDecoration] })
       }
       if ((node.fills as Paint[]).length > 0) {
@@ -179,7 +179,7 @@ export function getCssDataForTag(node: SceneNode, unitType: UnitType): CSSData {
     }
   }
 
-  return null
+  return { className: '', properties: [] }
 }
 
 function getBorderRadiusString(node: FrameNode | RectangleNode | ComponentNode | InstanceNode, unitType: UnitType) {
