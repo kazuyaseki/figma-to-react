@@ -28,8 +28,10 @@ async function generate(node: SceneNode, config: { cssStyle?: CssStyle; unitType
       unitType = 'px'
     }
   }
+  console.log('hoge')
 
   const tag = modifyTreeForComponent(buildTagTree(node, unitType), figma)
+  console.log(tag)
   const generatedCodeStr = buildCode(tag, cssStyle)
   const cssString = buildCssString(tag, cssStyle)
 

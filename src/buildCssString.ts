@@ -19,12 +19,15 @@ export function buildCssString(tag: Tag, cssStyle: CssStyle): string {
   let codeStr = ''
 
   cssArray.forEach((cssData) => {
+    if (!cssData) {
+      return
+    }
     const cssStr =
       cssStyle === 'styled-components'
-        ? `const ${cssData.className.replace(/\s/g, '')} = styled.div\`
+        ? `const ${cssData?.className.replace(/\s/g, '')} = styled.div\`
 ${cssData.properties.map((property) => `  ${property.name}: ${property.value};`).join('\n')}
 \`\n`
-        : `.${kebabize(cssData.className)} {
+        : `.${kebabize(cssData?.className.replace(/\s/g, ''))} {
 ${cssData.properties.map((property) => `  ${property.name}: ${property.value};`).join('\n')}
 }\n`
 
