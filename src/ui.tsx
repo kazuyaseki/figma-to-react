@@ -3,6 +3,7 @@ import * as ReactDom from 'react-dom'
 import { CssStyle } from './buildCssString'
 import { UnitType } from './buildSizeStringByUnit'
 import styles from './ui.css'
+import UserComponentSettingField from './ui/UserComponentSettingField'
 
 function escapeHtml(str: string) {
   str = str.replace(/&/g, '&amp;')
@@ -101,6 +102,12 @@ const App: React.VFC = () => {
           </React.Fragment>
         ))}
       </div>
+
+      <UserComponentSettingField
+        onSubmit={() => {
+          return
+        }}
+      />
 
       <div className="button-layout">
         <button className="copy-button" onClick={copyToClipboard}>
