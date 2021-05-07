@@ -82,6 +82,7 @@ const App: React.VFC = () => {
 
   const syntaxHighlightedCode = React.useMemo(() => insertSyntaxHighlightText(escapeHtml(code)), [code])
 
+  // set initial values taken from figma storage
   React.useEffect(() => {
     onmessage = (event) => {
       setCssStyle(event.data.pluginMessage.cssStyle)
