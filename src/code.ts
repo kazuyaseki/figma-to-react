@@ -1,3 +1,4 @@
+import { messageTypes } from './messagesTypes'
 import { UnitType } from './buildSizeStringByUnit'
 import { modifyTreeForComponent } from './modifyTreeForComponent'
 import { buildCode } from './buildCode'
@@ -9,6 +10,7 @@ figma.showUI(__html__, { width: 480, height: 440 })
 const selectedNodes = figma.currentPage.selection
 const CSS_STYLE_KEY = 'CSS_STYLE_KEY'
 const UNIT_TYPE_KEY = 'UNIT_TYPE_KEY'
+const USER_COMPONENT_SETTINGS_KEY = 'UNIT_TYPE_KEY'
 
 async function generate(node: SceneNode, config: { cssStyle?: CssStyle; unitType?: UnitType }) {
   let cssStyle = config.cssStyle
@@ -51,7 +53,7 @@ if (selectedNodes.length > 1) {
   generate(selectedNodes[0], {})
 }
 
-figma.ui.onmessage = (msg) => {
+figma.ui.onmessage = (msg: messageTypes) => {
   if (msg.type === 'notify-copy-success') {
     figma.notify('copied to clipboard👍')
   }
@@ -62,5 +64,8 @@ figma.ui.onmessage = (msg) => {
   if (msg.type === 'new-unit-type-set') {
     figma.clientStorage.setAsync(UNIT_TYPE_KEY, msg.unitType)
     generate(selectedNodes[0], { unitType: msg.unitType })
+  }
+  if (msg.type === 'update-user-component-settings') {
+    figma.clientStorage.setAsync(USER_COMPONENT_SETTINGS_KEY, msg.userComponentSettings)
   }
 }

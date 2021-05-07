@@ -2,8 +2,10 @@ import * as React from 'react'
 import * as ReactDom from 'react-dom'
 import { CssStyle } from './buildCssString'
 import { UnitType } from './buildSizeStringByUnit'
+import { messageTypes } from './messagesTypes'
 import styles from './ui.css'
 import UserComponentSettingField from './ui/UserComponentSettingField'
+import { UserComponentSetting } from './userComponentSetting'
 
 function escapeHtml(str: string) {
   str = str.replace(/&/g, '&amp;')
@@ -57,16 +59,25 @@ const App: React.VFC = () => {
     if (textRef.current) {
       textRef.current.select()
       document.execCommand('copy')
-      parent.postMessage({ pluginMessage: { type: 'notify-copy-success' } }, '*')
+
+      const msg: messageTypes = { type: 'notify-copy-success' }
+      parent.postMessage(msg, '*')
     }
   }
 
   const notifyChangeCssStyle = (event: React.ChangeEvent<HTMLInputElement>) => {
-    parent.postMessage({ pluginMessage: { type: 'new-css-style-set', cssStyle: event.target.value } }, '*')
+    const msg: messageTypes = { type: 'new-css-style-set', cssStyle: event.target.value as CssStyle }
+    parent.postMessage({ pluginMessage: msg }, '*')
   }
 
   const notifyChangeUnitType = (event: React.ChangeEvent<HTMLInputElement>) => {
-    parent.postMessage({ pluginMessage: { type: 'new-unit-type-set', unitType: event.target.value } }, '*')
+    const msg: messageTypes = { type: 'new-unit-type-set', unitType: event.target.value as UnitType }
+    parent.postMessage({ pluginMessage: msg }, '*')
+  }
+
+  const notifyUpdateComponentSettings = (userComponentSetting: UserComponentSetting) => {
+    const msg: messageTypes = { type: 'update-user-component-settings', userComponentSettings: [userComponentSetting] }
+    parent.postMessage({ pluginMessage: msg }, '*')
   }
 
   const syntaxHighlightedCode = React.useMemo(() => insertSyntaxHighlightText(escapeHtml(code)), [code])
@@ -103,11 +114,7 @@ const App: React.VFC = () => {
         ))}
       </div>
 
-      <UserComponentSettingField
-        onSubmit={() => {
-          return
-        }}
-      />
+      <UserComponentSettingField onSubmit={notifyUpdateComponentSettings} />
 
       <div className="button-layout">
         <button className="copy-button" onClick={copyToClipboard}>
