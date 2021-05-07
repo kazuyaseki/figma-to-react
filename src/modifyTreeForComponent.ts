@@ -1,3 +1,4 @@
+import { UserComponentSetting } from './userComponentSetting'
 import { Tag } from './buildTagTree'
 
 type ComponentSetting = {
@@ -25,13 +26,81 @@ const components: ComponentSetting[] = [
   }
 ]
 
+function findChildTagByName(name: string, tag: Tag): Tag | null {
+  const match = tag.children.find((child) => child.name === name)
+  if (match) {
+    return match
+  }
+
+  let res = null
+  tag.children.forEach((child) => {
+    const result = findChildTagByName(name, child)
+    if (result) {
+      res = result
+    }
+  })
+
+  return res
+}
+
+function findChildNodeWithName(name: string, node: SceneNode): SceneNode | null {
+  if (node.name === name) {
+    return node
+  }
+
+  let _node = null
+
+  if ('children' in node) {
+    node.children.forEach((child) => {
+      const foundNode = findChildNodeWithName(name, child)
+      if (foundNode) {
+        _node = foundNode
+      }
+    })
+  }
+
+  return _node
+}
+
+function generateComponentSetting(settings: UserComponentSetting[]): ComponentSetting[] {
+  return settings.map((setting) => {
+    return {
+      name: setting.name,
+      matcher: (node: SceneNode) => node.name === setting.name,
+      modifyFunc: (tag: Tag) => {
+        setting.props.forEach((prop) => {
+          const node = findChildNodeWithName(prop.labelNodeName, tag.node)
+
+          if (node && 'characters' in node) {
+            tag.properties.push({ name: prop.name, value: node.characters })
+          }
+        })
+
+        if (setting.childrenNodeName) {
+          const child = findChildTagByName(setting.childrenNodeName, tag)
+          tag.children = child ? [child] : []
+        } else {
+          tag.children = []
+        }
+        tag.isComponent = true
+        return tag
+      }
+    }
+  })
+}
+
+const setting: UserComponentSetting[] = [{ name: 'Test', props: [{ type: 'TEXT', name: 'title', labelNodeName: 'title' }], childrenNodeName: 'Hoge' }]
+
 function modify(tag: Tag, _figma: PluginAPI) {
   if (!tag || !tag.node) {
     return tag
   }
 
   let modifiedOnce = false
-  components.forEach((setting) => {
+  const compSetting = generateComponentSetting(setting)
+  const comps = [...components, ...compSetting]
+
+  comps.forEach((setting) => {
     if (!modifiedOnce && setting.matcher(tag.node)) {
       tag = setting.modifyFunc(tag, _figma)
       modifiedOnce = true
