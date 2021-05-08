@@ -53,6 +53,7 @@ const App: React.VFC = () => {
   const [code, setCode] = React.useState('')
   const [selectedCssStyle, setCssStyle] = React.useState<CssStyle>('css')
   const [selectedUnitType, setUnitType] = React.useState<UnitType>('px')
+  const [userComponentSettings, setUserComponentSettings] = React.useState<UserComponentSetting[]>([])
   const textRef = React.useRef<HTMLTextAreaElement>(null)
 
   const copyToClipboard = () => {
@@ -89,6 +90,7 @@ const App: React.VFC = () => {
       setUnitType(event.data.pluginMessage.unitType)
       const codeStr = event.data.pluginMessage.generatedCodeStr + '\n\n' + event.data.pluginMessage.cssString
       setCode(codeStr)
+      setUserComponentSettings(event.data.pluginMessage.userComponentSettings)
     }
   }, [])
 
@@ -115,7 +117,12 @@ const App: React.VFC = () => {
         ))}
       </div>
 
-      <UserComponentSettingField onSubmit={notifyUpdateComponentSettings} />
+      <div>
+        {userComponentSettings.map((setting) => (
+          <div key={setting.name}>{setting.name}</div>
+        ))}
+        <UserComponentSettingField onSubmit={notifyUpdateComponentSettings} />
+      </div>
 
       <div className="button-layout">
         <button className="copy-button" onClick={copyToClipboard}>
