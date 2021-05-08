@@ -14,7 +14,6 @@ p {
 .layout {
   padding: 20px;
   background-color: #f0f0f0;
-  height: 100%;
 }
 
 /* position this far outside of the window since it's used only for copy to clipboard functionality */
@@ -40,20 +39,12 @@ p {
   overflow: auto;
 }
 
-.switch-css-format {
-  margin-top: 12px;
-}
-
-.switch-unit-type {
-  margin-top: 12px;
-}
-
 .button-layout {
   width: 100%;
   display: flex;
   justify-content: center;
-  margin-top: 20px;
 }
+
 .copy-button {
   border: none;
   padding: 12px 20px;

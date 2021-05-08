@@ -4,6 +4,7 @@ import { CssStyle } from './buildCssString'
 import { UnitType } from './buildSizeStringByUnit'
 import { messageTypes } from './messagesTypes'
 import styles from './ui.css'
+import Spacer from './ui/Spacer'
 import UserComponentSettingField from './ui/UserComponentSettingField'
 import UserComponentSettingItem from './ui/UserComponentSettingItem'
 import { UserComponentSetting } from './userComponentSetting'
@@ -117,6 +118,16 @@ const App: React.VFC = () => {
       <textarea className="textarea-for-clipboard" ref={textRef} value={code} readOnly />
       <p id="generated-code" className={styles.jsx} dangerouslySetInnerHTML={{ __html: syntaxHighlightedCode }} />
 
+      <Spacer axis="vertical" size={12} />
+
+      <div className="button-layout">
+        <button className="copy-button" onClick={copyToClipboard}>
+          Copy to clipboard
+        </button>
+      </div>
+
+      <Spacer axis="vertical" size={24} />
+
       <div className="switch-css-format">
         {cssStyles.map((style) => (
           <React.Fragment key={style.value}>
@@ -125,6 +136,8 @@ const App: React.VFC = () => {
           </React.Fragment>
         ))}
       </div>
+
+      <Spacer axis="vertical" size={12} />
 
       <div className="switch-unit-type">
         {unitTypes.map((unitType) => (
@@ -135,17 +148,13 @@ const App: React.VFC = () => {
         ))}
       </div>
 
+      <Spacer axis="vertical" size={12} />
+
       <div>
         {userComponentSettings.map((setting) => (
           <UserComponentSettingItem key={setting.name} setting={setting} onDelete={onDeleteUserComponentSetting} onUpdate={onUpdateUserComponentSetting} />
         ))}
         <UserComponentSettingField onSubmit={onAddUserComponentSetting} />
-      </div>
-
-      <div className="button-layout">
-        <button className="copy-button" onClick={copyToClipboard}>
-          Copy to clipboard
-        </button>
       </div>
     </div>
   )
