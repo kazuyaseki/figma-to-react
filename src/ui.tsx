@@ -5,8 +5,6 @@ import { UnitType } from './buildSizeStringByUnit'
 import { messageTypes } from './messagesTypes'
 import styles from './ui.css'
 import Spacer from './ui/Spacer'
-import UserComponentSettingField from './ui/UserComponentSettingField'
-import UserComponentSettingItem from './ui/UserComponentSettingItem'
 import UserComponentSettingList from './ui/UserComponentSettingList'
 import { UserComponentSetting } from './userComponentSetting'
 
@@ -23,22 +21,22 @@ function escapeHtml(str: string) {
 // but didn't like the color. so I give it a go for this dirty style💪
 function insertSyntaxHighlightText(text: string) {
   return text
-    .replaceAll('const', 'const <span class="variable-name">')
-    .replaceAll(': React.VFC', '</span>: React.VFC')
-    .replaceAll('= styled.', '</span>= styled.')
-    .replaceAll('React.VFC', '<span class="type-text">React.VFC</span>')
-    .replaceAll('return', '<span class="return-text">return</span>')
-    .replaceAll(': ', '<span class="expression-text">: </span>')
-    .replaceAll('= ()', '<span class="expression-text">= ()</span>')
-    .replaceAll('{', '<span class="expression-text">{</span>')
-    .replaceAll('}', '<span class="expression-text">}</span>')
-    .replaceAll('(', '<span class="expression-text">(</span>')
-    .replaceAll(')', '<span class="expression-text">)</span>')
-    .replaceAll('&lt;', '<span class="tag-text">&lt;</span><span class="tag-name-text">')
-    .replaceAll('&gt;', '</span><span class="tag-text">&gt;</span>')
-    .replaceAll('=</span><span class="tag-text">&gt;</span>', '<span class="default-text">=&gt;</span>')
-    .replaceAll('.div', '<span class="function-text">.div</span>')
-    .replaceAll('`', '<span class="string-text">`</span>')
+    .replaceAll('const', `const <span class="${styles.variableName}">`)
+    .replaceAll(': React.VFC', `</span>: React.VFC`)
+    .replaceAll('= styled.', `</span>= styled.`)
+    .replaceAll('React.VFC', `<span class="${styles.typeText}">React.VFC</span>`)
+    .replaceAll('return', `<span class="${styles.returnText}">return</span>`)
+    .replaceAll(': ', `<span class="${styles.expressionText}">: </span>`)
+    .replaceAll('= ()', `<span class="${styles.expressionText}">= ()</span>`)
+    .replaceAll('{', `<span class="${styles.expressionText}">{</span>`)
+    .replaceAll('}', `<span class="${styles.expressionText}">}</span>`)
+    .replaceAll('(', `<span class="${styles.expressionText}">(</span>`)
+    .replaceAll(')', `<span class="${styles.expressionText}">)</span>`)
+    .replaceAll('&lt;', `<span class="${styles.tagText}">&lt;</span><span class="${styles.tagNameText}">`)
+    .replaceAll('&gt;', `</span><span class="${styles.tagText}">&gt;</span>`)
+    .replaceAll('=</span><span class="tag-text">&gt;</span>', `<span class="${styles.defaultText}">=&gt;</span>`)
+    .replaceAll('.div', `<span class="${styles.functionText}">.div</span>`)
+    .replaceAll('`', `<span class="${styles.stringText}">${'`'}</span>`)
 }
 
 const cssStyles: { value: CssStyle; label: string }[] = [
@@ -115,21 +113,21 @@ const App: React.VFC = () => {
   }, [])
 
   return (
-    <div className="layout">
-      <textarea className="textarea-for-clipboard" ref={textRef} value={code} readOnly />
-      <p id="generated-code" className={styles.jsx} dangerouslySetInnerHTML={{ __html: syntaxHighlightedCode }} />
+    <div className={styles.layout}>
+      <textarea className={styles.textareaForClipboard} ref={textRef} value={code} readOnly />
+      <p className={styles.generatedCode} dangerouslySetInnerHTML={{ __html: syntaxHighlightedCode }} />
 
       <Spacer axis="vertical" size={12} />
 
-      <div className="button-layout">
-        <button className="copy-button" onClick={copyToClipboard}>
+      <div className={styles.buttonLayout}>
+        <button className={styles.copyButton} onClick={copyToClipboard}>
           Copy to clipboard
         </button>
       </div>
 
       <Spacer axis="vertical" size={24} />
 
-      <div className="switch-css-format">
+      <div>
         {cssStyles.map((style) => (
           <React.Fragment key={style.value}>
             <input type="radio" name="css-style" id={style.value} value={style.value} checked={selectedCssStyle === style.value} onChange={notifyChangeCssStyle} />
@@ -140,7 +138,7 @@ const App: React.VFC = () => {
 
       <Spacer axis="vertical" size={12} />
 
-      <div className="switch-unit-type">
+      <div>
         {unitTypes.map((unitType) => (
           <React.Fragment key={unitType.value}>
             <input type="radio" name="unit-type" id={unitType.value} value={unitType.value} checked={selectedUnitType === unitType.value} onChange={notifyChangeUnitType} />
