@@ -10,7 +10,7 @@ export default function UserComponentSettingField(props: Props) {
   const [childrenNodeName, setChildrenNodeName] = React.useState('')
 
   const handleAdd = () => {
-    props.onSubmit({ name: componentName, props: [], childrenNodeName: childrenNodeName.length > 0 ? childrenNodeName : null })
+    props.onSubmit({ name: componentName, props: componentProps, childrenNodeName: childrenNodeName.length > 0 ? childrenNodeName : null })
   }
 
   const handleAddProp = () => {
