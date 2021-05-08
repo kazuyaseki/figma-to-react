@@ -54,7 +54,7 @@ export default function UserComponentSettingField(props: Props) {
         <label>Children Node Name</label>
       </div>
 
-      <button onClick={handleAdd} disabled={componentName.length === 0}>
+      <button className="button" onClick={handleAdd} disabled={componentName.length === 0}>
         Add
       </button>
     </div>
