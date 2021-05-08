@@ -85,6 +85,10 @@ const App: React.VFC = () => {
     notifyUpdateComponentSettings([...userComponentSettings, userComponentSetting])
   }
 
+  const onDeleteUserComponentSetting = (name: string) => {
+    notifyUpdateComponentSettings(userComponentSettings.filter((setting) => setting.name !== name))
+  }
+
   const syntaxHighlightedCode = React.useMemo(() => insertSyntaxHighlightText(escapeHtml(code)), [code])
 
   // set initial values taken from figma storage
@@ -123,7 +127,10 @@ const App: React.VFC = () => {
 
       <div>
         {userComponentSettings.map((setting) => (
-          <div key={setting.name}>{setting.name}</div>
+          <div key={setting.name}>
+            {setting.name}
+            <button onClick={() => onDeleteUserComponentSetting(setting.name)}>Delete</button>
+          </div>
         ))}
         <UserComponentSettingField onSubmit={onAddUserComponentSetting} />
       </div>
