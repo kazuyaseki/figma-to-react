@@ -5,6 +5,7 @@ import { UnitType } from './buildSizeStringByUnit'
 import { messageTypes } from './messagesTypes'
 import styles from './ui.css'
 import UserComponentSettingField from './ui/UserComponentSettingField'
+import UserComponentSettingItem from './ui/UserComponentSettingItem'
 import { UserComponentSetting } from './userComponentSetting'
 
 function escapeHtml(str: string) {
@@ -85,6 +86,15 @@ const App: React.VFC = () => {
     notifyUpdateComponentSettings([...userComponentSettings, userComponentSetting])
   }
 
+  const onUpdateUserComponentSetting = (userComponentSetting: UserComponentSetting) => {
+    const componentSettingIndex = userComponentSettings.findIndex((setting) => setting.name !== userComponentSetting.name)
+    if (componentSettingIndex > -1) {
+      const newUserComponentSettings = [...userComponentSettings]
+      newUserComponentSettings[componentSettingIndex] = userComponentSetting
+      notifyUpdateComponentSettings(newUserComponentSettings)
+    }
+  }
+
   const onDeleteUserComponentSetting = (name: string) => {
     notifyUpdateComponentSettings(userComponentSettings.filter((setting) => setting.name !== name))
   }
@@ -127,10 +137,7 @@ const App: React.VFC = () => {
 
       <div>
         {userComponentSettings.map((setting) => (
-          <div key={setting.name}>
-            {setting.name}
-            <button onClick={() => onDeleteUserComponentSetting(setting.name)}>Delete</button>
-          </div>
+          <UserComponentSettingItem key={setting.name} setting={setting} onDelete={onDeleteUserComponentSetting} onUpdate={onUpdateUserComponentSetting} />
         ))}
         <UserComponentSettingField onSubmit={onAddUserComponentSetting} />
       </div>
