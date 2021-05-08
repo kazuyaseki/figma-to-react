@@ -29,7 +29,7 @@ function createTextNodeWithDefaultProperties(figma: PluginAPI, config?: { name?:
 
 const figma = createFigma({})
 
-describe('when css style is pure CSS', async () => {
+describe('when css style is pure CSS', () => {
   test('Frame without children should render only one tag', async () => {
     const frameNode = createFrameWithDefaultProperties(figma)
 
@@ -80,7 +80,7 @@ describe('when css style is pure CSS', async () => {
   })
 })
 
-describe('when css style is styled-components', async () => {
+describe('when css style is styled-components', () => {
   test('Frame without children should render only one tag', async () => {
     const frameNode = createFrameWithDefaultProperties(figma)
 

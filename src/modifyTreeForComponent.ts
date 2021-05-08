@@ -97,7 +97,7 @@ async function modify(tag: Tag, _figma: PluginAPI) {
 
   let modifiedOnce = false
 
-  const userComponentSettings = await figma.clientStorage.getAsync(STORAGE_KEYS.USER_COMPONENT_SETTINGS_KEY)
+  const userComponentSettings = await _figma.clientStorage?.getAsync(STORAGE_KEYS.USER_COMPONENT_SETTINGS_KEY)
   const compSetting = generateComponentSetting(userComponentSettings || [])
   const comps = [...components, ...compSetting]
 
