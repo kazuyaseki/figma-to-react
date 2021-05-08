@@ -1,3 +1,4 @@
+import { STORAGE_KEYS } from './storageKeys'
 import { UserComponentSetting } from './userComponentSetting'
 import { Tag } from './buildTagTree'
 
@@ -89,15 +90,15 @@ function generateComponentSetting(settings: UserComponentSetting[]): ComponentSe
   })
 }
 
-const setting: UserComponentSetting[] = [{ name: 'Test', props: [{ type: 'TEXT', name: 'title', labelNodeName: 'title' }], childrenNodeName: 'Hoge' }]
-
-function modify(tag: Tag, _figma: PluginAPI) {
+async function modify(tag: Tag, _figma: PluginAPI) {
   if (!tag || !tag.node) {
     return tag
   }
 
   let modifiedOnce = false
-  const compSetting = generateComponentSetting(setting)
+
+  const userComponentSettings = await figma.clientStorage.getAsync(STORAGE_KEYS.USER_COMPONENT_SETTINGS_KEY)
+  const compSetting = generateComponentSetting(userComponentSettings || [])
   const comps = [...components, ...compSetting]
 
   comps.forEach((setting) => {
@@ -110,12 +111,12 @@ function modify(tag: Tag, _figma: PluginAPI) {
   return tag
 }
 
-export function modifyTreeForComponent(tree: Tag, _figma: PluginAPI): Tag {
-  const newTag = modify(tree, _figma)
+export async function modifyTreeForComponent(tree: Tag, _figma: PluginAPI) {
+  const newTag = await modify(tree, _figma)
 
   if (newTag) {
-    newTag.children.forEach((child, index) => {
-      newTag.children[index] = modifyTreeForComponent(child, _figma)
+    newTag.children.forEach(async (child, index) => {
+      newTag.children[index] = await modifyTreeForComponent(child, _figma)
     })
   }
 
