@@ -7,6 +7,7 @@ import styles from './ui.css'
 import Spacer from './ui/Spacer'
 import UserComponentSettingField from './ui/UserComponentSettingField'
 import UserComponentSettingItem from './ui/UserComponentSettingItem'
+import UserComponentSettingList from './ui/UserComponentSettingList'
 import { UserComponentSetting } from './userComponentSetting'
 
 function escapeHtml(str: string) {
@@ -150,12 +151,12 @@ const App: React.VFC = () => {
 
       <Spacer axis="vertical" size={12} />
 
-      <div>
-        {userComponentSettings.map((setting) => (
-          <UserComponentSettingItem key={setting.name} setting={setting} onDelete={onDeleteUserComponentSetting} onUpdate={onUpdateUserComponentSetting} />
-        ))}
-        <UserComponentSettingField onSubmit={onAddUserComponentSetting} />
-      </div>
+      <UserComponentSettingList
+        settings={userComponentSettings}
+        onAdd={onAddUserComponentSetting}
+        onDelete={onDeleteUserComponentSetting}
+        onUpdate={onUpdateUserComponentSetting}
+      />
     </div>
   )
 }
