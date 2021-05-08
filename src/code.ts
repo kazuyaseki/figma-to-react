@@ -1,21 +1,20 @@
+import { STORAGE_KEYS } from './storageKeys'
 import { messageTypes } from './messagesTypes'
 import { UnitType } from './buildSizeStringByUnit'
 import { modifyTreeForComponent } from './modifyTreeForComponent'
 import { buildCode } from './buildCode'
 import { buildTagTree } from './buildTagTree'
 import { buildCssString, CssStyle } from './buildCssString'
+import { UserComponentSetting } from './userComponentSetting'
 
 figma.showUI(__html__, { width: 480, height: 440 })
 
 const selectedNodes = figma.currentPage.selection
-const CSS_STYLE_KEY = 'CSS_STYLE_KEY'
-const UNIT_TYPE_KEY = 'UNIT_TYPE_KEY'
-const USER_COMPONENT_SETTINGS_KEY = 'UNIT_TYPE_KEY'
 
 async function generate(node: SceneNode, config: { cssStyle?: CssStyle; unitType?: UnitType }) {
   let cssStyle = config.cssStyle
   if (!cssStyle) {
-    cssStyle = await figma.clientStorage.getAsync(CSS_STYLE_KEY)
+    cssStyle = await figma.clientStorage.getAsync(STORAGE_KEYS.CSS_STYLE_KEY)
 
     if (!cssStyle) {
       cssStyle = 'css'
@@ -24,23 +23,26 @@ async function generate(node: SceneNode, config: { cssStyle?: CssStyle; unitType
 
   let unitType = config.unitType
   if (!unitType) {
-    unitType = await figma.clientStorage.getAsync(UNIT_TYPE_KEY)
+    unitType = await figma.clientStorage.getAsync(STORAGE_KEYS.UNIT_TYPE_KEY)
 
     if (!unitType) {
       unitType = 'px'
     }
   }
+
+  const userComponentSettings: UserComponentSetting[] = (await figma.clientStorage.getAsync(STORAGE_KEYS.USER_COMPONENT_SETTINGS_KEY)) || []
+
   const originalTagTree = buildTagTree(node, unitType)
   if (originalTagTree === null) {
     figma.notify('Please select a visible node')
     return
   }
 
-  const tag = modifyTreeForComponent(originalTagTree, figma)
+  const tag = await modifyTreeForComponent(originalTagTree, figma)
   const generatedCodeStr = buildCode(tag, cssStyle)
   const cssString = buildCssString(tag, cssStyle)
 
-  figma.ui.postMessage({ generatedCodeStr, cssString, cssStyle, unitType })
+  figma.ui.postMessage({ generatedCodeStr, cssString, cssStyle, unitType, userComponentSettings })
 }
 
 if (selectedNodes.length > 1) {
@@ -58,14 +60,14 @@ figma.ui.onmessage = (msg: messageTypes) => {
     figma.notify('copied to clipboard👍')
   }
   if (msg.type === 'new-css-style-set') {
-    figma.clientStorage.setAsync(CSS_STYLE_KEY, msg.cssStyle)
+    figma.clientStorage.setAsync(STORAGE_KEYS.CSS_STYLE_KEY, msg.cssStyle)
     generate(selectedNodes[0], { cssStyle: msg.cssStyle })
   }
   if (msg.type === 'new-unit-type-set') {
-    figma.clientStorage.setAsync(UNIT_TYPE_KEY, msg.unitType)
+    figma.clientStorage.setAsync(STORAGE_KEYS.UNIT_TYPE_KEY, msg.unitType)
     generate(selectedNodes[0], { unitType: msg.unitType })
   }
   if (msg.type === 'update-user-component-settings') {
-    figma.clientStorage.setAsync(USER_COMPONENT_SETTINGS_KEY, msg.userComponentSettings)
+    figma.clientStorage.setAsync(STORAGE_KEYS.USER_COMPONENT_SETTINGS_KEY, msg.userComponentSettings)
   }
 }
