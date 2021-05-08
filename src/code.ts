@@ -69,5 +69,6 @@ figma.ui.onmessage = (msg: messageTypes) => {
   }
   if (msg.type === 'update-user-component-settings') {
     figma.clientStorage.setAsync(STORAGE_KEYS.USER_COMPONENT_SETTINGS_KEY, msg.userComponentSettings)
+    generate(selectedNodes[0], {})
   }
 }

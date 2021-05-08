@@ -76,9 +76,13 @@ const App: React.VFC = () => {
     parent.postMessage({ pluginMessage: msg }, '*')
   }
 
-  const notifyUpdateComponentSettings = (userComponentSetting: UserComponentSetting) => {
-    const msg: messageTypes = { type: 'update-user-component-settings', userComponentSettings: [userComponentSetting] }
+  const notifyUpdateComponentSettings = (userComponentSettings: UserComponentSetting[]) => {
+    const msg: messageTypes = { type: 'update-user-component-settings', userComponentSettings: userComponentSettings }
     parent.postMessage({ pluginMessage: msg }, '*')
+  }
+
+  const onAddUserComponentSetting = (userComponentSetting: UserComponentSetting) => {
+    notifyUpdateComponentSettings([...userComponentSettings, userComponentSetting])
   }
 
   const syntaxHighlightedCode = React.useMemo(() => insertSyntaxHighlightText(escapeHtml(code)), [code])
@@ -121,7 +125,7 @@ const App: React.VFC = () => {
         {userComponentSettings.map((setting) => (
           <div key={setting.name}>{setting.name}</div>
         ))}
-        <UserComponentSettingField onSubmit={notifyUpdateComponentSettings} />
+        <UserComponentSettingField onSubmit={onAddUserComponentSetting} />
       </div>
 
       <div className="button-layout">
