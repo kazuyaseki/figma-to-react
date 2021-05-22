@@ -1,0 +1,77 @@
+.layout {
+  background-color: #f0f0f0;
+  padding: 20px;
+  border-radius: 8px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+}
+
+.row > label {
+  font-size: 14px;
+  width: 144px;
+}
+
+.heading {
+  margin: 0;
+}
+
+.subheading {
+  margin: 0;
+}
+
+.buttonLayout {
+  display: flex;
+  justify-content: space-between;
+}
+
+.button {
+  padding: 8px 12px;
+  border-radius: 4px;
+  background-color: #007555;
+  color: #fff;
+  border: none;
+}
+
+.buttonOutline {
+  padding: 8px 12px;
+  border-radius: 4px;
+  border: 1px solid #999;
+}
+
+.button:disabled {
+  color: #999;
+  background-color: #f0f0f0;
+  border: 1px solid #999;
+}
+
+.textField {
+  padding: 8px 12px;
+  border-radius: 4px;
+  border: rgba(201, 204, 207, 1);
+}
+
+.textField::placeholder {
+  color: #ccc;
+}
+
+.propList {
+  padding: 0;
+}
+
+.propListItem {
+  list-style: none;
+
+  display: flex;
+  gap: 8px;
+}
+
+.propListItem > input:nth-child(2) {
+  flex-grow: 1;
+}
+
+.propList > li:not(:last-child) {
+  margin-bottom: 8px;
+}

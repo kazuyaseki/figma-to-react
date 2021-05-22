@@ -1,62 +1,87 @@
 import * as React from 'react'
+import styles from './UserComponentSettingField.css'
 import { UserComponentSetting } from '../userComponentSetting'
+import Spacer from './Spacer'
 
-type Props = { onSubmit: (userComponentSetting: UserComponentSetting) => void }
+type Props = { onSubmit: (userComponentSetting: UserComponentSetting) => void; onCancel: () => void }
 
 export default function UserComponentSettingField(props: Props) {
   const [componentName, setComponentName] = React.useState('')
-  const [editingProp, setEditingProps] = React.useState<UserComponentSetting['props'][number]>({ type: 'TEXT', name: '', labelNodeName: '' })
-  const [componentProps, setComponentProps] = React.useState<UserComponentSetting['props']>([])
+  const [componentProps, setComponentProps] = React.useState<UserComponentSetting['props']>([
+    { name: '', type: 'TEXT', labelNodeName: '' },
+    { name: '', type: 'TEXT', labelNodeName: '' },
+    { name: '', type: 'TEXT', labelNodeName: '' },
+    { name: '', type: 'TEXT', labelNodeName: '' },
+    { name: '', type: 'TEXT', labelNodeName: '' }
+  ])
   const [childrenNodeName, setChildrenNodeName] = React.useState('')
 
   const handleAdd = () => {
     props.onSubmit({ name: componentName, props: componentProps, childrenNodeName: childrenNodeName.length > 0 ? childrenNodeName : null })
   }
 
-  const handleAddProp = () => {
-    setComponentProps([...componentProps, editingProp])
-    setEditingProps({ type: 'TEXT', name: '', labelNodeName: '' })
+  const handleEditProps = (prop: UserComponentSetting['props'][number], index: number) => {
+    const _props = [...componentProps]
+    _props[index] = prop
+    setComponentProps(_props)
   }
 
   return (
-    <div>
-      <div>
-        <input type="text" value={componentName} onChange={(e) => setComponentName(e.target.value)} />
-        <label>Component Name</label>
+    <div className={styles.layout}>
+      <h3 className={styles.heading}>Add new component</h3>
+
+      <Spacer size={16} axis="vertical" />
+
+      <div className={styles.row}>
+        <label>Component Name:</label>
+        <input type="text" value={componentName} className={styles.textField} onChange={(e) => setComponentName(e.target.value)} />
       </div>
 
+      <Spacer size={8} axis="vertical" />
+
+      <div className={styles.row}>
+        <label>Children Node Name:</label>
+        <input type="text" value={childrenNodeName} className={styles.textField} onChange={(e) => setChildrenNodeName(e.target.value)} />
+      </div>
+
+      <Spacer size={16} axis="vertical" />
+
       <div>
-        <h3>props</h3>
-        <ul>
-          {componentProps.map((prop) => (
-            <li>
-              <p>{prop.name}</p>
-              <p>{prop.labelNodeName}</p>
+        <h4 className={styles.subheading}>Text Props</h4>
+        <Spacer size={4} axis="vertical" />
+        <ul className={styles.propList}>
+          {componentProps.map((prop, index) => (
+            <li className={styles.propListItem}>
+              <input
+                type="text"
+                className={styles.textField}
+                value={prop.name}
+                onChange={(e) => handleEditProps({ ...componentProps[index], name: e.target.value }, index)}
+                placeholder="Prop name"
+              />
+
+              <input
+                type="text"
+                className={styles.textField}
+                value={prop.labelNodeName}
+                onChange={(e) => handleEditProps({ ...componentProps[index], labelNodeName: e.target.value }, index)}
+                placeholder="Figma node name for the prop"
+              />
             </li>
           ))}
         </ul>
-
-        <div>
-          <div>
-            <input type="text" value={editingProp.name} onChange={(e) => setEditingProps({ ...editingProp, name: e.target.value })} />
-            <label>prop Name</label>
-          </div>
-          <div>
-            <input type="text" value={editingProp.labelNodeName} onChange={(e) => setEditingProps({ ...editingProp, labelNodeName: e.target.value })} />
-            <label>prop labelNodeName</label>
-          </div>
-          <button onClick={handleAddProp}>add prop</button>
-        </div>
       </div>
 
-      <div>
-        <input type="text" value={childrenNodeName} onChange={(e) => setChildrenNodeName(e.target.value)} />
-        <label>Children Node Name</label>
-      </div>
+      <Spacer size={20} axis="vertical" />
 
-      <button className="button" onClick={handleAdd} disabled={componentName.length === 0}>
-        Add
-      </button>
+      <div className={styles.buttonLayout}>
+        <button className={styles.buttonOutline} onClick={props.onCancel}>
+          Cancel
+        </button>
+        <button className={styles.button} onClick={handleAdd} disabled={componentName.length === 0}>
+          Add
+        </button>
+      </div>
     </div>
   )
 }

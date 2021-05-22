@@ -1,0 +1,34 @@
+.iconButton {
+  border: none;
+  background-color: transparent;
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.iconButton:hover {
+  background-color: #ddd;
+  border-radius: 50%;
+}
+
+.component {
+  max-width: 280px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.componentTexts {
+  display: flex;
+  align-items: center;
+}
+.componentTexts > p:first-child {
+  margin-right: 8px;
+}
+
+.componentSummaryText {
+  color: #888;
+  font-size: 14px;
+}
