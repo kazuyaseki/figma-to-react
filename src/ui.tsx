@@ -113,48 +113,54 @@ const App: React.VFC = () => {
   }, [])
 
   return (
-    <div className={styles.layout}>
-      <textarea className={styles.textareaForClipboard} ref={textRef} value={code} readOnly />
-      <p className={styles.generatedCode} dangerouslySetInnerHTML={{ __html: syntaxHighlightedCode }} />
+    <div>
+      <div className={styles.code}>
+        <textarea className={styles.textareaForClipboard} ref={textRef} value={code} readOnly />
+        <p className={styles.generatedCode} dangerouslySetInnerHTML={{ __html: syntaxHighlightedCode }} />
 
-      <Spacer axis="vertical" size={12} />
+        <Spacer axis="vertical" size={12} />
 
-      <div className={styles.buttonLayout}>
-        <button className={styles.copyButton} onClick={copyToClipboard}>
-          Copy to clipboard
-        </button>
+        <div className={styles.buttonLayout}>
+          <button className={styles.copyButton} onClick={copyToClipboard}>
+            Copy to clipboard
+          </button>
+        </div>
       </div>
 
-      <Spacer axis="vertical" size={24} />
+      <div className={styles.settings}>
+        <h2 className={styles.heading}>Settings</h2>
 
-      <div>
-        {cssStyles.map((style) => (
-          <React.Fragment key={style.value}>
-            <input type="radio" name="css-style" id={style.value} value={style.value} checked={selectedCssStyle === style.value} onChange={notifyChangeCssStyle} />
-            <label htmlFor={style.value}>{style.label}</label>
-          </React.Fragment>
-        ))}
+        <Spacer axis="vertical" size={12} />
+
+        <div className={styles.optionList}>
+          {cssStyles.map((style) => (
+            <div key={style.value} className={styles.option}>
+              <input type="radio" name="css-style" id={style.value} value={style.value} checked={selectedCssStyle === style.value} onChange={notifyChangeCssStyle} />
+              <label htmlFor={style.value}>{style.label}</label>
+            </div>
+          ))}
+        </div>
+
+        <Spacer axis="vertical" size={12} />
+
+        <div className={styles.optionList}>
+          {unitTypes.map((unitType) => (
+            <div key={unitType.value} className={styles.option}>
+              <input type="radio" name="unit-type" id={unitType.value} value={unitType.value} checked={selectedUnitType === unitType.value} onChange={notifyChangeUnitType} />
+              <label htmlFor={unitType.value}>{unitType.label}</label>
+            </div>
+          ))}
+        </div>
+
+        <Spacer axis="vertical" size={12} />
+
+        <UserComponentSettingList
+          settings={userComponentSettings}
+          onAdd={onAddUserComponentSetting}
+          onDelete={onDeleteUserComponentSetting}
+          onUpdate={onUpdateUserComponentSetting}
+        />
       </div>
-
-      <Spacer axis="vertical" size={12} />
-
-      <div>
-        {unitTypes.map((unitType) => (
-          <React.Fragment key={unitType.value}>
-            <input type="radio" name="unit-type" id={unitType.value} value={unitType.value} checked={selectedUnitType === unitType.value} onChange={notifyChangeUnitType} />
-            <label htmlFor={unitType.value}>{unitType.label}</label>
-          </React.Fragment>
-        ))}
-      </div>
-
-      <Spacer axis="vertical" size={12} />
-
-      <UserComponentSettingList
-        settings={userComponentSettings}
-        onAdd={onAddUserComponentSetting}
-        onDelete={onDeleteUserComponentSetting}
-        onUpdate={onUpdateUserComponentSetting}
-      />
     </div>
   )
 }

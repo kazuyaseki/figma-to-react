@@ -10,10 +10,38 @@ body {
 p {
   margin: 0;
 }
+input {
+  margin: 0;
+}
 
-.layout {
+.code {
   padding: 20px;
   background-color: #f0f0f0;
+}
+
+.settings {
+  padding: 20px;
+}
+
+.heading {
+  margin: 0;
+}
+
+.optionList {
+  display: flex;
+}
+
+.optionList > div:not(:last-child) {
+  margin-right: 8px;
+}
+
+.option {
+  display: flex;
+  align-items: center;
+}
+
+.option > label {
+  margin-left: 4px;
 }
 
 /* position this far outside of the window since it's used only for copy to clipboard functionality */
@@ -35,7 +63,7 @@ p {
   color: #5497c3;
   white-space: pre-wrap;
 
-  max-height: 280px;
+  max-height: 240px;
   overflow: auto;
 }
 
