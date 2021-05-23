@@ -23,6 +23,11 @@
 .componentTexts {
   display: flex;
   align-items: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  width: 200px;
 }
 .componentTexts > p:first-child {
   margin-right: 8px;
@@ -31,4 +36,8 @@
 .componentSummaryText {
   color: #888;
   font-size: 14px;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
