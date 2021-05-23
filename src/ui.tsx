@@ -86,13 +86,10 @@ const App: React.VFC = () => {
     notifyUpdateComponentSettings([...userComponentSettings, userComponentSetting])
   }
 
-  const onUpdateUserComponentSetting = (userComponentSetting: UserComponentSetting) => {
-    const componentSettingIndex = userComponentSettings.findIndex((setting) => setting.name !== userComponentSetting.name)
-    if (componentSettingIndex > -1) {
-      const newUserComponentSettings = [...userComponentSettings]
-      newUserComponentSettings[componentSettingIndex] = userComponentSetting
-      notifyUpdateComponentSettings(newUserComponentSettings)
-    }
+  const onUpdateUserComponentSetting = (userComponentSetting: UserComponentSetting, index: number) => {
+    const newUserComponentSettings = [...userComponentSettings]
+    newUserComponentSettings[index] = userComponentSetting
+    notifyUpdateComponentSettings(newUserComponentSettings)
   }
 
   const onDeleteUserComponentSetting = (name: string) => {

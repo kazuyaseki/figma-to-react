@@ -3,21 +3,29 @@ import styles from './UserComponentSettingField.css'
 import { UserComponentSetting } from '../userComponentSetting'
 import Spacer from './Spacer'
 
-type Props = { onSubmit: (userComponentSetting: UserComponentSetting) => void; onCancel: () => void }
+type Props = { onSubmit: (userComponentSetting: UserComponentSetting) => void; onCancel: () => void; initialValue: UserComponentSetting | null }
+
+function buildInitialProps(props: UserComponentSetting['props']) {
+  const _props = [...props]
+  for (let i = _props.length; i < 5; i++) {
+    _props.push({ name: '', type: 'TEXT', labelNodeName: '' })
+  }
+  return _props
+}
 
 export default function UserComponentSettingField(props: Props) {
-  const [componentName, setComponentName] = React.useState('')
-  const [componentProps, setComponentProps] = React.useState<UserComponentSetting['props']>([
-    { name: '', type: 'TEXT', labelNodeName: '' },
-    { name: '', type: 'TEXT', labelNodeName: '' },
-    { name: '', type: 'TEXT', labelNodeName: '' },
-    { name: '', type: 'TEXT', labelNodeName: '' },
-    { name: '', type: 'TEXT', labelNodeName: '' }
-  ])
-  const [childrenNodeName, setChildrenNodeName] = React.useState('')
+  const [componentName, setComponentName] = React.useState(props.initialValue ? props.initialValue.name : '')
+  const [componentProps, setComponentProps] = React.useState<UserComponentSetting['props']>(buildInitialProps(props.initialValue ? props.initialValue.props : []))
+  const [childrenNodeName, setChildrenNodeName] = React.useState(props.initialValue ? props.initialValue.childrenNodeName || '' : '')
+
+  const isUpdating = React.useMemo(() => props.initialValue !== null, [props.initialValue])
 
   const handleAdd = () => {
-    props.onSubmit({ name: componentName, props: componentProps, childrenNodeName: childrenNodeName.length > 0 ? childrenNodeName : null })
+    props.onSubmit({
+      name: componentName,
+      props: componentProps.filter((prop) => prop.name.length > 0 && prop.labelNodeName.length > 0),
+      childrenNodeName: childrenNodeName.length > 0 ? childrenNodeName : null
+    })
   }
 
   const handleEditProps = (prop: UserComponentSetting['props'][number], index: number) => {
@@ -28,7 +36,7 @@ export default function UserComponentSettingField(props: Props) {
 
   return (
     <div className={styles.layout}>
-      <h3 className={styles.heading}>Add new component</h3>
+      <h3 className={styles.heading}>{isUpdating ? 'Edit component' : 'Add new component'}</h3>
 
       <Spacer size={16} axis="vertical" />
 
@@ -51,7 +59,7 @@ export default function UserComponentSettingField(props: Props) {
         <Spacer size={4} axis="vertical" />
         <ul className={styles.propList}>
           {componentProps.map((prop, index) => (
-            <li className={styles.propListItem}>
+            <li className={styles.propListItem} key={index}>
               <input
                 type="text"
                 className={styles.textField}
@@ -79,7 +87,7 @@ export default function UserComponentSettingField(props: Props) {
           Cancel
         </button>
         <button className={styles.button} onClick={handleAdd} disabled={componentName.length === 0}>
-          Add
+          {isUpdating ? 'Save' : 'Add'}
         </button>
       </div>
     </div>

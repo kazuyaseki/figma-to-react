@@ -8,7 +8,7 @@ import UserComponentSettingItem from './UserComponentSettingItem'
 type Props = {
   settings: UserComponentSetting[]
   onAdd: (setting: UserComponentSetting) => void
-  onUpdate: (setting: UserComponentSetting) => void
+  onUpdate: (setting: UserComponentSetting, index: number) => void
   onDelete: (name: string) => void
 }
 
@@ -20,8 +20,8 @@ export default function UserComponentSettingList(props: Props) {
       <h3>Components</h3>
 
       <ul className={styles.components}>
-        {props.settings.map((setting) => (
-          <UserComponentSettingItem key={setting.name} setting={setting} onDelete={props.onDelete} onUpdate={props.onUpdate} />
+        {props.settings.map((setting, index) => (
+          <UserComponentSettingItem key={setting.name} setting={setting} onDelete={props.onDelete} onUpdate={(newSetting) => props.onUpdate(newSetting, index)} />
         ))}
       </ul>
 
@@ -33,6 +33,7 @@ export default function UserComponentSettingList(props: Props) {
               setAddingComponent(false)
             }}
             onCancel={() => setAddingComponent(false)}
+            initialValue={null}
           />
         </div>
       ) : (

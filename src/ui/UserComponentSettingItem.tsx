@@ -15,7 +15,14 @@ export default function UserComponentSettingItem(props: Props) {
   return (
     <div>
       {updating ? (
-        <UserComponentSettingField onSubmit={props.onUpdate} onCancel={() => setUpdating((_updating) => !_updating)} />
+        <UserComponentSettingField
+          onSubmit={(setting) => {
+            props.onUpdate(setting)
+            setUpdating(false)
+          }}
+          onCancel={() => setUpdating((_updating) => !_updating)}
+          initialValue={props.setting}
+        />
       ) : (
         <div className={styles.component}>
           <div className={styles.componentTexts}>
