@@ -7,7 +7,7 @@ import { buildTagTree } from './buildTagTree'
 import { buildCssString, CssStyle } from './buildCssString'
 import { UserComponentSetting } from './userComponentSetting'
 
-figma.showUI(__html__, { width: 480, height: 440 })
+figma.showUI(__html__, { width: 480, height: 480 })
 
 const selectedNodes = figma.currentPage.selection
 

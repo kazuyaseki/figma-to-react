@@ -24,6 +24,23 @@ And its style is derived from Auto Layout properties, thus is responsive.
 
 <img src="publish/readme_demo.png" align="center" alt="How the plugin works" />
 
+## Futrther features
+
+### Change CSS format and size
+
+You may choose either Pure CSS or styled-components, and you may also change size for px and rem.
+
+<img src="publish/format_setting.png" align="center" alt="change format" />
+
+### Component setting
+
+You may add component setting.
+When you add component setting including component name, name of children node(optional), and props(optional), the plugin will render matched node as component.
+
+<img src="publish/component_setting_1.png" align="center" alt="adding Banner component setting" />
+
+<img src="publish/component_setting_2.png" align="center" alt="Plugin generates Banner as component" />
+
 ## Development
 
 ```sh
