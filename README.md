@@ -4,10 +4,14 @@
 [![Tweeting](https://img.shields.io/twitter/url/http/shields.io.svg?style=social)](https://twitter.com/intent/tweet?text=Figma%20to%20React%20is%20awesome%20https://github.com/kazuyaseki/figma-to-react/)
 
 <p align="center"><img src="publish/icon.png" align="center" alt="Figma to React logo" width="128" height="128"></p>
-
+  
 <h1 align="center">Figma to React Component</h1>
 
+<div align="center">
 <a href="https://www.figma.com/community/plugin/959795830541939498/Figma-to-React-Component" align="center"><img src="publish/install_button.png" align="center" alt="Install Plugin"></a>
+</div>
+
+<br />
 
 https://user-images.githubusercontent.com/6080698/116072313-de1cd180-a6c9-11eb-8e32-fe9a2f9a79f8.mov
 
