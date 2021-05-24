@@ -7,6 +7,8 @@
 
 <h1 align="center">Figma to React Component</h1>
 
+<a href="https://www.figma.com/community/plugin/959795830541939498/Figma-to-React-Component" align="center"><img src="publish/install_button.png" align="center" alt="Install Plugin"></a>
+
 https://user-images.githubusercontent.com/6080698/116072313-de1cd180-a6c9-11eb-8e32-fe9a2f9a79f8.mov
 
 ## The Problem
