@@ -88,7 +88,7 @@ function buildJsxString(tag: Tag, cssStyle: CssStyle, level: number) {
 
   const tagName = getTagName(tag, cssStyle)
   const className = getClassName(tag, cssStyle)
-  const properties = tag.properties.length > 0 ? ` ${tag.properties.map(buildPropertyString).join(' ')} ` : ''
+  const properties = tag.properties.length > 0 ? ` ${tag.properties.map(buildPropertyString).join(' ')}` : ''
 
   const openingTag = `${spaceString}<${tagName}${className}${properties}${hasChildren || tag.isText ? `` : ' /'}>`
   const childTags = buildChildTagsString(tag, cssStyle, level)
