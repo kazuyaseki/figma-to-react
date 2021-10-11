@@ -107,6 +107,68 @@ export function buildTagTree(node: SceneNode, unitType: UnitType): Tag | null {
       childTags = []
     }
 
+    if (node.name === 'SpinButton') {
+      fluentType = FluentComponentType.SpinButton
+      childTags = []
+    }
+
+    if (node.name === 'Checkbox') {
+      fluentType = FluentComponentType.CheckBox
+      const labelTag = childTags.find(childTag => childTag.name === 'String')
+      if (labelTag && labelTag.textCharacters) {
+        properties.push({ name: 'label', value: labelTag.textCharacters })
+      }
+      childTags = []
+    }
+
+    if (node.name === 'ChoiceGroup') {
+      fluentType = FluentComponentType.ChoiceGroup
+
+      const labelTag = childTags.find(childTag => childTag.name === 'Label')
+      if (labelTag && labelTag.textCharacters) {
+        properties.push({ name: 'label', value: labelTag.textCharacters })
+      }
+
+      const choicesContainerTag = childTags.find(childTag => childTag.node.type === 'FRAME')
+      if (choicesContainerTag && 'children' in choicesContainerTag.node) {
+        const options = choicesContainerTag.node.children.map((optionNode, index) => {
+          if ('children' in optionNode) {
+            const optionLabelNode = optionNode.children.find(childNode => childNode.type === 'TEXT')
+            if (optionLabelNode && 'characters' in optionLabelNode) {
+              return `{ key: '${index}' , text: '${optionLabelNode.characters}' },`
+            }
+          }
+        })
+        if (options.length > 0) {
+          properties.push({ name: 'options', value: `[${options.join(' ')}]`, notStringValue: true, })
+        }
+      }
+
+      childTags = []
+    }
+
+    if (node.name.startsWith('Toggle')) { // 'Toggle' or 'Toggle-label'
+      fluentType = FluentComponentType.Toggle
+
+      if (node.name === 'Toggle-label') {
+        parseLabelAndPlaceholder(childTags, properties, 'Dropdown')
+        childTags.find(child => child.fluentType === FluentComponentType.Toggle)?.properties.forEach(p => properties.push(p))
+      }
+
+      const toggleContainer = childTags.find(child => child.name === 'Toggle-container')
+      if (toggleContainer) {
+        const stringContainer = toggleContainer.children.find(child => child.name === 'String-container')
+        if (stringContainer) {
+          const stringTag = stringContainer.children.find(child => child.name === 'String-toggle')
+          if (stringTag && stringTag.textCharacters) {
+            properties.push({ name: 'onText', value: stringTag.textCharacters }) // TODO: ON/OFF?
+          }
+        }
+      }
+
+      childTags = []
+    }
+
     if (node.name.includes('DetailsList')) {
       fluentType = FluentComponentType.DetailsList
       childTags = []
@@ -157,9 +219,9 @@ const parseLabelAndPlaceholder = (childTags: Tag[], properties: Property[], nest
     if (labelTag.textCharacters) {
       properties.push({ name: 'label', value: labelTag.textCharacters })
     }
-    const textFieldTag = childTags.find(childTag => childTag.name === nestedTagName)
-    if (textFieldTag) {
-      const placeholderProperty = textFieldTag.properties.find(p => p.name === "placeholder")
+    const nestedTag = childTags.find(childTag => childTag.name === nestedTagName)
+    if (nestedTag) {
+      const placeholderProperty = nestedTag.properties.find(p => p.name === "placeholder")
       if (placeholderProperty) {
         properties.push({ name: 'placeholder', value: placeholderProperty.value })
       }
