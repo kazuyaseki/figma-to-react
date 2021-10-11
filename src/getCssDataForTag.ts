@@ -45,10 +45,10 @@ export function getCssDataForTag(node: SceneNode, unitType: UnitType): CSSData {
 
   // skip vector since it's often displayed as an img tag
   if (node.visible && node.type !== 'VECTOR') {
-    if ('opacity' in node && node.opacity < 1) {
+    if ('opacity' in node && node.opacity && node.opacity < 1) {
       properties.push({ name: 'opacity', value: node.opacity })
     }
-    if (node.rotation !== 0) {
+    if ('rotation' in node && node.rotation !== 0) {
       properties.push({ name: 'transform', value: `rotate(${Math.floor(node.rotation)}deg)` })
     }
 

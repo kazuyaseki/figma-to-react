@@ -32,11 +32,14 @@ function guessTagName(name: string) {
 
 function getTagName(tag: Tag, cssStyle: CssStyle) {
   if (cssStyle === 'css' && !tag.isComponent) {
+    if (tag.fluentType) {
+      return tag.fluentType
+    }
     if (tag.isImg) {
       return 'img'
     }
     if (tag.isText) {
-      return 'p'
+      return 'Text'
     }
     return guessTagName(tag.name)
   }
@@ -56,8 +59,14 @@ function getClassName(tag: Tag, cssStyle: CssStyle) {
   return ''
 }
 
-function buildPropertyString(prop: Tag['properties'][number]) {
-  return ` ${prop.name}${prop.value !== null ? `=${prop.notStringValue ? '{' : '"'}${prop.value}${prop.notStringValue ? '}' : '"'}` : ''}`
+function buildPropertyString(prop: Tag['properties'][number]): string {
+  let propValue = ''
+  if (typeof prop.value === 'string') {
+    propValue = prop.value
+  } else if (Array.isArray(prop.value) && prop.value.length > 0) {
+    propValue = ` ${prop.value.map(buildPropertyString).join(' ')} `
+  }
+  return `${prop.name}${prop.value !== null ? `=${prop.notStringValue ? '{' : '"'}${propValue}${prop.notStringValue ? '}' : '"'}` : ''}`
 }
 
 function buildChildTagsString(tag: Tag, cssStyle: CssStyle, level: number): string {
@@ -79,7 +88,7 @@ function buildJsxString(tag: Tag, cssStyle: CssStyle, level: number) {
 
   const tagName = getTagName(tag, cssStyle)
   const className = getClassName(tag, cssStyle)
-  const properties = tag.properties.map(buildPropertyString).join('')
+  const properties = tag.properties.length > 0 ? ` ${tag.properties.map(buildPropertyString).join(' ')} ` : ''
 
   const openingTag = `${spaceString}<${tagName}${className}${properties}${hasChildren || tag.isText ? `` : ' /'}>`
   const childTags = buildChildTagsString(tag, cssStyle, level)
