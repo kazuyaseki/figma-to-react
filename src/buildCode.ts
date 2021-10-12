@@ -60,13 +60,7 @@ function getClassName(tag: Tag, cssStyle: CssStyle) {
 }
 
 function buildPropertyString(prop: Tag['properties'][number]): string {
-  let propValue = ''
-  if (typeof prop.value === 'string') {
-    propValue = prop.value
-  } else if (Array.isArray(prop.value) && prop.value.length > 0) {
-    propValue = ` ${prop.value.map(buildPropertyString).join(' ')} `
-  }
-  return `${prop.name}${prop.value !== null ? `=${prop.notStringValue ? '{' : '"'}${propValue}${prop.notStringValue ? '}' : '"'}` : ''}`
+  return `${prop.name}${prop.value !== null ? `=${prop.notStringValue ? '{' : '"'}${prop.value}${prop.notStringValue ? '}' : '"'}` : ''}`
 }
 
 function buildChildTagsString(tag: Tag, cssStyle: CssStyle, level: number): string {
