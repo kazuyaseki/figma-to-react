@@ -50,12 +50,20 @@ export function buildTagTree(node: SceneNode, unitType: UnitType): Tag | null {
   if (node.type === 'INSTANCE') {
     if (node.name === 'Button') {
       if (node.variantProperties) {
-        if (node.variantProperties['Type'] === 'Primary') {
-          fluentType = FluentComponentType.PrimaryButton
-        } else {
-          fluentType = FluentComponentType.DefaultButton
+        switch (node.variantProperties['Type']) {
+          case 'Primary':
+            fluentType = FluentComponentType.PrimaryButton
+            break;
+          case 'Action':
+            fluentType = FluentComponentType.ActionButton
+            break;
+          case 'Secondary':
+          default:
+            fluentType = FluentComponentType.DefaultButton
         }
       }
+      parseFigmaVariant(node, 'Icon', 'True', properties, 'iconProps', `{ iconName: 'TODO' }`, true)
+      parseFigmaButton(node, properties)
       parseFigmaText(childTags, 'String-button', properties, 'text')
       childTags = []
     }
@@ -67,11 +75,13 @@ export function buildTagTree(node: SceneNode, unitType: UnitType): Tag | null {
         // TODO: find a better solution to specify the icon name
         properties.push({ name: 'iconProps', value: `{ iconName: 'TODO' }`, notStringValue: true })
       }
+      parseFigmaButton(node, properties)
       childTags = []
     }
 
     if (node.name === 'Link') {
       fluentType = FluentComponentType.Link
+      parseCommonFigmaVariants(node, properties)
       properties.push({ name: 'href', value: ''}, { name: 'underline', value: null })
       const stringChild = childTags.find(childTag => childTag.isText)
       if (stringChild) {
@@ -81,35 +91,71 @@ export function buildTagTree(node: SceneNode, unitType: UnitType): Tag | null {
       childTags = []
     }
 
+    if (node.name === 'OverflowSet') {
+      fluentType = FluentComponentType.OverflowSet
+      
+      const items = childTags.map((_, index) => {
+        return `{ key: '${index}', icon: 'TODO', name: 'TODO', title: 'TODO', ariaLabel: 'TODO' }`
+      })
+      properties.push({ name: 'items', value: items.length > 0 ? `[ ${items.join(' ')} ]` : '', notStringValue: true})
+
+      parseFigmaVariant(node, 'Direction', 'Vertical', properties, 'vertical', null)
+
+      childTags = []
+    }
+
     if (node.name === 'SearchBox') {
       fluentType = FluentComponentType.SearchBox
-      if (node.variantProperties && node.variantProperties['Type'] === 'Underline') {
-        properties.push({ name: 'underlined', value: 'true', notStringValue: true })
-      }
+      parseCommonFigmaVariants(node, properties)
+      parseFigmaVariant(node, 'Type', 'Underline', properties, 'underlined', null)
       parseFigmaText(childTags, 'String', properties, 'placeholder')
       childTags = []
     }
 
     if (node.name.toLocaleLowerCase().includes('textfield')) {
       fluentType = FluentComponentType.TextField
+      parseCommonFigmaVariants(node, properties)
+      parseFigmaVariant(node, 'Type', 'Underlined', properties, 'underlined', null)
+      parseFigmaVariant(node, 'Type', 'Borderless', properties, 'borderless', null)
+      parseFigmaVariant(node, 'Icon', 'True', properties, 'iconProps', '{ iconName: \'TODO\' }')
+      parseFigmaVariant(node, 'Multiline', 'True', properties, 'multiline', null)
+      parseFigmaVariant(node, 'Multiline', 'True', properties, 'row', '3', true)
       parseLabelAndPlaceholder(childTags, properties, 'TextField')
       childTags = []
     }
 
     if (node.name.toLowerCase().includes('dropdown')) {
       fluentType = FluentComponentType.Dropdown
+      parseCommonFigmaVariants(node, properties)
       parseLabelAndPlaceholder(childTags, properties, 'Dropdown')
       childTags = []
     }
 
     if (node.name === 'SpinButton') {
       fluentType = FluentComponentType.SpinButton
+      parseCommonFigmaVariants(node, properties)
       childTags = []
     }
 
     if (node.name === 'Checkbox') {
       fluentType = FluentComponentType.CheckBox
+      parseCommonFigmaVariants(node, properties)
+      parseFigmaVariant(node, 'Checked', 'True', properties, 'checked', 'true', true)
+      parseFigmaVariant(node, 'Indeterminate', 'True', properties, 'indeterminate', 'true', true)
       parseFigmaText(childTags, 'String', properties, 'label')
+      childTags = []
+    }
+
+    if (node.name === 'Radio Button') {
+      fluentType = FluentComponentType.ChoiceGroupOption
+      parseCommonFigmaVariants(node, properties)
+      parseFigmaVariant(node, 'Checked', 'True', properties, 'checked', 'true', true)
+      parseFigmaVariant(node, 'Type', 'Thumbnail', properties, 'imageSrc', 'TODO')
+
+      properties.push({ name: 'key', value: 'TODO' })
+      const stringContainerTag = childTags.find(child => child.name === 'String-container')
+      parseFigmaText(stringContainerTag?.children ?? childTags, stringContainerTag ? 'String-option' : 'String', properties, 'text')
+
       childTags = []
     }
 
@@ -117,19 +163,16 @@ export function buildTagTree(node: SceneNode, unitType: UnitType): Tag | null {
       fluentType = FluentComponentType.ChoiceGroup
       parseFigmaText(childTags, 'Label', properties, 'label')
 
-      const choicesContainerTag = childTags.find(childTag => childTag.node.type === 'FRAME')
-      if (choicesContainerTag && 'children' in choicesContainerTag.node) {
-        const options = choicesContainerTag.node.children.map((optionNode, index) => {
-          if ('children' in optionNode) {
-            const optionLabelNode = optionNode.children.find(childNode => childNode.type === 'TEXT')
-            if (optionLabelNode && 'characters' in optionLabelNode) {
-              return `{ key: '${index}' , text: '${optionLabelNode.characters}' },`
-            }
-          }
-        })
-        if (options.length > 0) {
-          properties.push({ name: 'options', value: `[${options.join(' ')}]`, notStringValue: true, })
+      const optionStrings: string[] = []
+      childTags.forEach(childTag => {
+        if (childTag.node.type === 'FRAME') {
+          childTag.children.forEach((optionTag) => {
+            optionStrings.push(optionTag.properties.length > 0 ? `{ ${optionTag.properties.map(prop => `${prop.name}: ${prop.notStringValue ? '' : '"'}${prop.value}${prop.notStringValue ? '' : '"'}, `).join('')} }, ` : '')
+          })
         }
+      })
+      if (optionStrings.length > 0) {
+        properties.push({ name: 'options', value: `[${optionStrings.join('')}]`, notStringValue: true, })
       }
 
       childTags = []
@@ -297,6 +340,12 @@ export function buildTagTree(node: SceneNode, unitType: UnitType): Tag | null {
       }
 
       parseFigmaText(childTags, 'String-description', properties, 'description')
+      
+      if (node.variantProperties) {
+        if (node.variantProperties['Indeterminate'] === 'False') {
+          properties.push({ name: 'percentComplete', value: '0.2', notStringValue: true })
+        }
+      }
 
       childTags = []
     }
@@ -429,11 +478,32 @@ const parseLabelAndPlaceholder = (childTags: Tag[], properties: Property[], nest
   }
 }
 
+const parseFigmaVariant = (node: InstanceNode, variantName: string, variantValue: string, properties: Property[], propName: string, propValue: string | null, notStringValue?: boolean) => {
+  if (node.variantProperties && node.variantProperties[variantName] === variantValue) {
+    properties.push({ name: propName, value: propValue, notStringValue: notStringValue })
+  }
+}
+
+const parseCommonFigmaVariants = (node: InstanceNode, properties: Property[]) => {
+  parseFigmaVariant(node, 'Disable', 'True', properties, 'disabled', null, true)
+}
+
 const parseFigmaText = (childTags: Tag[], childNodeName: string, properties: Property[], propName: string) => {
-  console.log(childTags)
   const textTag = childTags.find(child => child.name === childNodeName)
   if (textTag) {
     properties.push({ name: propName, value: textTag.textCharacters ?? '' })
+  }
+}
+
+const parseFigmaButton = (node: InstanceNode, properties: Property[]) => {
+  parseCommonFigmaVariants(node, properties)
+  if (node.variantProperties) {
+    if (node.variantProperties['Menu'] === 'True' || node.variantProperties['Split'] === 'True') {
+      properties.push({ name: 'menuProps', value: '{ items: [] }', notStringValue: true })
+      if (node.variantProperties['Split'] === 'True') {
+        properties.push({ name: 'split', value: null })
+      }
+    }
   }
 }
 
