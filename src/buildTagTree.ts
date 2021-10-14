@@ -313,9 +313,9 @@ export function buildTagTree(node: SceneNode, unitType: UnitType): Tag | null {
       childTags = []
     }
 
-    if (node.name.includes('Nav')) {
+    if (node.name === '-Nav') {
       fluentType = FluentComponentType.Nav
-      properties.push({ name: 'groups', value: '[]', notStringValue: true })
+      parseFigmaNav(node, childTags, properties)
       childTags = []
     }
 
@@ -328,17 +328,19 @@ export function buildTagTree(node: SceneNode, unitType: UnitType): Tag | null {
       }
 
       properties.push({ name: 'onDismiss', value: '() => { return }', notStringValue: true })
-      if (node.variantProperties) {
-        if (node.variantProperties['Type']) {
-          properties.push({ name: 'messageBarType', value: `MessageBarType.${getMessageBarTypeByFigmaVariant(node.variantProperties['Type'])}`, notStringValue: true })
-        }
-        if (node.variantProperties['Actions'] !== 'None') {
-          properties.push({ name: 'actions', value: '<MessageBarButton>Action</MessageBarButton>', notStringValue: true })
-        }
-        if (node.variantProperties['State'] !== 'Fixed') {
-          properties.push({ name: 'truncated', value: 'true', notStringValue: true })
-        }
-      }
+
+      parseFigmaVariant(node, 'Type', 'Blocked', properties, 'messageBarType', 'MessageBarType.blocked', true)
+      parseFigmaVariant(node, 'Type', 'Error', properties, 'messageBarType', 'MessageBarType.error', true)
+      parseFigmaVariant(node, 'Type', 'Info', properties, 'messageBarType', 'MessageBarType.info', true)
+      parseFigmaVariant(node, 'Type', 'Severe-Warning', properties, 'messageBarType', 'MessageBarType.severeWarning', true)
+      parseFigmaVariant(node, 'Type', 'Success', properties, 'messageBarType', 'MessageBarType.success', true)
+      parseFigmaVariant(node, 'Type', 'Warning', properties, 'messageBarType', 'MessageBarType.warning', true)
+
+      parseFigmaVariant(node, 'Actions', 'Single action', properties, 'actions', '<MessageBarButton>Action</MessageBarButton>', true)
+      parseFigmaVariant(node, 'Actions', 'Multi action', properties, 'actions', '<div><MessageBarButton>Yes</MessageBarButton><MessageBarButton>No</MessageBarButton></div>', true)
+
+      parseFigmaVariant(node, 'State', 'Collapsed', properties, 'truncated', 'true', true)
+      parseFigmaVariant(node, 'State', 'Expanded', properties, 'truncated', 'true', true)
     }
 
     if (node.name === 'Progress indicator') {
@@ -363,6 +365,20 @@ export function buildTagTree(node: SceneNode, unitType: UnitType): Tag | null {
     if (node.name === 'Spinner') {
       fluentType = FluentComponentType.Spinner
       if (node.variantProperties) {
+        switch (node.variantProperties['Size']) {
+          case '12':
+            properties.push({ name: 'size', value: 'SpinnerSize.xSmall', notStringValue: true })
+            break;
+          case '16':
+            properties.push({ name: 'size', value: 'SpinnerSize.small', notStringValue: true })
+            break;
+          case '28':
+            properties.push({ name: 'size', value: 'SpinnerSize.large', notStringValue: true })
+            break;
+          default:
+            properties.push({ name: 'size', value: 'SpinnerSize.medium', notStringValue: true })
+            break;
+        }
         if (node.variantProperties['Label'] !== 'None') {
           properties.push({ name: 'label', value: 'Loading...' })
           properties.push({ name: 'labelPosition', value: node.variantProperties['Label'].toLowerCase() })
@@ -383,7 +399,7 @@ export function buildTagTree(node: SceneNode, unitType: UnitType): Tag | null {
 
       if (node.variantProperties) {
         if (node.variantProperties['Icon'] === 'True') {
-          properties.push({ name: 'activityIcon', value: '<Icon iconName={\'TODO\'} />' })
+          properties.push({ name: 'activityIcon', value: '<Icon iconName=\'TODO\' />' })
         }
         if (node.variantProperties['Persona'] === 'True') {
           properties.push({ name: 'activityPersonas', value: '[{ imageUrl: \'TODO\', text: \'TODO\' }', notStringValue: true })
@@ -554,6 +570,24 @@ const parseFigmaList = (node: InstanceNode, childTags: Tag[], properties: Proper
   properties.push({ name: 'columns', value: `[${columnStrings.join(' ')}]`, notStringValue: true })
 }
 
+const parseFigmaNav = (node: InstanceNode, childTags: Tag[], properties: Property[]) => {
+  const linkStrings: string[] = []
+  const navigationListTag = childTags.find(child => child.name === 'Navigation-list')
+  if (navigationListTag) {
+    console.log(navigationListTag.children)
+    navigationListTag.children.forEach(navItemTag => {
+      const LinkName = navItemTag.children.find(child => child.isText && child.name === 'String')?.textCharacters ?? 'TODO'
+      if (navItemTag.name.includes('NavItem-Icon')) {
+        linkStrings.push(`{ key: 'key${linkStrings.length}', name: '${LinkName}', url: 'TODO', icon: 'TODO' },`)
+      } else {
+        linkStrings.push(`{ key: 'key${linkStrings.length}', name: '${LinkName}', url: 'TODO' },`)
+      }
+    })
+  }
+
+  properties.push({ name: 'groups', value: `{ links: [${linkStrings.join(' ')}] }`, notStringValue: true })
+}
+
 const getCommandBarItemProps = (containerTag: Tag): string => {
   const items = containerTag.children.map((childTag, index) => {
     if (childTag.name === 'Button') { // already parsed
@@ -582,23 +616,4 @@ const getBreadcrumbProps = (childTags: Tag[]): string => {
 
 const getItemString = (properties: Property[]): string => {
   return properties.length > 0 ? `{ ${properties.map(prop => `${prop.name}: ${prop.notStringValue ? '' : '"'}${prop.value}${prop.notStringValue ? '' : '"'}, `).join('')} },` : ''
-}
-
-const getMessageBarTypeByFigmaVariant = (type: string): string => {
-  switch (type) {
-    case 'Blocked':
-      return 'blocked';
-    case 'Error':
-      return 'error';
-    case 'Info':
-      return 'info';
-    case 'Severe-Warning':
-      return 'severeWarning';
-    case 'Success':
-      return 'success';
-    case 'Warning':
-      return 'warning';
-    default:
-      return 'info';
-  }
 }
