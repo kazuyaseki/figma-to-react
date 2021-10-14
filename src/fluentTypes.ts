@@ -26,6 +26,7 @@ export enum FluentComponentType {
   Breadcrumb = 'Breadcrumb',
   Nav = 'Nav',
   MessageBar = 'MessageBar',
+  TeachingBubble = 'TeachingBubble',
   ProgressIndicator = 'ProgressIndicator',
   Spinner = 'Spinner',
   ActivityItem = 'ActivityItem',

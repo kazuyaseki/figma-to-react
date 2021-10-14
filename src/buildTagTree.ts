@@ -343,6 +343,62 @@ export function buildTagTree(node: SceneNode, unitType: UnitType): Tag | null {
       parseFigmaVariant(node, 'State', 'Expanded', properties, 'truncated', 'true', true)
     }
 
+    if (node.name.includes('TeachingBubble')) {
+      fluentType = FluentComponentType.TeachingBubble
+
+      if (node.name.includes('Wide')) {
+        properties.push({ name: 'isWide', value: 'true', notStringValue: true })
+      }
+      if (node.name.includes('Condensed')) {
+        properties.push({ name: 'hasCondensedHeadline', value: 'true', notStringValue: true })        
+      }
+      if (node.name.includes('Illustration')) {
+        properties.push({ name: 'illustrationImage', value: '{ src: \'TODO\', alt: \'TODO\' }', notStringValue: true })        
+      }
+    
+      const bodyContainerTag = childTags.find(child => child.name === 'Body-content') ?? childTags.find(child => child.name === 'Body')?.children.find(child => child.name === 'Body-content')
+      if (bodyContainerTag) {
+        const headerLargeTag = bodyContainerTag.children.find(child => child.name === 'Header-large')
+        if (headerLargeTag) {
+          const stringHeadlineTag = headerLargeTag.children.find(child => child.name === 'String-headline')
+          if (stringHeadlineTag) {
+            properties.push({ name: 'headline', value: stringHeadlineTag.textCharacters ?? '' })
+          }
+          const dismissTag = headerLargeTag.children.find(child => child.name === 'Sub-components / Dismiss')
+          if (dismissTag) {
+            properties.push({ name: 'hasCloseButton', value: 'true', notStringValue: true })
+          }
+        }
+        const footerTag = bodyContainerTag.children.find(child => child.name === 'Footer-content')
+        if (footerTag) {
+          const actionsStackTag = footerTag.children.find(child => child.name === 'Actions-stack')
+          if (actionsStackTag) {
+            const primaryButtonTag = actionsStackTag.children
+              .find(child => child.name.includes('Sub-components / Primary'))?.children
+              .find(child => child.name.includes('Sub-components / Button'))?.children
+              .find(child => child.name === 'Button')
+            properties.push({ name: 'primaryButtonProps', value: `{ children: '${primaryButtonTag?.textCharacters ?? 'TODO'}' }`, notStringValue: true })
+            const secondaryButtonTag = actionsStackTag.children
+              .find(child => child.name.includes('Sub-components / Secondary'))?.children
+              .find(child => child.name.includes('Sub-components / Button'))?.children
+              .find(child => child.name === 'Button')
+            properties.push({ name: 'secondaryButtonProps', value: `{ children: '${secondaryButtonTag?.textCharacters ?? 'TODO'}' }`, notStringValue: true })
+          }
+          const multiStepContainerTag = footerTag.children.find(child => child.name === 'Multi-step')
+          if (multiStepContainerTag) {
+            parseFigmaText(multiStepContainerTag.children, 'String-step', properties, 'footerContent')
+          }
+        }
+        const subTextTag = bodyContainerTag.children.find(child => child.name === 'String-subtext')
+        if (subTextTag) {
+          childTags = [subTextTag]
+        }
+      }
+      if (childTags.length > 1) {
+        childTags = []
+      }
+    }
+
     if (node.name === 'Progress indicator') {
       fluentType = FluentComponentType.ProgressIndicator
 
