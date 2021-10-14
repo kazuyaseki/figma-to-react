@@ -22,6 +22,7 @@ export enum FluentComponentType {
   NormalPeoplePicker = 'NormalPeoplePicker',
   TagPicker = 'TagPicker',
   DetailsList = 'DetailsList',
+  GroupedList = 'GroupedList',
   Breadcrumb = 'Breadcrumb',
   Nav = 'Nav',
   MessageBar = 'MessageBar',

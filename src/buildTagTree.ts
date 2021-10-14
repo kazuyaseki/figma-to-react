@@ -2,6 +2,7 @@ import { UnitType } from './buildSizeStringByUnit'
 import { FluentComponentType } from './fluentTypes'
 import { CSSData, getCssDataForTag } from './getCssDataForTag'
 import { isImageNode } from './utils/isImageNode'
+import { kebabize } from './utils/stringUtils'
 
 type Property = {
   name: string
@@ -162,29 +163,19 @@ export function buildTagTree(node: SceneNode, unitType: UnitType): Tag | null {
     if (node.name === 'ChoiceGroup') {
       fluentType = FluentComponentType.ChoiceGroup
       parseFigmaText(childTags, 'Label', properties, 'label')
-
-      const optionStrings: string[] = []
-      childTags.forEach(childTag => {
-        if (childTag.node.type === 'FRAME') {
-          childTag.children.forEach((optionTag) => {
-            optionStrings.push(optionTag.properties.length > 0 ? `{ ${optionTag.properties.map(prop => `${prop.name}: ${prop.notStringValue ? '' : '"'}${prop.value}${prop.notStringValue ? '' : '"'}, `).join('')} }, ` : '')
-          })
-        }
-      })
-      if (optionStrings.length > 0) {
-        properties.push({ name: 'options', value: `[${optionStrings.join('')}]`, notStringValue: true, })
-      }
-
+      parseFigmaNestedItems(childTags, properties, 'options')
       childTags = []
     }
 
     if (node.name.startsWith('Toggle')) { // 'Toggle' or 'Toggle-label'
       fluentType = FluentComponentType.Toggle
-
       if (node.name === 'Toggle-label') {
         parseLabelAndPlaceholder(childTags, properties, 'Dropdown')
         childTags.find(child => child.fluentType === FluentComponentType.Toggle)?.properties.forEach(p => properties.push(p))
       }
+
+      parseCommonFigmaVariants(node, properties)
+      parseFigmaVariant(node, 'OFF | ON', 'True', properties, 'checked', 'true', true)
 
       const toggleContainer = childTags.find(child => child.name === 'Toggle-container')
       if (toggleContainer) {
@@ -199,7 +190,16 @@ export function buildTagTree(node: SceneNode, unitType: UnitType): Tag | null {
 
     if (node.name === 'Facepile') {
       fluentType = FluentComponentType.Facepile
-      properties.push({ name: 'personas', value: '[]', notStringValue: true })
+
+      const facepileOverflowNode = childTags.find(child => child.name === 'Facepile-Overflow')?.node
+      if (facepileOverflowNode) {
+        parseFigmaVariant(facepileOverflowNode as InstanceNode, 'Type', 'Descriptive', properties, 'overflowButtonType', 'OverflowButtonType.descriptive', true)
+        parseFigmaVariant(facepileOverflowNode as InstanceNode, 'Type', 'Chevron', properties, 'overflowButtonType', 'OverflowButtonType.downArrow', true)
+        parseFigmaVariant(facepileOverflowNode as InstanceNode, 'Type', 'More', properties, 'overflowButtonType', 'OverflowButtonType.more', true)
+      }
+
+      parseFigmaNestedItems(childTags.find(child => child.name === 'Flex-container')?.children ?? [], properties, 'personas')
+
       childTags = []
     }
 
@@ -266,6 +266,7 @@ export function buildTagTree(node: SceneNode, unitType: UnitType): Tag | null {
 
     if (node.name.includes('DatePicker')) {
       fluentType = FluentComponentType.DatePicker
+      parseCommonFigmaVariants(node, properties)
       const textFieldTag = childTags.find(child => child.fluentType === FluentComponentType.TextField) // already parsed
       if (textFieldTag) {
         const labelProp = textFieldTag.properties.find(p => p.name === 'label')
@@ -282,18 +283,27 @@ export function buildTagTree(node: SceneNode, unitType: UnitType): Tag | null {
 
     if (node.name === 'PeoplePicker') {
       fluentType = FluentComponentType.NormalPeoplePicker
+      parseCommonFigmaVariants(node, properties)
       properties.push({ name: 'onResolveSuggestions', value: '(filterText, currentPersonas) => []', notStringValue: true })
       childTags = []
     }
 
     if (node.name === 'TagPicker') {
       fluentType = FluentComponentType.TagPicker
+      parseCommonFigmaVariants(node, properties)
       properties.push({ name: 'onResolveSuggestions', value: '(filter) => []', notStringValue: true })
       childTags = []
     }
 
     if (node.name.includes('DetailsList')) {
       fluentType = FluentComponentType.DetailsList
+      parseFigmaList(node, childTags, properties)
+      childTags = []
+    }
+
+    if (node.name.includes('GroupedList')) {
+      fluentType = FluentComponentType.GroupedList
+      parseFigmaList(node, childTags, properties)
       childTags = []
     }
 
@@ -495,6 +505,21 @@ const parseFigmaText = (childTags: Tag[], childNodeName: string, properties: Pro
   }
 }
 
+const parseFigmaNestedItems = (childTags: Tag[], properties: Property[], propName: string) => {
+  const optionStrings: string[] = []
+  childTags.forEach(childTag => {
+    if (childTag.node.type === 'FRAME') {
+      childTag.children.forEach((optionTag) => {
+        optionStrings.push(getItemString(optionTag.properties))
+      })
+    } else {
+      optionStrings.push(getItemString(childTag.properties))
+    }
+  })
+
+  properties.push({ name: propName, value: `[${optionStrings.join(' ')}]`, notStringValue: true })
+}
+
 const parseFigmaButton = (node: InstanceNode, properties: Property[]) => {
   parseCommonFigmaVariants(node, properties)
   if (node.variantProperties) {
@@ -505,6 +530,28 @@ const parseFigmaButton = (node: InstanceNode, properties: Property[]) => {
       }
     }
   }
+}
+
+const parseFigmaList = (node: InstanceNode, childTags: Tag[], properties: Property[]) => {
+  if (node.name.includes('Compact')) {
+    properties.push({ name: 'compact', value: 'true', notStringValue: true })
+  }
+  const headerContainerTag = childTags.find(child => child.name.includes('DetailsHeader'))
+  const columnStrings: string[] = []
+  headerContainerTag?.children.forEach(columnContainerTag => {
+    columnContainerTag?.children.forEach(columnComponentTag => {
+      if (columnComponentTag.name.includes('Cell-Icon')) {
+        columnStrings.push(`{ key: 'column${columnStrings.length}', name: 'TODO', iconName: 'TODO', isIconOnly: true, fieldName: 'TODO' },`)            
+      }
+      if (columnComponentTag.name.includes('ColumnHeader')) {
+        let columnName = 'TODO'
+        const stringContainerTag = columnComponentTag.children.find(child => child.name === 'String-container' || child.name === 'String-icon-container')
+        columnName = stringContainerTag?.children.find(child => child.isText)?.textCharacters ?? 'TODO'
+        columnStrings.push(`{ key: 'column${columnStrings.length}', name: '${columnName}', fieldName: '${kebabize(columnName)}' },`)            
+      }
+    })
+  })
+  properties.push({ name: 'columns', value: `[${columnStrings.join(' ')}]`, notStringValue: true })
 }
 
 const getCommandBarItemProps = (containerTag: Tag): string => {
@@ -531,6 +578,10 @@ const getBreadcrumbProps = (childTags: Tag[]): string => {
     }
   })
   return items.length > 0 ? `[ ${items.join(' ')} ]` : ''
+}
+
+const getItemString = (properties: Property[]): string => {
+  return properties.length > 0 ? `{ ${properties.map(prop => `${prop.name}: ${prop.notStringValue ? '' : '"'}${prop.value}${prop.notStringValue ? '' : '"'}, `).join('')} },` : ''
 }
 
 const getMessageBarTypeByFigmaVariant = (type: string): string => {
