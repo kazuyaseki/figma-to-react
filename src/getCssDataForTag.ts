@@ -217,7 +217,9 @@ function getBorderRadiusString(node: FrameNode | RectangleNode | ComponentNode |
 }
 
 function rgbValueToHex(value: number) {
-  return Math.floor(value * 255).toString(16)
+  return Math.floor(value * 255)
+    .toString(16)
+    .padStart(2, '0')
 }
 
 function buildColorString(paint: Paint) {
