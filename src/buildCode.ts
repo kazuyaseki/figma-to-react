@@ -1,4 +1,4 @@
-import { capitalizeFirstLetter, kebabize } from './utils/stringUtils'
+import { capitalizeFirstLetter } from './utils/stringUtils'
 import { Tag } from './buildTagTree'
 import { buildClassName } from './utils/cssUtils'
 
