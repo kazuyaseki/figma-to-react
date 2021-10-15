@@ -21,6 +21,7 @@ export type Tag = {
   node: SceneNode
   isComponent?: boolean
   fluentType?: FluentComponentType
+  variables?: {[key: string]: string};
 }
 
 export function buildTagTree(node: SceneNode, unitType: UnitType): Tag | null {
@@ -35,6 +36,7 @@ export function buildTagTree(node: SceneNode, unitType: UnitType): Tag | null {
   let childTags: Tag[] = !isImg ? getChildTags(node, unitType) : []
   let isText = node.type === 'TEXT'
   let textCharacters = node.type === 'TEXT' ? node.characters : null
+  const variables: {[key:string]: string} = {};
 
   if (isImg) {
     properties.push({ name: 'src', value: '' })
@@ -42,8 +44,29 @@ export function buildTagTree(node: SceneNode, unitType: UnitType): Tag | null {
   
   if (node.type === 'FRAME' && (node.layoutMode === 'HORIZONTAL' || node.layoutMode === 'VERTICAL')) {
     fluentType = FluentComponentType.Stack
+    const stackTokens: {childrenGap?: number, paddingLeft?: number, paddingRight?: number, paddingBottom?: number, paddingTop?: number } = {};
+    const {itemSpacing, paddingLeft, paddingRight, paddingBottom, paddingTop} = node;
+    if(itemSpacing !== 0) {
+      stackTokens.childrenGap = itemSpacing;
+    }
+
+    if(paddingLeft !== 0) {
+      stackTokens.paddingLeft = paddingLeft;
+    }
+    if(paddingRight !== 0) {
+      stackTokens.paddingRight = paddingRight;
+    }
+    if(paddingBottom !== 0) {
+      stackTokens.paddingBottom = paddingBottom;
+    }
+    if(paddingTop !== 0) {
+      stackTokens.paddingTop = paddingTop;
+    }
+
     if (node.layoutMode === 'HORIZONTAL') {
-      properties.push({ name: 'horizontal', value: null })
+      properties.push({ name: 'horizontal', value: null});
+      properties.push({name: 'tokens', value: 'stackTokens', notStringValue: true});
+      variables['stackTokens'] =JSON.stringify(stackTokens);
     }
   }
 
@@ -309,7 +332,8 @@ export function buildTagTree(node: SceneNode, unitType: UnitType): Tag | null {
 
     if (node.name.includes('Breadcrumbs')) {
       fluentType = FluentComponentType.Breadcrumb
-      properties.push({ name: 'items', value: getBreadcrumbProps(childTags), notStringValue: true })
+      properties.push({ name: 'items', value: `items`, notStringValue: true});
+      variables['items'] = `${getBreadcrumbProps(childTags)}`;
       childTags = []
     }
 
@@ -524,6 +548,7 @@ export function buildTagTree(node: SceneNode, unitType: UnitType): Tag | null {
     children: childTags,
     node,
     fluentType: fluentType,
+    variables,
   }
 
   return tag
@@ -667,7 +692,7 @@ const getBreadcrumbProps = (childTags: Tag[]): string => {
       return `{ key: '${index}', text: '${textProperty?.value ?? ''}'${childTag.name.includes('Selected') ? ', isCurrentItem: true' : ''} }`
     }
   })
-  return items.length > 0 ? `[ ${items.join(' ')} ]` : ''
+  return items.length > 0 ? `[ ${items.join(',')} ]` : ''
 }
 
 const getItemString = (properties: Property[]): string => {

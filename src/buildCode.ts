@@ -73,6 +73,15 @@ function buildChildTagsString(tag: Tag, cssStyle: CssStyle, level: number): stri
   return ''
 }
 
+function buildVariableString(variables: {[key:string]: string} | undefined): string {
+  if(!variables) {
+    return '';
+  }
+  return Object.keys(variables).map(vname => {
+    return `const ${vname} = ${variables[vname]}`;
+  }).join('\n');
+}
+
 function buildJsxString(tag: Tag, cssStyle: CssStyle, level: number) {
   if (!tag) {
     return ''
@@ -93,6 +102,7 @@ function buildJsxString(tag: Tag, cssStyle: CssStyle, level: number) {
 
 export function buildCode(tag: Tag, css: CssStyle): string {
   return `const ${capitalizeFirstLetter(tag.name.replace(/\s/g, ''))}: React.VFC = () => {
+    ${buildVariableString(tag.variables)}
   return (
 ${buildJsxString(tag, css, 0)}
   )
