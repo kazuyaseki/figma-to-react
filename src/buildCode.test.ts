@@ -64,7 +64,7 @@ describe('when css style is pure CSS', () => {
     const tag = await modifyTreeForComponent(buildTagTree(textNode, 'px', new TextCount())!, figma)
     expect(buildCode(tag, 'css')).toBe(`const Text: React.VFC = () => {
   return (
-    <p className="text">${characters}</p>
+    <p className="text-1">${characters}</p>
   )
 }`)
   })
