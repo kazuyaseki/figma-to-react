@@ -185,7 +185,8 @@ export function getCssDataForTag(node: SceneNode, unitType: UnitType, textCount:
     let className = node.name
 
     if (isImageNode(node)) {
-      className = 'img'
+      className = 'img' + textCount.count
+      textCount.increment()
     }
 
     if (node.type === 'TEXT') {
