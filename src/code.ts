@@ -6,6 +6,7 @@ import { buildCode } from './buildCode'
 import { buildTagTree } from './buildTagTree'
 import { buildCssString, CssStyle } from './buildCssString'
 import { UserComponentSetting } from './userComponentSetting'
+import { TextCount } from './getCssDataForTag'
 
 figma.showUI(__html__, { width: 480, height: 480 })
 
@@ -32,7 +33,9 @@ async function generate(node: SceneNode, config: { cssStyle?: CssStyle; unitType
 
   const userComponentSettings: UserComponentSetting[] = (await figma.clientStorage.getAsync(STORAGE_KEYS.USER_COMPONENT_SETTINGS_KEY)) || []
 
-  const originalTagTree = buildTagTree(node, unitType)
+  const textCount = new TextCount()
+
+  const originalTagTree = buildTagTree(node, unitType, textCount)
   if (originalTagTree === null) {
     figma.notify('Please select a visible node')
     return

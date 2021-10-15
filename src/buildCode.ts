@@ -1,5 +1,6 @@
 import { capitalizeFirstLetter, kebabize } from './utils/stringUtils'
 import { Tag } from './buildTagTree'
+import { buildClassName } from './utils/cssUtils'
 
 type CssStyle = 'css' | 'styled-components'
 
@@ -48,10 +49,7 @@ function getClassName(tag: Tag, cssStyle: CssStyle) {
     if (tag.isImg) {
       return ''
     }
-    if (tag.isText) {
-      return ' className="text"'
-    }
-    return ` className="${kebabize(tag.name)}"`
+    return ` className="${buildClassName(tag.css.className)}"`
   }
   return ''
 }

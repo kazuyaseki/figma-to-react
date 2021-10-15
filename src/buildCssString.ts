@@ -1,6 +1,6 @@
-import { kebabize } from './utils/stringUtils'
 import { CSSData } from './getCssDataForTag'
 import { Tag } from './buildTagTree'
+import { buildClassName } from './utils/cssUtils'
 
 export type CssStyle = 'css' | 'styled-components'
 
@@ -32,7 +32,7 @@ export function buildCssString(tag: Tag, cssStyle: CssStyle): string {
         ? `const ${cssData?.className.replace(/\s/g, '')} = styled.div\`
 ${cssData.properties.map((property) => `  ${property.name}: ${property.value};`).join('\n')}
 \`\n`
-        : `.${kebabize(cssData?.className.replace(/\s/g, ''))} {
+        : `.${buildClassName(cssData?.className)} {
 ${cssData.properties.map((property) => `  ${property.name}: ${property.value};`).join('\n')}
 }\n`
 

@@ -9,6 +9,17 @@ export type CSSData = {
   }[]
 }
 
+export class TextCount {
+  count = 1
+  constructor() {
+    return
+  }
+
+  increment() {
+    this.count++
+  }
+}
+
 const justifyContentCssValues = {
   MIN: 'flex-start',
   MAX: 'flex-end',
@@ -40,7 +51,7 @@ const textDecorationCssValues = {
   STRIKETHROUGH: 'line-through'
 }
 
-export function getCssDataForTag(node: SceneNode, unitType: UnitType): CSSData {
+export function getCssDataForTag(node: SceneNode, unitType: UnitType, textCount: TextCount): CSSData {
   const properties: CSSData['properties'] = []
 
   // skip vector since it's often displayed as an img tag
@@ -171,10 +182,19 @@ export function getCssDataForTag(node: SceneNode, unitType: UnitType): CSSData {
   }
 
   if (properties.length > 0) {
-    const isImage = isImageNode(node)
+    let className = node.name
+
+    if (isImageNode(node)) {
+      className = 'img'
+    }
+
+    if (node.type === 'TEXT') {
+      className = 'text' + textCount.count
+      textCount.increment()
+    }
     return {
       // name Text node as "Text" since name of text node is often the content of the node and is not appropriate as a name
-      className: isImage ? 'img' : node.type === 'TEXT' ? 'text' : node.name,
+      className,
       properties
     }
   }

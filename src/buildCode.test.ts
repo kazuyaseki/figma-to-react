@@ -1,6 +1,7 @@
 import { createFigma } from 'figma-api-stub'
 import { buildCode } from './buildCode'
 import { buildTagTree } from './buildTagTree'
+import { TextCount } from './getCssDataForTag'
 import { modifyTreeForComponent } from './modifyTreeForComponent'
 
 function createFrameWithDefaultProperties(figma: PluginAPI, config?: { name?: string; isImage?: boolean }) {
@@ -33,7 +34,7 @@ describe('when css style is pure CSS', () => {
   test('Frame without children should render only one tag', async () => {
     const frameNode = createFrameWithDefaultProperties(figma)
 
-    const tag = await modifyTreeForComponent(buildTagTree(frameNode, 'px')!, figma)
+    const tag = await modifyTreeForComponent(buildTagTree(frameNode, 'px', new TextCount())!, figma)
     expect(buildCode(tag, 'css')).toBe(`const Test: React.VFC = () => {
   return (
     <div className="test" />
@@ -46,7 +47,7 @@ describe('when css style is pure CSS', () => {
     const childNode = createFrameWithDefaultProperties(figma, { name: 'Child' })
     parentNode.appendChild(childNode)
 
-    const tag = await modifyTreeForComponent(buildTagTree(parentNode, 'px')!, figma)
+    const tag = await modifyTreeForComponent(buildTagTree(parentNode, 'px', new TextCount())!, figma)
     expect(buildCode(tag, 'css')).toBe(`const Parent: React.VFC = () => {
   return (
     <div className="parent">
@@ -60,7 +61,7 @@ describe('when css style is pure CSS', () => {
     const characters = 'てすと'
     const textNode = createTextNodeWithDefaultProperties(figma, { name: 'Text', characters })
 
-    const tag = await modifyTreeForComponent(buildTagTree(textNode, 'px')!, figma)
+    const tag = await modifyTreeForComponent(buildTagTree(textNode, 'px', new TextCount())!, figma)
     expect(buildCode(tag, 'css')).toBe(`const Text: React.VFC = () => {
   return (
     <p className="text">${characters}</p>
@@ -71,7 +72,7 @@ describe('when css style is pure CSS', () => {
   test('render Image node', async () => {
     const imageNode = createFrameWithDefaultProperties(figma, { name: 'Image', isImage: true })
 
-    const tag = await modifyTreeForComponent(buildTagTree(imageNode, 'px')!, figma)
+    const tag = await modifyTreeForComponent(buildTagTree(imageNode, 'px', new TextCount())!, figma)
     expect(buildCode(tag, 'css')).toBe(`const Img: React.VFC = () => {
   return (
     <img src="" />
@@ -84,7 +85,7 @@ describe('when css style is styled-components', () => {
   test('Frame without children should render only one tag', async () => {
     const frameNode = createFrameWithDefaultProperties(figma)
 
-    const tag = await modifyTreeForComponent(buildTagTree(frameNode, 'px')!, figma)
+    const tag = await modifyTreeForComponent(buildTagTree(frameNode, 'px', new TextCount())!, figma)
     expect(buildCode(tag, 'styled-components')).toBe(`const Test: React.VFC = () => {
   return (
     <Test />
@@ -97,7 +98,7 @@ describe('when css style is styled-components', () => {
     const childNode = createFrameWithDefaultProperties(figma, { name: 'Child' })
     parentNode.appendChild(childNode)
 
-    const tag = await modifyTreeForComponent(buildTagTree(parentNode, 'px')!, figma)
+    const tag = await modifyTreeForComponent(buildTagTree(parentNode, 'px', new TextCount())!, figma)
     expect(buildCode(tag, 'styled-components')).toBe(`const Parent: React.VFC = () => {
   return (
     <Parent>
@@ -112,7 +113,7 @@ describe('when css style is styled-components', () => {
 
     const textNode = createTextNodeWithDefaultProperties(figma, { name: 'Text', characters })
 
-    const tag = await modifyTreeForComponent(buildTagTree(textNode, 'px')!, figma)
+    const tag = await modifyTreeForComponent(buildTagTree(textNode, 'px', new TextCount())!, figma)
     expect(buildCode(tag, 'styled-components')).toBe(`const Text: React.VFC = () => {
   return (
     <Text>${characters}</Text>
@@ -123,7 +124,7 @@ describe('when css style is styled-components', () => {
   test('render Image node', async () => {
     const imageNode = createFrameWithDefaultProperties(figma, { name: 'Image', isImage: true })
 
-    const tag = await modifyTreeForComponent(buildTagTree(imageNode, 'px')!, figma)
+    const tag = await modifyTreeForComponent(buildTagTree(imageNode, 'px', new TextCount())!, figma)
     expect(buildCode(tag, 'styled-components')).toBe(`const Img: React.VFC = () => {
   return (
     <img src="" />
@@ -138,7 +139,7 @@ test('render Frame with invisible node', async () => {
   childNode.visible = false
   parentNode.appendChild(childNode)
 
-  const tag = await modifyTreeForComponent(buildTagTree(parentNode, 'px')!, figma)
+  const tag = await modifyTreeForComponent(buildTagTree(parentNode, 'px', new TextCount())!, figma)
   expect(buildCode(tag, 'styled-components')).toBe(`const Parent: React.VFC = () => {
   return (
     <Parent />
