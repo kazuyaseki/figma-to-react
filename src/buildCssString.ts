@@ -24,7 +24,7 @@ export function buildCssString(tag: Tag, cssStyle: CssStyle): string {
     return codeStr
   }
   cssArray.forEach((cssData) => {
-    if (!cssData) {
+    if (!cssData || cssData.properties.length === 0) {
       return
     }
     const cssStr =
