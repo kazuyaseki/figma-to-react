@@ -29,7 +29,7 @@ export function buildTagTree(node: SceneNode, unitType: UnitType, textCount: Tex
   const properties: Property[] = []
 
   if (isImg) {
-    properties.push({ name: 'src', value: '' })
+    properties.push({ name: 'source', value: '' })
   }
 
   const childTags: Tag[] = []
@@ -43,7 +43,7 @@ export function buildTagTree(node: SceneNode, unitType: UnitType, textCount: Tex
   }
 
   const tag: Tag = {
-    name: isImg ? 'img' : node.name,
+    name: isImg ? 'Image' : node.name,
     isText: node.type === 'TEXT',
     textCharacters: node.type === 'TEXT' ? node.characters : null,
     isImg,

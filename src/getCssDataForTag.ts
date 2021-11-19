@@ -70,7 +70,7 @@ export function getCssDataForTag(node: SceneNode, unitType: UnitType, textCount:
       }
 
       if (node.layoutMode !== 'NONE') {
-        properties.push({ name: 'display', value: 'flex' })
+        properties.push({ name: 'flex', value: '1' })
         properties.push({ name: 'flex-direction', value: node.layoutMode === 'HORIZONTAL' ? 'row' : 'column' })
         properties.push({ name: 'justify-content', value: justifyContentCssValues[node.primaryAxisAlignItems] })
         properties.push({ name: 'align-items', value: alignItemsCssValues[node.counterAxisAlignItems] })

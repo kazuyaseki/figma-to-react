@@ -29,7 +29,7 @@ export function buildCssString(tag: Tag, cssStyle: CssStyle): string {
     }
     const cssStr =
       cssStyle === 'styled-components'
-        ? `const ${cssData?.className.replace(/\s/g, '')} = styled.div\`
+        ? `const ${cssData?.className.replace(/\s/g, '')} = styled.View\`
 ${cssData.properties.map((property) => `  ${property.name}: ${property.value};`).join('\n')}
 \`\n`
         : `.${buildClassName(cssData?.className)} {

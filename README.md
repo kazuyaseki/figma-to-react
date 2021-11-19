@@ -3,9 +3,9 @@
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](https://github.com/kazuyaseki/figma-to-react/pulls)
 [![Tweeting](https://img.shields.io/twitter/url/http/shields.io.svg?style=social)](https://twitter.com/intent/tweet?text=Figma%20to%20React%20is%20awesome%20https://github.com/kazuyaseki/figma-to-react/)
 
-<p align="center"><img src="publish/icon.png" align="center" alt="Figma to React logo" width="128" height="128"></p>
+<p align="center"><img src="publish/icon.png" align="center" alt="Figma to React Native logo" width="128" height="128"></p>
   
-<h1 align="center">Figma to React Component</h1>
+<h1 align="center">Figma to React Native Component</h1>
 
 <div align="center">
 <a href="https://www.figma.com/community/plugin/959795830541939498/Figma-to-React-Component" align="center"><img src="publish/install_button.png" align="center" alt="Install Plugin"></a>
@@ -25,7 +25,7 @@ Many Figma to Code tools have one or more problems of the follwings:
 
 ## Solution
 
-Figma to React Component outputs React code in the plugin UI and can be genrated by selecting certain node.
+Figma to React Native Component outputs React Native code in the plugin UI and can be genrated by selecting certain node.
 And its style is derived from Auto Layout properties, thus is responsive.
 
 <img src="publish/readme_demo.png" align="center" alt="How the plugin works" />

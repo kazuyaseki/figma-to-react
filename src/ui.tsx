@@ -39,15 +39,15 @@ function insertSyntaxHighlightText(text: string) {
     .replaceAll('`', `<span class="${styles.stringText}">${'`'}</span>`)
 }
 
-const cssStyles: { value: CssStyle; label: string }[] = [
-  { value: 'css', label: 'CSS' },
-  { value: 'styled-components', label: 'styled-components' }
+const cssStyles: { value: CssStyle; label: string; disabled: boolean }[] = [
+  { value: 'css', label: 'StyleSheet', disabled: true },
+  { value: 'styled-components', label: 'styled-components', disabled: false }
 ]
 
-const unitTypes: { value: UnitType; label: string }[] = [
-  { value: 'px', label: 'px' },
-  { value: 'rem', label: 'rem' },
-  { value: 'remAs10px', label: 'rem(as 10px)' }
+const unitTypes: { value: UnitType; label: string; disabled: boolean }[] = [
+  { value: 'px', label: 'px', disabled: false },
+  { value: 'rem', label: 'rem', disabled: true },
+  { value: 'remAs10px', label: 'rem (as 10px)', disabled: true }
 ]
 
 const App: React.VFC = () => {
@@ -132,7 +132,15 @@ const App: React.VFC = () => {
         <div className={styles.optionList}>
           {cssStyles.map((style) => (
             <div key={style.value} className={styles.option}>
-              <input type="radio" name="css-style" id={style.value} value={style.value} checked={selectedCssStyle === style.value} onChange={notifyChangeCssStyle} />
+              <input
+                type="radio"
+                name="css-style"
+                id={style.value}
+                value={style.value}
+                checked={selectedCssStyle === style.value}
+                disabled={style.disabled}
+                onChange={notifyChangeCssStyle}
+              />
               <label htmlFor={style.value}>{style.label}</label>
             </div>
           ))}
@@ -143,7 +151,15 @@ const App: React.VFC = () => {
         <div className={styles.optionList}>
           {unitTypes.map((unitType) => (
             <div key={unitType.value} className={styles.option}>
-              <input type="radio" name="unit-type" id={unitType.value} value={unitType.value} checked={selectedUnitType === unitType.value} onChange={notifyChangeUnitType} />
+              <input
+                type="radio"
+                name="unit-type"
+                id={unitType.value}
+                value={unitType.value}
+                checked={selectedUnitType === unitType.value}
+                disabled={unitType.disabled}
+                onChange={notifyChangeUnitType}
+              />
               <label htmlFor={unitType.value}>{unitType.label}</label>
             </div>
           ))}

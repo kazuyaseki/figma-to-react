@@ -14,6 +14,7 @@ function buildSpaces(baseSpaces: number, level: number) {
   for (let i = 0; i < level; i++) {
     spacesStr += '  '
   }
+
   return spacesStr
 }
 
@@ -28,7 +29,7 @@ function guessTagName(name: string) {
   if (_name.includes('article')) {
     return 'article'
   }
-  return 'div'
+  return 'View'
 }
 
 function getTagName(tag: Tag, cssStyle: CssStyle) {
@@ -40,6 +41,10 @@ function getTagName(tag: Tag, cssStyle: CssStyle) {
       return 'p'
     }
     return guessTagName(tag.name)
+  } else if (cssStyle === 'styled-components' && !tag.isComponent) {
+    if (tag.isImg) {
+      return 'Image'
+    }
   }
   return tag.isText ? 'Text' : tag.name.replace(/\s/g, '')
 }
