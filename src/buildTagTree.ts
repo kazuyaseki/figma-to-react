@@ -25,6 +25,16 @@ export function buildTagTree(node: SceneNode, unitType: UnitType, textCount: Tex
     return null
   }
 
+  if (node.name === 'SignUp Phone') {
+    console.log(node)
+  }
+  if (node.name === 'Logo Box') {
+    console.log(node)
+  }
+  if (node.name === 'Buttons Box') {
+    console.log(node)
+  }
+
   const isImg = isImageNode(node)
   const properties: Property[] = []
 

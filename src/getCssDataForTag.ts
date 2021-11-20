@@ -70,10 +70,13 @@ export function getCssDataForTag(node: SceneNode, unitType: UnitType, textCount:
       }
 
       if (node.layoutMode !== 'NONE') {
-        properties.push({ name: 'flex', value: '1' })
         properties.push({ name: 'flex-direction', value: node.layoutMode === 'HORIZONTAL' ? 'row' : 'column' })
         properties.push({ name: 'justify-content', value: justifyContentCssValues[node.primaryAxisAlignItems] })
         properties.push({ name: 'align-items', value: alignItemsCssValues[node.counterAxisAlignItems] })
+
+        if (node.layoutGrow > 0 || node.layoutAlign === 'INHERIT') {
+          properties.push({ name: 'flex', value: node.layoutGrow === 0 ? 1 : node.layoutGrow })
+        }
 
         if (node.paddingTop === node.paddingBottom && node.paddingTop === node.paddingLeft && node.paddingTop === node.paddingRight) {
           if (node.paddingTop > 0) {
