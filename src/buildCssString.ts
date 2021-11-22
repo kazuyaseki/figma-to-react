@@ -3,7 +3,7 @@ import { Tag } from './buildTagTree'
 import { buildClassName } from './utils/cssUtils'
 import { IMAGE_TAG_SUFFIX, PRESSABLE_TAG_SUFFIX, TEXT_TAG_SUFFIX } from './utils/constants'
 
-export type CssStyle = 'css' | 'styled-components'
+export type CssStyle = 'css' | 'StyleSheet' | 'Restyle' | 'styled-components'
 
 function buildArray(tag: Tag, arr: CSSData[]): CSSData[] {
   if (!tag.isComponent) {
