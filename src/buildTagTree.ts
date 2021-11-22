@@ -25,22 +25,8 @@ export function buildTagTree(node: SceneNode, unitType: UnitType, textCount: Tex
     return null
   }
 
-  if (node.name === 'SignUp Phone') {
-    console.log(node)
-  }
-  if (node.name === 'Logo Box') {
-    console.log(node)
-  }
-  if (node.name === 'Buttons Box') {
-    console.log(node)
-  }
-
   const isImg = isImageNode(node)
   const properties: Property[] = []
-
-  if (isImg) {
-    properties.push({ name: 'source', value: '' })
-  }
 
   const childTags: Tag[] = []
   if ('children' in node && !isImg) {
@@ -53,7 +39,7 @@ export function buildTagTree(node: SceneNode, unitType: UnitType, textCount: Tex
   }
 
   const tag: Tag = {
-    name: isImg ? 'Image' : node.name,
+    name: node.name,
     isText: node.type === 'TEXT',
     textCharacters: node.type === 'TEXT' ? node.characters : null,
     isImg,

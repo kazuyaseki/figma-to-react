@@ -1,4 +1,5 @@
 import { buildSizeStringByUnit, UnitType } from './buildSizeStringByUnit'
+import { IMAGE_TAG_PREFIX, IMAGE_TAG_SUFFIX, PRESSABLE_TAG_PREFIX, PRESSABLE_TAG_SUFFIX, TEXT_TAG_SUFFIX } from './utils/constants'
 import { isImageNode } from './utils/isImageNode'
 
 export type CSSData = {
@@ -20,17 +21,17 @@ export class TextCount {
   }
 }
 
+const alignItemsCssValues = {
+  MIN: 'flex-start',
+  MAX: 'flex-end',
+  CENTER: 'center'
+}
+
 const justifyContentCssValues = {
   MIN: 'flex-start',
   MAX: 'flex-end',
   CENTER: 'center',
   SPACE_BETWEEN: 'space-between'
-}
-
-const alignItemsCssValues = {
-  MIN: 'flex-start',
-  MAX: 'flex-end',
-  CENTER: 'center'
 }
 
 const textAlignCssValues = {
@@ -40,19 +41,21 @@ const textAlignCssValues = {
   JUSTIFIED: 'justify'
 }
 
+const textDecorationCssValues = {
+  UNDERLINE: 'underline',
+  STRIKETHROUGH: 'line-through'
+}
+
 const textVerticalAlignCssValues = {
   TOP: 'top',
   CENTER: 'middle',
   BOTTOM: 'bottom'
 }
 
-const textDecorationCssValues = {
-  UNDERLINE: 'underline',
-  STRIKETHROUGH: 'line-through'
-}
-
 export function getCssDataForTag(node: SceneNode, unitType: UnitType, textCount: TextCount): CSSData {
   const properties: CSSData['properties'] = []
+
+  console.log('node.name: ' + node.name + ' node.type: ' + node.type)
 
   // skip vector since it's often displayed as an img tag
   if (node.visible && node.type !== 'VECTOR') {
@@ -74,7 +77,8 @@ export function getCssDataForTag(node: SceneNode, unitType: UnitType, textCount:
         properties.push({ name: 'justify-content', value: justifyContentCssValues[node.primaryAxisAlignItems] })
         properties.push({ name: 'align-items', value: alignItemsCssValues[node.counterAxisAlignItems] })
 
-        if (node.layoutGrow > 0 || node.layoutAlign === 'INHERIT') {
+        // FIXME: This name startsWith workaround for Pressable shouldn't be needed
+        if (!node.name.startsWith(PRESSABLE_TAG_PREFIX) && (node.layoutGrow > 0 || node.layoutAlign === 'INHERIT')) {
           properties.push({ name: 'flex', value: node.layoutGrow === 0 ? 1 : node.layoutGrow })
         }
 
@@ -182,20 +186,42 @@ export function getCssDataForTag(node: SceneNode, unitType: UnitType, textCount:
       properties.push({ name: 'height', value: Math.floor(node.height) + 'px' })
       properties.push({ name: 'width', value: Math.floor(node.width) + 'px' })
     }
+
+    // FIXME: Just a workaround while Image is not implemented, use a Gray View as placeholder
+    if (node.name.startsWith(IMAGE_TAG_PREFIX)) {
+      properties.push({ name: 'background-color', value: 'gray' })
+    }
+
+    // FIXME: this workaround for Pressable should't be needed in the future
+    if (node.name.startsWith(PRESSABLE_TAG_PREFIX)) {
+      properties.push({ name: 'height', value: Math.floor(node.height) + 'px' })
+      properties.push({ name: 'width', value: Math.floor(node.width) + 'px' })
+    }
   }
 
   if (properties.length > 0) {
     let className = node.name
 
     if (isImageNode(node)) {
-      className = 'img' + textCount.count
-      textCount.increment()
+      if (node.name.startsWith(IMAGE_TAG_PREFIX)) {
+        className = node.name.substring(IMAGE_TAG_PREFIX.length, node.name.length)
+      }
+      if (!node.name.endsWith(IMAGE_TAG_SUFFIX)) {
+        className += IMAGE_TAG_SUFFIX
+      }
     }
 
     if (node.type === 'TEXT') {
-      className = 'text' + textCount.count
-      textCount.increment()
+      className = node.name + TEXT_TAG_SUFFIX
     }
+
+    if (node.name.startsWith(PRESSABLE_TAG_PREFIX)) {
+      className = node.name.substring(PRESSABLE_TAG_PREFIX.length, node.name.length)
+      if (!node.name.endsWith(PRESSABLE_TAG_SUFFIX)) {
+        className += PRESSABLE_TAG_SUFFIX
+      }
+    }
+
     return {
       // name Text node as "Text" since name of text node is often the content of the node and is not appropriate as a name
       className,

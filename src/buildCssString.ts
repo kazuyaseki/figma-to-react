@@ -1,6 +1,7 @@
 import { CSSData } from './getCssDataForTag'
 import { Tag } from './buildTagTree'
 import { buildClassName } from './utils/cssUtils'
+import { IMAGE_TAG_SUFFIX, PRESSABLE_TAG_SUFFIX, TEXT_TAG_SUFFIX } from './utils/constants'
 
 export type CssStyle = 'css' | 'styled-components'
 
@@ -27,16 +28,33 @@ export function buildCssString(tag: Tag, cssStyle: CssStyle): string {
     if (!cssData || cssData.properties.length === 0) {
       return
     }
-    const cssStr =
+
+    let reactNativeComponent = 'View'
+
+    if (cssStyle === 'styled-components') {
+      /*
+       * FIXME: Image still not implemented
+      if (tag.isImg || cssData?.className.endsWith(IMAGE_TAG_SUFFIX)) {
+        reactNativeComponent = 'Image'
+      }
+      */
+      if (tag.isText || cssData?.className.endsWith(TEXT_TAG_SUFFIX)) {
+        reactNativeComponent = 'Text'
+      } else if (cssData?.className.endsWith(PRESSABLE_TAG_SUFFIX)) {
+        reactNativeComponent = 'Pressable'
+      }
+    }
+
+    const currentStr =
       cssStyle === 'styled-components'
-        ? `const ${cssData?.className.replace(/\s/g, '')} = styled.View\`
+        ? `const ${cssData?.className.replace(/\s/g, '')} = styled.${reactNativeComponent}\`
 ${cssData.properties.map((property) => `  ${property.name}: ${property.value};`).join('\n')}
 \`\n`
         : `.${buildClassName(cssData?.className)} {
 ${cssData.properties.map((property) => `  ${property.name}: ${property.value};`).join('\n')}
 }\n`
 
-    codeStr += cssStr
+    codeStr += currentStr
   })
 
   return codeStr

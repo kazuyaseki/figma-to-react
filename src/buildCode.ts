@@ -1,6 +1,7 @@
 import { capitalizeFirstLetter } from './utils/stringUtils'
 import { Tag } from './buildTagTree'
 import { buildClassName } from './utils/cssUtils'
+import { IMAGE_TAG_PREFIX, IMAGE_TAG_SUFFIX, PRESSABLE_TAG_PREFIX, PRESSABLE_TAG_SUFFIX, TEXT_TAG_PREFIX, TEXT_TAG_SUFFIX } from './utils/constants'
 
 type CssStyle = 'css' | 'styled-components'
 
@@ -18,7 +19,7 @@ function buildSpaces(baseSpaces: number, level: number) {
   return spacesStr
 }
 
-function guessTagName(name: string) {
+function guessCssTagName(name: string) {
   const _name = name.toLowerCase()
   if (_name.includes('button')) {
     return 'button'
@@ -29,7 +30,7 @@ function guessTagName(name: string) {
   if (_name.includes('article')) {
     return 'article'
   }
-  return 'View'
+  return 'div'
 }
 
 function getTagName(tag: Tag, cssStyle: CssStyle) {
@@ -40,13 +41,31 @@ function getTagName(tag: Tag, cssStyle: CssStyle) {
     if (tag.isText) {
       return 'p'
     }
-    return guessTagName(tag.name)
+    return guessCssTagName(tag.name)
   } else if (cssStyle === 'styled-components' && !tag.isComponent) {
     if (tag.isImg) {
-      return 'Image'
+      if (tag.name.startsWith(IMAGE_TAG_PREFIX)) {
+        tag.name = tag.name.substring(IMAGE_TAG_PREFIX.length, tag.name.length)
+      }
+      if (!tag.name.endsWith(IMAGE_TAG_SUFFIX)) {
+        tag.name += IMAGE_TAG_SUFFIX
+      }
+    } else if (tag.isText) {
+      if (tag.name.startsWith(TEXT_TAG_PREFIX)) {
+        tag.name = tag.name.substring(TEXT_TAG_PREFIX.length, tag.name.length)
+      }
+      if (!tag.name.endsWith(TEXT_TAG_SUFFIX)) {
+        tag.name += TEXT_TAG_SUFFIX
+      }
+    } else if (tag.name.startsWith(PRESSABLE_TAG_PREFIX)) {
+      tag.name = tag.name.substring(PRESSABLE_TAG_PREFIX.length, tag.name.length)
+
+      if (!tag.name.endsWith(PRESSABLE_TAG_SUFFIX)) {
+        tag.name += PRESSABLE_TAG_SUFFIX
+      }
     }
   }
-  return tag.isText ? 'Text' : tag.name.replace(/\s/g, '')
+  return tag.name.replace(/\s/g, '')
 }
 
 function getClassName(tag: Tag, cssStyle: CssStyle) {
@@ -92,7 +111,7 @@ function buildJsxString(tag: Tag, cssStyle: CssStyle, level: number) {
 }
 
 export function buildCode(tag: Tag, css: CssStyle): string {
-  return `const ${capitalizeFirstLetter(tag.name.replace(/\s/g, ''))}: React.VFC = () => {
+  return `const ${capitalizeFirstLetter(tag.name.replace(/\s/g, ''))}Component: React.VFC = () => {
   return (
 ${buildJsxString(tag, css, 0)}
   )

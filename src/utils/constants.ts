@@ -1,0 +1,6 @@
+export const IMAGE_TAG_PREFIX = 'Image/'
+export const IMAGE_TAG_SUFFIX = 'Image'
+export const PRESSABLE_TAG_PREFIX = 'Pressable/'
+export const PRESSABLE_TAG_SUFFIX = 'Pressable'
+export const TEXT_TAG_PREFIX = 'Text/'
+export const TEXT_TAG_SUFFIX = 'Text'

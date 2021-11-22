@@ -8,11 +8,16 @@ import { buildCssString, CssStyle } from './buildCssString'
 import { UserComponentSetting } from './userComponentSetting'
 import { TextCount } from './getCssDataForTag'
 
-figma.showUI(__html__, { width: 480, height: 480 })
+figma.showUI(__html__, { width: 640, height: 480 })
 
 const selectedNodes = figma.currentPage.selection
 
 async function generate(node: SceneNode, config: { cssStyle?: CssStyle; unitType?: UnitType }) {
+  console.log('Figma currentPage: ')
+  console.log(figma.currentPage)
+  console.log('Figma object: ')
+  console.log(figma)
+
   let cssStyle = config.cssStyle
   if (!cssStyle) {
     cssStyle = await figma.clientStorage.getAsync(STORAGE_KEYS.CSS_STYLE_KEY)
