@@ -28,7 +28,7 @@
     "@babel/preset-typescript": "7.13.0",
     "@figma/plugin-typings": "1.33.0",
     "@types/jest": "26.0.24",
-    "@types/react": "17.0.4",
+    "@types/react": "17.0.36",
     "@types/react-dom": "17.0.3",
     "@typescript-eslint/eslint-plugin": "4.20.0",
     "@typescript-eslint/parser": "4.20.0",
