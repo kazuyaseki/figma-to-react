@@ -70,6 +70,11 @@ export function getCssDataForTag(node: SceneNode, unitType: UnitType, textCount:
         properties.push({ name: 'border-radius', value: borderRadiusValue })
       }
 
+      const boxShadowValue = getBoxShadowString(node, unitType)
+      if (boxShadowValue) {
+        properties.push({ name: 'box-shadow', value: boxShadowValue })
+      }
+
       if (node.layoutMode !== 'NONE') {
         properties.push({ name: 'flex-direction', value: node.layoutMode === 'HORIZONTAL' ? 'row' : 'column' })
         properties.push({ name: 'justify-content', value: justifyContentCssValues[node.primaryAxisAlignItems] })
@@ -156,7 +161,10 @@ export function getCssDataForTag(node: SceneNode, unitType: UnitType, textCount:
 
       const letterSpacing = node.letterSpacing as LetterSpacing
       if (letterSpacing.value !== 0) {
-        properties.push({ name: 'letter-spacing', value: letterSpacing.unit === 'PIXELS' ? buildSizeStringByUnit(letterSpacing.value, unitType) : letterSpacing.value + '%' })
+        properties.push({
+          name: 'letter-spacing',
+          value: letterSpacing.unit === 'PIXELS' ? buildSizeStringByUnit(Number(letterSpacing.value).toFixed(2), unitType) : letterSpacing.value + '%'
+        })
       }
 
       type LineHeightWithValue = {
@@ -255,18 +263,54 @@ function getBorderRadiusString(node: FrameNode | RectangleNode | ComponentNode |
   return null
 }
 
+function getBoxShadowString(node: FrameNode | RectangleNode | ComponentNode | InstanceNode, unitType: UnitType) {
+  if (node.effects.length > 0 && node.effects[0].type === 'DROP_SHADOW') {
+    const dropShadowEffect = node.effects[0] as ShadowEffect
+
+    let resultString = ''
+
+    if (dropShadowEffect.offset) {
+      resultString += `${buildSizeStringByUnit(dropShadowEffect.offset.x, unitType)} ${buildSizeStringByUnit(dropShadowEffect.offset.y, unitType)} `
+    }
+    if (dropShadowEffect.radius) {
+      resultString += `${buildSizeStringByUnit(dropShadowEffect.radius, unitType)} `
+    }
+    if (dropShadowEffect.color) {
+      resultString += buildColorString(dropShadowEffect)
+    }
+    return resultString
+  }
+  return null
+}
+
 function rgbValueToHex(value: number) {
   return Math.floor(value * 255)
     .toString(16)
     .padStart(2, '0')
 }
 
-function buildColorString(paint: Paint) {
-  if (paint.type === 'SOLID') {
-    if (paint.opacity !== undefined && paint.opacity < 1) {
-      return `rgba(${Math.floor(paint.color.r * 255)}, ${Math.floor(paint.color.g * 255)}, ${Math.floor(paint.color.b * 255)}, ${paint.opacity})`
+function buildColorString(source: any) {
+  const isSolidPaint = (source as Paint).type === 'SOLID'
+
+  if (isSolidPaint) {
+    const solidPaint = source as SolidPaint
+    if (solidPaint.opacity !== undefined && solidPaint.opacity < 1) {
+      return `rgba(${Math.floor(solidPaint.color.r * 255)}, ${Math.floor(solidPaint.color.g * 255)}, ${Math.floor(solidPaint.color.b * 255)}, ${Number(solidPaint.opacity).toFixed(
+        2
+      )})`
     }
-    return `#${rgbValueToHex(paint.color.r)}${rgbValueToHex(paint.color.g)}${rgbValueToHex(paint.color.b)}`
+    return `#${rgbValueToHex(solidPaint.color.r)}${rgbValueToHex(solidPaint.color.g)}${rgbValueToHex(solidPaint.color.b)}`
+  }
+
+  const isDropShadow = (source as ShadowEffect).type === 'DROP_SHADOW'
+  if (isDropShadow) {
+    const shadowEffect = source as ShadowEffect
+    if (shadowEffect.color.a !== undefined && shadowEffect.color.a < 1) {
+      return `rgba(${Math.floor(shadowEffect.color.r * 255)}, ${Math.floor(shadowEffect.color.g * 255)}, ${Math.floor(shadowEffect.color.b * 255)}, ${Number(
+        shadowEffect.color.a
+      ).toFixed(2)})`
+    }
+    return `#${rgbValueToHex(shadowEffect.color.r)}${rgbValueToHex(shadowEffect.color.g)}${rgbValueToHex(shadowEffect.color.b)}`
   }
 
   return ''

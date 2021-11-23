@@ -59,7 +59,7 @@ ${cssData.properties.map((property) => `  ${property.name}: ${property.value};`)
   })
 
   // FIXME: Spacer shouldn't be needed if gap property is working
-  if (cssStyle === 'styled-components') {
+  if (cssStyle === 'styled-components' && tag.hasItemSpacing) {
     const node = tag.node
     let propertyName = 'height'
     if (node.type === 'FRAME' || node.type === 'INSTANCE' || node.type === 'COMPONENT') {
