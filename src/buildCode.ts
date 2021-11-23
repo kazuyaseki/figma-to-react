@@ -2,8 +2,7 @@ import { capitalizeFirstLetter } from './utils/stringUtils'
 import { Tag } from './buildTagTree'
 import { buildClassName } from './utils/cssUtils'
 import { IMAGE_TAG_PREFIX, IMAGE_TAG_SUFFIX, PRESSABLE_TAG_PREFIX, PRESSABLE_TAG_SUFFIX, TEXT_TAG_PREFIX, TEXT_TAG_SUFFIX } from './utils/constants'
-
-type CssStyle = 'css' | 'styled-components'
+import { CssStyle } from './buildCssString'
 
 function buildSpaces(baseSpaces: number, level: number) {
   let spacesStr = ''
@@ -84,7 +83,11 @@ function buildPropertyString(prop: Tag['properties'][number]) {
 
 function buildChildTagsString(tag: Tag, cssStyle: CssStyle, level: number): string {
   if (tag.children.length > 0) {
-    return '\n' + tag.children.map((child) => buildJsxString(child, cssStyle, level + 1)).join('\n')
+    const childrenMap = tag.children.map((child) => buildJsxString(child, cssStyle, level + 1))
+
+    // FIXME: Spacer shouldn't be needed if flex gap property is working
+    const spaceString = buildSpaces(4, level + 1)
+    return '\n' + childrenMap.join(tag.hasItemSpacing ? `\n${spaceString}<Spacer />\n` : '\n')
   }
   if (tag.isText) {
     return `${tag.textCharacters}`

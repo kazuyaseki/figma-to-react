@@ -1,7 +1,8 @@
 import { CSSData } from './getCssDataForTag'
 import { Tag } from './buildTagTree'
 import { buildClassName } from './utils/cssUtils'
-import { IMAGE_TAG_SUFFIX, PRESSABLE_TAG_SUFFIX, TEXT_TAG_SUFFIX } from './utils/constants'
+import { PRESSABLE_TAG_SUFFIX, TEXT_TAG_SUFFIX } from './utils/constants'
+import { getItemSpacing } from './utils/isImageNode'
 
 export type CssStyle = 'css' | 'StyleSheet' | 'Restyle' | 'styled-components'
 
@@ -56,6 +57,22 @@ ${cssData.properties.map((property) => `  ${property.name}: ${property.value};`)
 
     codeStr += currentStr
   })
+
+  // FIXME: Spacer shouldn't be needed if gap property is working
+  if (cssStyle === 'styled-components') {
+    const node = tag.node
+    let propertyName = 'height'
+    if (node.type === 'FRAME' || node.type === 'INSTANCE' || node.type === 'COMPONENT') {
+      if (node.layoutMode === 'HORIZONTAL') {
+        propertyName = 'width'
+      }
+    }
+
+    const spacerStr = `\nconst Spacer = styled.View\`
+  ${propertyName}: ${getItemSpacing(tag.node)}px;
+\``
+    codeStr += spacerStr
+  }
 
   return codeStr
 }

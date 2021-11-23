@@ -1,23 +1,24 @@
 import { UnitType } from './buildSizeStringByUnit'
 import { CSSData, getCssDataForTag, TextCount } from './getCssDataForTag'
-import { isImageNode } from './utils/isImageNode'
+import { getItemSpacing, isImageNode } from './utils/isImageNode'
 
 type Property = {
   name: string
-  value: string
   notStringValue?: boolean
+  value: string
 }
 
 export type Tag = {
-  name: string
-  isText: boolean
-  textCharacters: string | null
-  isImg: boolean
-  properties: Property[]
-  css: CSSData
   children: Tag[]
-  node: SceneNode
+  css: CSSData
+  hasItemSpacing: boolean
   isComponent?: boolean
+  isImg: boolean
+  isText: boolean
+  name: string
+  node: SceneNode
+  properties: Property[]
+  textCharacters: string | null
 }
 
 export function buildTagTree(node: SceneNode, unitType: UnitType, textCount: TextCount): Tag | null {
@@ -25,6 +26,7 @@ export function buildTagTree(node: SceneNode, unitType: UnitType, textCount: Tex
     return null
   }
 
+  const hasItemSpacing = getItemSpacing(node) > 0
   const isImg = isImageNode(node)
   const properties: Property[] = []
 
@@ -46,7 +48,8 @@ export function buildTagTree(node: SceneNode, unitType: UnitType, textCount: Tex
     css: getCssDataForTag(node, unitType, textCount),
     properties,
     children: childTags,
-    node
+    node,
+    hasItemSpacing
   }
 
   return tag

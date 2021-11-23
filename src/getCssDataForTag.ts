@@ -55,8 +55,6 @@ const textVerticalAlignCssValues = {
 export function getCssDataForTag(node: SceneNode, unitType: UnitType, textCount: TextCount): CSSData {
   const properties: CSSData['properties'] = []
 
-  console.log('node.name: ' + node.name + ' node.type: ' + node.type)
-
   // skip vector since it's often displayed as an img tag
   if (node.visible && node.type !== 'VECTOR') {
     if ('opacity' in node && (node?.opacity || 1) < 1) {
@@ -98,9 +96,10 @@ export function getCssDataForTag(node: SceneNode, unitType: UnitType, textCount:
           })
         }
 
+        /* FIXME: gap is currently not supported on React Native styled-components
         if (node.primaryAxisAlignItems !== 'SPACE_BETWEEN' && node.itemSpacing > 0) {
           properties.push({ name: 'gap', value: buildSizeStringByUnit(node.itemSpacing, unitType) })
-        }
+        } */
       } else {
         properties.push({ name: 'height', value: Math.floor(node.height) + 'px' })
         properties.push({ name: 'width', value: Math.floor(node.width) + 'px' })
@@ -138,10 +137,22 @@ export function getCssDataForTag(node: SceneNode, unitType: UnitType, textCount:
     }
 
     if (node.type === 'TEXT') {
+      if (node.textAutoResize !== 'WIDTH_AND_HEIGHT') {
+        properties.push({ name: 'width', value: `${node.width}px` })
+      }
+
       properties.push({ name: 'text-align', value: textAlignCssValues[node.textAlignHorizontal] })
       properties.push({ name: 'vertical-align', value: textVerticalAlignCssValues[node.textAlignVertical] })
+      if (node.fontName) {
+        const fontName = node.fontName
+        if ((fontName as FontName).family) {
+          properties.push({ name: 'font-family', value: (node.fontName as FontName).family })
+        }
+        if ((fontName as FontName).style) {
+          properties.push({ name: 'font-weight', value: (node.fontName as FontName).style.toLowerCase() })
+        }
+      }
       properties.push({ name: 'font-size', value: `${node.fontSize as number}px` })
-      properties.push({ name: 'font-family', value: (node.fontName as FontName).family })
 
       const letterSpacing = node.letterSpacing as LetterSpacing
       if (letterSpacing.value !== 0) {
@@ -194,7 +205,6 @@ export function getCssDataForTag(node: SceneNode, unitType: UnitType, textCount:
 
     // FIXME: this workaround for Pressable should't be needed in the future
     if (node.name.startsWith(PRESSABLE_TAG_PREFIX)) {
-      properties.push({ name: 'height', value: Math.floor(node.height) + 'px' })
       properties.push({ name: 'width', value: Math.floor(node.width) + 'px' })
     }
   }
