@@ -1,3 +1,5 @@
+import { IMAGE_TAG_PREFIX } from './constants'
+
 export function getItemSpacing(node: SceneNode): number {
   if (node.type === 'FRAME' || node.type === 'INSTANCE' || node.type === 'COMPONENT') {
     if (node.layoutMode !== 'NONE') {
@@ -10,7 +12,9 @@ export function getItemSpacing(node: SceneNode): number {
 }
 
 export function isImageNode(node: SceneNode): boolean {
-  // 下部に Vector しか存在しないものは画像と判定する
+  if (node.name.startsWith(IMAGE_TAG_PREFIX)) {
+    return true
+  }
   if ('children' in node && node.children.length > 0) {
     let hasOnlyVector = true
     node.children.forEach((child) => {

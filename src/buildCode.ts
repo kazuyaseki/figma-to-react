@@ -58,7 +58,6 @@ function getTagName(tag: Tag, cssStyle: CssStyle) {
       }
     } else if (tag.name.startsWith(PRESSABLE_TAG_PREFIX)) {
       tag.name = tag.name.substring(PRESSABLE_TAG_PREFIX.length, tag.name.length)
-
       if (!tag.name.endsWith(PRESSABLE_TAG_SUFFIX)) {
         tag.name += PRESSABLE_TAG_SUFFIX
       }
@@ -87,7 +86,7 @@ function buildChildTagsString(tag: Tag, cssStyle: CssStyle, level: number): stri
 
     // FIXME: Spacer shouldn't be needed if flex gap property is working
     const spaceString = buildSpaces(4, level + 1)
-    return '\n' + childrenMap.join(tag.hasItemSpacing ? `\n${spaceString}<Spacer />\n` : '\n')
+    return '\n' + childrenMap.join(tag.hasItemSpacing ? `\n${spaceString}<${getTagName(tag, cssStyle)}Spacer />\n` : '\n')
   }
   if (tag.isText) {
     return `${tag.textCharacters}`

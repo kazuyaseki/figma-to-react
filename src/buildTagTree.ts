@@ -1,5 +1,6 @@
 import { UnitType } from './buildSizeStringByUnit'
 import { CSSData, getCssDataForTag, TextCount } from './getCssDataForTag'
+import { TEXT_TAG_PREFIX } from './utils/constants'
 import { getItemSpacing, isImageNode } from './utils/isImageNode'
 
 type Property = {
@@ -42,7 +43,7 @@ export function buildTagTree(node: SceneNode, unitType: UnitType, textCount: Tex
 
   const tag: Tag = {
     name: node.name,
-    isText: node.type === 'TEXT',
+    isText: node.type === 'TEXT' || node.name.startsWith(TEXT_TAG_PREFIX),
     textCharacters: node.type === 'TEXT' ? node.characters : null,
     isImg,
     css: getCssDataForTag(node, unitType, textCount),

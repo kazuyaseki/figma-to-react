@@ -76,9 +76,15 @@ export function getCssDataForTag(node: SceneNode, unitType: UnitType, textCount:
       }
 
       if (node.layoutMode !== 'NONE') {
+        console.log('node.name ' + node.name)
+        console.log(node)
         properties.push({ name: 'flex-direction', value: node.layoutMode === 'HORIZONTAL' ? 'row' : 'column' })
         properties.push({ name: 'justify-content', value: justifyContentCssValues[node.primaryAxisAlignItems] })
         properties.push({ name: 'align-items', value: alignItemsCssValues[node.counterAxisAlignItems] })
+
+        if (node.layoutAlign === 'STRETCH') {
+          properties.push({ name: 'align-self', value: 'stretch' })
+        }
 
         // FIXME: This name startsWith workaround for Pressable shouldn't be needed
         if (!node.name.startsWith(PRESSABLE_TAG_PREFIX) && (node.layoutGrow > 0 || node.layoutAlign === 'INHERIT')) {
@@ -143,7 +149,7 @@ export function getCssDataForTag(node: SceneNode, unitType: UnitType, textCount:
 
     if (node.type === 'TEXT') {
       if (node.textAutoResize !== 'WIDTH_AND_HEIGHT') {
-        properties.push({ name: 'width', value: `${node.width}px` })
+        properties.push({ name: 'max-width', value: `${node.width}px` })
       }
 
       properties.push({ name: 'text-align', value: textAlignCssValues[node.textAlignHorizontal] })
@@ -229,7 +235,7 @@ export function getCssDataForTag(node: SceneNode, unitType: UnitType, textCount:
       }
     }
 
-    if (node.type === 'TEXT') {
+    if (node.type === 'TEXT' && !node.name.endsWith(TEXT_TAG_SUFFIX)) {
       className = node.name + TEXT_TAG_SUFFIX
     }
 

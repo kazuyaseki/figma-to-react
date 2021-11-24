@@ -6,9 +6,14 @@ import { getItemSpacing } from './utils/isImageNode'
 
 export type CssStyle = 'css' | 'StyleSheet' | 'Restyle' | 'styled-components'
 
-function buildArray(tag: Tag, arr: CSSData[]): CSSData[] {
+type DataObject = {
+  tag: Tag
+  cssData: CSSData
+}
+
+function buildArray(tag: Tag, arr: DataObject[]): DataObject[] {
   if (!tag.isComponent) {
-    arr.push(tag.css)
+    arr.push({ addedToCode: false, tag: tag, cssData: tag.css })
   }
 
   tag.children.forEach((child) => {
@@ -19,14 +24,23 @@ function buildArray(tag: Tag, arr: CSSData[]): CSSData[] {
 }
 
 export function buildCssString(tag: Tag, cssStyle: CssStyle): string {
-  const cssArray = buildArray(tag, [])
+  const dataObjectArray: DataObject[] = buildArray(tag, [])
+  const codeTagNames: string[] = []
+
   let codeStr = ''
 
-  if (!cssArray) {
+  if (!dataObjectArray) {
     return codeStr
   }
-  cssArray.forEach((cssData) => {
-    if (!cssData || cssData.properties.length === 0) {
+
+  dataObjectArray.forEach((dataObject: DataObject) => {
+    if (!dataObject.cssData || dataObject.cssData.properties.length === 0) {
+      return
+    }
+
+    const codeTagName = getCodeTagName(dataObject.cssData?.className, cssStyle)
+
+    if (codeTagNames.includes(codeTagName)) {
       return
     }
 
@@ -39,40 +53,50 @@ export function buildCssString(tag: Tag, cssStyle: CssStyle): string {
         reactNativeComponent = 'Image'
       }
       */
-      if (tag.isText || cssData?.className.endsWith(TEXT_TAG_SUFFIX)) {
+      if (tag.isText || dataObject.cssData?.className.endsWith(TEXT_TAG_SUFFIX)) {
         reactNativeComponent = 'Text'
-      } else if (cssData?.className.endsWith(PRESSABLE_TAG_SUFFIX)) {
+      } else if (dataObject.cssData?.className.endsWith(PRESSABLE_TAG_SUFFIX)) {
         reactNativeComponent = 'Pressable'
       }
     }
 
     const currentStr =
       cssStyle === 'styled-components'
-        ? `const ${cssData?.className.replace(/\s/g, '')} = styled.${reactNativeComponent}\`
-${cssData.properties.map((property) => `  ${property.name}: ${property.value};`).join('\n')}
+        ? `const ${codeTagName} = styled.${reactNativeComponent}\`
+${dataObject.cssData.properties.map((property: any) => `  ${property.name}: ${property.value};`).join('\n')}
 \`\n`
-        : `.${buildClassName(cssData?.className)} {
-${cssData.properties.map((property) => `  ${property.name}: ${property.value};`).join('\n')}
+        : `.${codeTagName} {
+${dataObject.cssData.properties.map((property: any) => `  ${property.name}: ${property.value};`).join('\n')}
 }\n`
 
     codeStr += currentStr
+    codeTagNames.push(codeTagName)
+
+    // FIXME: Spacer shouldn't be needed if gap property is working
+    if (cssStyle === 'styled-components' && dataObject.tag.hasItemSpacing) {
+      const node = dataObject.tag.node
+      let propertyName = 'height'
+
+      if (node.type === 'FRAME' || node.type === 'INSTANCE' || node.type === 'COMPONENT') {
+        if (node.layoutMode === 'HORIZONTAL') {
+          propertyName = 'width'
+        }
+      }
+
+      const spacerStr = `\nconst ${dataObject.cssData?.className.replace(/\s/g, '')}Spacer = styled.View\`
+  ${propertyName}: ${getItemSpacing(dataObject.tag.node)}px;
+\`\n\n`
+
+      codeStr += spacerStr
+    }
   })
 
-  // FIXME: Spacer shouldn't be needed if gap property is working
-  if (cssStyle === 'styled-components' && tag.hasItemSpacing) {
-    const node = tag.node
-    let propertyName = 'height'
-    if (node.type === 'FRAME' || node.type === 'INSTANCE' || node.type === 'COMPONENT') {
-      if (node.layoutMode === 'HORIZONTAL') {
-        propertyName = 'width'
-      }
-    }
-
-    const spacerStr = `\nconst Spacer = styled.View\`
-  ${propertyName}: ${getItemSpacing(tag.node)}px;
-\``
-    codeStr += spacerStr
-  }
-
   return codeStr
+}
+
+export function getCodeTagName(className: string, style: CssStyle) {
+  if (style === 'styled-components') {
+    return className.replace(/\s/g, '')
+  }
+  return buildClassName(className)
 }
