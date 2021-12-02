@@ -14,11 +14,18 @@
   "author": "",
   "license": "",
   "dependencies": {
+    "@emotion/react": "^11.7.0",
+    "@emotion/styled": "^11.6.0",
+    "@material-ui/core": "^5.0.0-beta.5",
+    "@material-ui/styled-engine-sc": "^5.0.0-beta.5",
+    "@mui/material": "^5.2.2",
+    "@mui/x-data-grid": "^5.1.0",
     "@vanilla-extract/css": "^1.0.0",
     "html-webpack-inline-source-plugin": "0.0.10",
     "html-webpack-plugin": "^3.2.0",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
+    "styled-components": "^5.3.3",
     "webpack": "^4.41.4",
     "webpack-cli": "^3.3.6"
   },

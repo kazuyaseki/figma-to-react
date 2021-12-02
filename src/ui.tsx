@@ -5,8 +5,16 @@ import { UnitType } from './buildSizeStringByUnit'
 import { messageTypes } from './messagesTypes'
 import styles from './ui.css'
 import Spacer from './ui/Spacer'
+import TabPanel from './ui/TabPanel'
 import UserComponentSettingList from './ui/UserComponentSettingList'
 import { UserComponentSetting } from './userComponentSetting'
+
+import Box from '@material-ui/core/Box'
+import Tabs from '@material-ui/core/Tabs'
+import Tab from '@material-ui/core/Tab'
+
+import { renderDesignTokensTab } from './ui/DesignTokensTab'
+import { renderPropertiesTab } from './ui/PropertiesTab'
 
 function escapeHtml(str: string) {
   str = str.replace(/&/g, '&amp;')
@@ -53,10 +61,31 @@ const unitTypes: { value: UnitType; label: string; disabled: boolean }[] = [
 
 const App: React.VFC = () => {
   const [code, setCode] = React.useState('')
+  const [nodeProperties, setNodeProperties] = React.useState({})
   const [selectedCssStyle, setCssStyle] = React.useState<CssStyle>('css')
   const [selectedUnitType, setUnitType] = React.useState<UnitType>('px')
+  const [tabValue, setTabValue] = React.useState(2)
   const [userComponentSettings, setUserComponentSettings] = React.useState<UserComponentSetting[]>([])
   const textRef = React.useRef<HTMLTextAreaElement>(null)
+
+  // set initial values taken from figma storage
+  React.useEffect(() => {
+    onmessage = (event) => {
+      setCssStyle(event.data.pluginMessage.cssStyle)
+      setUnitType(event.data.pluginMessage.unitType)
+
+      const codeStr = event.data.pluginMessage.generatedCodeStr + '\n\n' + event.data.pluginMessage.cssString
+      setCode(codeStr)
+
+      setUserComponentSettings(event.data.pluginMessage.userComponentSettings)
+
+      setNodeProperties(event.data.pluginMessage.nodeProperties)
+    }
+  }, [])
+
+  const handleTabChange = (event: any, newValue: any) => {
+    setTabValue(newValue)
+  }
 
   const copyToClipboard = () => {
     if (textRef.current) {
@@ -99,83 +128,87 @@ const App: React.VFC = () => {
 
   const syntaxHighlightedCode = React.useMemo(() => insertSyntaxHighlightText(escapeHtml(code)), [code])
 
-  // set initial values taken from figma storage
-  React.useEffect(() => {
-    onmessage = (event) => {
-      setCssStyle(event.data.pluginMessage.cssStyle)
-      setUnitType(event.data.pluginMessage.unitType)
-      const codeStr = event.data.pluginMessage.generatedCodeStr + '\n\n' + event.data.pluginMessage.cssString
-      setCode(codeStr)
-      setUserComponentSettings(event.data.pluginMessage.userComponentSettings)
-    }
-  }, [])
-
   return (
-    <div>
-      <div className={styles.code}>
-        <textarea className={styles.textareaForClipboard} ref={textRef} value={code} readOnly />
-        <p className={styles.generatedCode} dangerouslySetInnerHTML={{ __html: syntaxHighlightedCode }} />
+    <Box sx={{ width: '100%' }}>
+      <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+        <Tabs value={tabValue} onChange={handleTabChange}>
+          <Tab label="Design Tokens" />
+          <Tab label="Properties" />
+          <Tab label="Code" />
+        </Tabs>
+      </Box>
+      <TabPanel value={tabValue} index={0}>
+        {renderDesignTokensTab()}
+      </TabPanel>
+      <TabPanel value={tabValue} index={1}>
+        {renderPropertiesTab(nodeProperties, parent)}
+      </TabPanel>
+      <TabPanel value={tabValue} index={2}>
+        <div className={styles.code}>
+          <textarea className={styles.textareaForClipboard} ref={textRef} value={code} readOnly />
+          <p className={styles.generatedCode} dangerouslySetInnerHTML={{ __html: syntaxHighlightedCode }} />
 
-        <Spacer axis="vertical" size={12} />
+          <Spacer axis="vertical" size={12} />
 
-        <div className={styles.buttonLayout}>
-          <button className={styles.copyButton} onClick={copyToClipboard}>
-            Copy to clipboard
-          </button>
-        </div>
-      </div>
-
-      <div className={styles.settings}>
-        <h2 className={styles.heading}>Settings</h2>
-
-        <Spacer axis="vertical" size={12} />
-
-        <div className={styles.optionList}>
-          {cssStyles.map((style) => (
-            <div key={style.value} className={styles.option}>
-              <input
-                type="radio"
-                name="css-style"
-                id={style.value}
-                value={style.value}
-                checked={selectedCssStyle === style.value}
-                disabled={style.disabled}
-                onChange={notifyChangeCssStyle}
-              />
-              <label htmlFor={style.value}>{style.label}</label>
-            </div>
-          ))}
+          <div className={styles.buttonLayout}>
+            <button className={styles.copyButton} onClick={copyToClipboard}>
+              Copy to clipboard
+            </button>
+          </div>
         </div>
 
-        <Spacer axis="vertical" size={12} />
+        <div className={styles.settings}>
+          <h2 className={styles.heading}>Settings</h2>
 
-        <div className={styles.optionList}>
-          {unitTypes.map((unitType) => (
-            <div key={unitType.value} className={styles.option}>
-              <input
-                type="radio"
-                name="unit-type"
-                id={unitType.value}
-                value={unitType.value}
-                checked={selectedUnitType === unitType.value}
-                disabled={unitType.disabled}
-                onChange={notifyChangeUnitType}
-              />
-              <label htmlFor={unitType.value}>{unitType.label}</label>
-            </div>
-          ))}
+          <Spacer axis="vertical" size={12} />
+
+          <div className={styles.optionList}>
+            {cssStyles.map((style) => (
+              <div key={style.value} className={styles.option}>
+                <input
+                  type="radio"
+                  name="css-style"
+                  id={style.value}
+                  value={style.value}
+                  checked={selectedCssStyle === style.value}
+                  disabled={style.disabled}
+                  onChange={notifyChangeCssStyle}
+                />
+                <label htmlFor={style.value}>{style.label}</label>
+              </div>
+            ))}
+          </div>
+
+          <Spacer axis="vertical" size={12} />
+
+          <div className={styles.optionList}>
+            {unitTypes.map((unitType) => (
+              <div key={unitType.value} className={styles.option}>
+                <input
+                  type="radio"
+                  name="unit-type"
+                  id={unitType.value}
+                  value={unitType.value}
+                  checked={selectedUnitType === unitType.value}
+                  disabled={unitType.disabled}
+                  onChange={notifyChangeUnitType}
+                />
+                <label htmlFor={unitType.value}>{unitType.label}</label>
+              </div>
+            ))}
+          </div>
+
+          <Spacer axis="vertical" size={12} />
+
+          <UserComponentSettingList
+            settings={userComponentSettings}
+            onAdd={onAddUserComponentSetting}
+            onDelete={onDeleteUserComponentSetting}
+            onUpdate={onUpdateUserComponentSetting}
+          />
         </div>
-
-        <Spacer axis="vertical" size={12} />
-
-        <UserComponentSettingList
-          settings={userComponentSettings}
-          onAdd={onAddUserComponentSetting}
-          onDelete={onDeleteUserComponentSetting}
-          onUpdate={onUpdateUserComponentSetting}
-        />
-      </div>
-    </div>
+      </TabPanel>
+    </Box>
   )
 }
 

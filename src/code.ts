@@ -45,7 +45,16 @@ async function generate(node: SceneNode, config: { cssStyle?: CssStyle; unitType
   const generatedCodeStr = buildCode(tag, cssStyle)
   const cssString = buildCssString(tag, cssStyle)
 
-  figma.ui.postMessage({ generatedCodeStr, cssString, cssStyle, unitType, userComponentSettings })
+  const commonNodeProperties = {
+    id: node.id,
+    name: node.name,
+    height: node.height,
+    width: node.width
+  }
+
+  const nodeProperties = { ...commonNodeProperties }
+
+  figma.ui.postMessage({ generatedCodeStr, cssString, cssStyle, unitType, userComponentSettings, nodeProperties })
 }
 
 if (selectedNodes.length > 1) {
@@ -73,5 +82,17 @@ figma.ui.onmessage = (msg: messageTypes) => {
   if (msg.type === 'update-user-component-settings') {
     figma.clientStorage.setAsync(STORAGE_KEYS.USER_COMPONENT_SETTINGS_KEY, msg.userComponentSettings)
     generate(selectedNodes[0], {})
+  }
+  // FIXME: example code
+  if (msg.type === 'update-node-properties') {
+    figma.clientStorage.setAsync(STORAGE_KEYS.UPDATE_NODE_PROPERTIES_KEY, msg.nodeProperties)
+    const updatedNodeProperties = msg.nodeProperties
+    const updatedNode = { ...selectedNodes[0] }
+    updatedNode.height = updatedNodeProperties.height
+
+    if (selectedNodes[0].type === 'FRAME') {
+      console.log('entrou aqui, chamou resize')
+      selectedNodes[0].resize(selectedNodes[0].width, updatedNode.height)
+    }
   }
 }

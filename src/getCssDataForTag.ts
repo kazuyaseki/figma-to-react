@@ -166,10 +166,11 @@ export function getCssDataForTag(node: SceneNode, unitType: UnitType, textCount:
       properties.push({ name: 'font-size', value: `${node.fontSize as number}px` })
 
       const letterSpacing = node.letterSpacing as LetterSpacing
-      if (letterSpacing.value !== 0) {
+      const letterSpacingValue = letterSpacing.value
+      if (letterSpacingValue !== 0) {
         properties.push({
           name: 'letter-spacing',
-          value: letterSpacing.unit === 'PIXELS' ? buildSizeStringByUnit(Number(letterSpacing.value).toFixed(2), unitType) : letterSpacing.value + '%'
+          value: letterSpacing.unit === 'PIXELS' ? buildSizeStringByUnit(Number(letterSpacingValue.toFixed(2)), unitType) : letterSpacing.value + '%'
         })
       }
 

@@ -7,6 +7,7 @@ import { getItemSpacing } from './utils/isImageNode'
 export type CssStyle = 'css' | 'StyleSheet' | 'Restyle' | 'styled-components'
 
 type DataObject = {
+  addedToCode?: boolean
   tag: Tag
   cssData: CSSData
 }
