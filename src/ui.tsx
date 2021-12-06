@@ -128,6 +128,9 @@ const App: React.VFC = () => {
 
   const syntaxHighlightedCode = React.useMemo(() => insertSyntaxHighlightText(escapeHtml(code)), [code])
 
+  console.log('ui.tsx nodeProperties')
+  console.log(nodeProperties)
+
   return (
     <Box sx={{ width: '100%' }}>
       <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>

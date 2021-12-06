@@ -1,59 +1,43 @@
 import { Button } from '@material-ui/core'
 import { DataGrid, GridColDef } from '@mui/x-data-grid'
 import * as React from 'react'
-
-let designTokenIdCounter = 0
-
-const designTokenCreateRow = () => {
-  designTokenIdCounter += 1
-  return { id: designTokenIdCounter, col1: 'exampleToken', col2: '10' }
-}
+import { useStore } from '../hooks/useStore'
 
 const designTokensColumns: GridColDef[] = [
-  { field: 'col1', headerName: 'Token Name', width: 300, editable: true },
-  { field: 'col2', headerName: 'Token Value', width: 300, editable: true }
+  { field: 'tokenName', headerName: 'Token Name', width: 300, editable: true },
+  { field: 'tokenValue', headerName: 'Token Value', width: 300, editable: true }
 ]
 
-const designTokensArray: any[] = []
-
-export function getDesignTokensNames() {
-  console.log('getDesignTokensNames designTokensArray')
-  console.log(designTokensArray)
-  const names: string[] = []
-  for (let index = 0; index < designTokensArray.length; index++) {
-    if (!names.includes(designTokensArray[index].tokenName)) {
-      names.push(designTokensArray[index].tokenName)
-    }
-  }
-  return names
-}
-
 export const renderDesignTokensTab = () => {
-  const [designTokensRows, setDesignTokensRows] = React.useState(() => [designTokenCreateRow()])
+  const [editRowsModel, setEditRowsModel] = React.useState({})
+
+  const addDesignToken = useStore((state) => state.addDesignToken)
+  const designTokens = useStore((state) => state.designTokens)
+  const designTokensCounter = useStore((state) => state.designTokensCounter)
+  const updateDesignToken = useStore((state) => state.updateDesignToken)
 
   React.useEffect(() => {
-    updateDesignTokensArray(designTokensRows)
-  }, [designTokensRows])
+    const objectKeys = Object.keys(editRowsModel)
+    if (objectKeys.length !== 0) {
+      const designTokenId = objectKeys[0]
+      updateDesignToken(Number(designTokenId), editRowsModel[designTokenId].tokenName?.value, editRowsModel[designTokenId].tokenValue?.value)
+    }
+  }, [editRowsModel])
+
+  const onEditRowsModelChange = React.useCallback((model) => {
+    setEditRowsModel(model)
+  }, [])
 
   const onPressAddAToken = () => {
-    setDesignTokensRows((prevRows) => [...prevRows, designTokenCreateRow()])
-  }
-
-  const updateDesignTokensArray = (designTokensRows: any) => {
-    Object.keys(designTokensRows).map((key) => {
-      const value = designTokensRows && designTokensRows[key as keyof unknown]
-      if (value) {
-        designTokensArray.push({
-          tokenName: value.col1,
-          tokenValue: value.col2
-        })
-      }
-    })
+    const tokenName = 'exampleToken' + designTokensCounter
+    addDesignToken(tokenName, 10)
   }
 
   return (
-    <div style={{ width: '100%' }}>
-      <DataGrid autoHeight rows={designTokensRows} columns={designTokensColumns} />
+    <div style={{ display: 'flex', flexDirection: 'column' }}>
+      <div style={{ height: 400 }}>
+        <DataGrid columns={designTokensColumns} editRowsModel={editRowsModel} onEditRowsModelChange={onEditRowsModelChange} rows={designTokens} />
+      </div>
       <Button variant="outlined" onClick={onPressAddAToken}>
         Add a Token
       </Button>
