@@ -9,7 +9,7 @@ const designTokensColumns: GridColDef[] = [
 ]
 
 export const renderDesignTokensTab = () => {
-  const [editRowsModel, setEditRowsModel] = React.useState({})
+  const [editRowsModel, setEditRowsModel] = React.useState<any>({})
 
   const addDesignToken = useStore((state) => state.addDesignToken)
   const designTokens = useStore((state) => state.designTokens)
@@ -20,7 +20,8 @@ export const renderDesignTokensTab = () => {
     const objectKeys = Object.keys(editRowsModel)
     if (objectKeys.length !== 0) {
       const designTokenId = objectKeys[0]
-      updateDesignToken(Number(designTokenId), editRowsModel[designTokenId].tokenName?.value, editRowsModel[designTokenId].tokenValue?.value)
+      const row = editRowsModel[designTokenId]
+      updateDesignToken(Number(designTokenId), row.tokenName?.value, row.tokenValue?.value)
     }
   }, [editRowsModel])
 

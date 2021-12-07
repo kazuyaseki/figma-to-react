@@ -91,7 +91,6 @@ figma.ui.onmessage = (msg: messageTypes) => {
     updatedNode.height = updatedNodeProperties.height
 
     if (selectedNodes[0].type === 'FRAME') {
-      console.log('entrou aqui, chamou resize')
       selectedNodes[0].resize(selectedNodes[0].width, updatedNode.height)
     }
   }
