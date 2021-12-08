@@ -7,10 +7,22 @@ import { buildTagTree } from './buildTagTree'
 import { buildCssString, CssStyle } from './buildCssString'
 import { UserComponentSetting } from './userComponentSetting'
 import { TextCount } from './getCssDataForTag'
+import { updateNode } from './core/updateFigma'
 
-figma.showUI(__html__, { width: 640, height: 700 })
+let selectedNodes = figma.currentPage.selection
 
-const selectedNodes = figma.currentPage.selection
+function init() {
+  figma.showUI(__html__, { width: 640, height: 700 })
+
+  if (selectedNodes.length > 1) {
+    figma.notify('Figma To React Native - Please select only 1 node')
+    figma.closePlugin()
+  } else if (selectedNodes.length === 0) {
+    figma.notify('Figma To React Native - Please select a node')
+  } else {
+    generate(selectedNodes[0], {})
+  }
+}
 
 async function generate(node: SceneNode, config: { cssStyle?: CssStyle; unitType?: UnitType }) {
   let cssStyle = config.cssStyle
@@ -54,20 +66,16 @@ async function generate(node: SceneNode, config: { cssStyle?: CssStyle; unitType
 
   const nodeProperties = { ...commonNodeProperties }
 
+  console.log('generate nodeProperties')
+  console.log(nodeProperties)
+
   figma.ui.postMessage({ generatedCodeStr, cssString, cssStyle, unitType, userComponentSettings, nodeProperties })
 }
 
-if (selectedNodes.length > 1) {
-  figma.notify('Please select only 1 node')
-  figma.closePlugin()
-} else if (selectedNodes.length === 0) {
-  figma.notify('Please select a node')
-  figma.closePlugin()
-} else {
-  generate(selectedNodes[0], {})
-}
-
 figma.ui.onmessage = (msg: messageTypes) => {
+  console.log('onmessage msg')
+  console.log(msg)
+
   if (msg.type === 'notify-copy-success') {
     figma.notify('copied to clipboard👍')
   }
@@ -83,15 +91,23 @@ figma.ui.onmessage = (msg: messageTypes) => {
     figma.clientStorage.setAsync(STORAGE_KEYS.USER_COMPONENT_SETTINGS_KEY, msg.userComponentSettings)
     generate(selectedNodes[0], {})
   }
-  // FIXME: example code
   if (msg.type === 'update-node-properties') {
     figma.clientStorage.setAsync(STORAGE_KEYS.UPDATE_NODE_PROPERTIES_KEY, msg.nodeProperties)
-    const updatedNodeProperties = msg.nodeProperties
-    const updatedNode = { ...selectedNodes[0] }
-    updatedNode.height = updatedNodeProperties.height
-
-    if (selectedNodes[0].type === 'FRAME') {
-      selectedNodes[0].resize(selectedNodes[0].width, updatedNode.height)
-    }
+    updateNode(selectedNodes[0], msg.nodeProperties)
   }
 }
+
+figma.on('selectionchange', () => {
+  selectedNodes = figma.currentPage.selection
+  if (selectedNodes.length > 1) {
+    figma.notify('Please select only 1 node')
+  } else if (selectedNodes.length === 0) {
+    figma.notify('Please select a node')
+    figma.ui.postMessage({ nodeProperties: {} })
+  } else {
+    generate(selectedNodes[0], {})
+  }
+})
+
+// Load Plugin
+init()

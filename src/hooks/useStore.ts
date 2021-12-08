@@ -2,6 +2,10 @@ import create from 'zustand'
 import * as _ from 'lodash'
 
 export const useStore = create((set: any, get: any) => ({
+  designTokensCounter: 0,
+  designTokens: [],
+  properties: [],
+
   addDesignToken: (tokenName: string, tokenValue: any) =>
     set((state: any) => ({
       designTokens: [...state.designTokens, { id: state.designTokensCounter, tokenName, tokenValue }],
@@ -12,22 +16,25 @@ export const useStore = create((set: any, get: any) => ({
     const designToken = designTokens.find((designToken: any) => designToken.tokenName === tokenName)
     return designToken
   },
-  getDesignTokenByPropertyName: (propertyName: string) => {
+  getLinkedToken: (nodeId: string, propertyName: string) => {
     const designTokens = get().designTokens
-    const properties = get().properties
+    const properties = get().getPropertiesByNodeId(nodeId)
     const property = properties.find((currentProperty: any) => propertyName === currentProperty.id)
-    console.log('getDesignTokenByPropertyName property')
-    console.log(property)
     if (property?.linkedToken) {
       const designToken = designTokens.find((designToken: any) => designToken.tokenName === property.linkedToken)
       return designToken
     }
     return undefined
   },
-  getPropertyByName: (propertyName: string) => {
-    const properties = get().properties
-    const property = properties.find((property: any) => property.id === propertyName)
+  getPropertyByName: (nodeId: string, propertyName: string) => {
+    const properties = get().getPropertiesByNodeId(nodeId)
+    const property = properties.find((currentProperty: any) => propertyName === currentProperty.id)
     return property
+  },
+  getPropertiesByNodeId: (nodeId: string) => {
+    const properties = get().properties
+    const propertiesByNodeId = properties.filter((property: any) => property.nodeId === nodeId)
+    return propertiesByNodeId
   },
   updateDesignToken: (id: number, tokenName?: string, tokenValue?: any) =>
     set((state: any) => {
@@ -67,8 +74,5 @@ export const useStore = create((set: any, get: any) => ({
           properties: [...state.properties, newProperty]
         }
       }
-    }),
-  designTokensCounter: 0,
-  designTokens: [],
-  properties: []
+    })
 }))

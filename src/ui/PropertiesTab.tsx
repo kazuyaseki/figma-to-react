@@ -3,13 +3,16 @@ import { Autocomplete, Button, TextField } from '@material-ui/core'
 import { DataGrid, GridColDef, GridRenderCellParams } from '@mui/x-data-grid'
 import { messageTypes } from '../messagesTypes'
 import { useStore } from '../hooks/useStore'
+import * as _ from 'lodash'
+import { getConvertedValue } from '../utils/unitTypeUtils'
 
 export const renderPropertiesTab = (nodeProperties: any, parent: any) => {
   const designTokens = useStore((state) => state.designTokens)
   const properties = useStore((state) => state.properties)
 
-  const getDesignTokenByPropertyName = useStore((state) => state.getDesignTokenByPropertyName)
   const getDesignTokenByName = useStore((state) => state.getDesignTokenByName)
+  const getLinkedToken = useStore((state) => state.getLinkedToken)
+  const getPropertiesByNodeId = useStore((state) => state.getPropertiesByNodeId)
   const getPropertyByName = useStore((state) => state.getPropertyByName)
   const updateProperty = useStore((state) => state.updateProperty)
 
@@ -31,7 +34,7 @@ export const renderPropertiesTab = (nodeProperties: any, parent: any) => {
             const row = params.row
             onChangeLinkedToken(row, newValue)
           }}
-          options={designTokens.map((designToken) => designToken.tokenName)}
+          options={designTokens.map((designToken: any) => designToken.tokenName)}
           renderInput={(params) => <TextField {...params} />}
           sx={{ width: 250 }}
           value={getAutocompleteValue(params)}
@@ -57,43 +60,45 @@ export const renderPropertiesTab = (nodeProperties: any, parent: any) => {
     Object.keys(nodeProperties).map((key) => {
       const value = nodeProperties && nodeProperties[key as keyof unknown]
       if (key !== 'id' && key !== 'name') {
-        const designToken = getDesignTokenByPropertyName(key)
+        const designToken = getLinkedToken(nodeId, key)
         const newValue = designToken?.tokenValue || value
         updateProperty(nodeId, key, newValue)
       }
     })
   }
 
-  const test = () => {
+  const updateFigmaProperties = () => {
+    const nodeId = nodeProperties['id']
     Object.keys(nodeProperties).map((key) => {
       const value = nodeProperties && nodeProperties[key as keyof unknown]
       if (key !== 'id' && key !== 'name') {
-        const property = getPropertyByName(key)
-        console.log('property')
-        console.log(property)
+        const property = getPropertyByName(nodeId, key)
         const newValue = property.value || value
-        nodeProperties[key] = Number(newValue)
+        nodeProperties[key] = getConvertedValue(newValue)
       }
     })
 
-    const updatedNodeProperties = { ...nodeProperties }
-
-    console.log('updatedNodeProperties')
-    console.log(updatedNodeProperties)
-
-    const msg: messageTypes = { type: 'update-node-properties', nodeProperties: updatedNodeProperties }
+    const msg: messageTypes = { type: 'update-node-properties', nodeProperties }
     parent.postMessage({ pluginMessage: msg }, '*')
   }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
-      <div style={{ height: 400 }}>
-        <span style={{ fontWeight: 'bold' }}>Node: {nodeProperties['name']}</span>
-        <DataGrid rows={properties} columns={propertiesColumns} />
-      </div>
-      <Button variant="outlined" onClick={test}>
-        Test
-      </Button>
+      {_.isEmpty(nodeProperties) ? (
+        <span style={{ fontWeight: 'bold' }}>No Figma Node selected.</span>
+      ) : (
+        <div>
+          <div>
+            <span style={{ fontWeight: 'bold' }}>Node: {nodeProperties['name']}</span>
+            <div style={{ height: 350 }}>
+              <DataGrid rows={getPropertiesByNodeId(nodeProperties['id'])} columns={propertiesColumns} />
+            </div>
+          </div>
+          <Button variant="outlined" onClick={updateFigmaProperties}>
+            Update Figma Properties
+          </Button>
+        </div>
+      )}
     </div>
   )
 }

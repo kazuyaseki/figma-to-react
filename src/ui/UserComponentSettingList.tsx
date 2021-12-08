@@ -20,7 +20,7 @@ export default function UserComponentSettingList(props: Props) {
       <h3>Components</h3>
 
       <ul className={styles.components}>
-        {props.settings.map((setting, index) => (
+        {props.settings?.map((setting, index) => (
           <UserComponentSettingItem key={setting.name} setting={setting} onDelete={props.onDelete} onUpdate={(newSetting) => props.onUpdate(newSetting, index)} />
         ))}
       </ul>
