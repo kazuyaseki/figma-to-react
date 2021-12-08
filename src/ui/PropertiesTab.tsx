@@ -95,7 +95,7 @@ export const renderPropertiesTab = (nodeProperties: any, parent: any) => {
             </div>
           </div>
           <Button variant="outlined" onClick={updateFigmaProperties}>
-            Update Figma Properties
+            UPDATE FIGMA PROPERTIES
           </Button>
         </div>
       )}

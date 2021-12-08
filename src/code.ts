@@ -7,7 +7,7 @@ import { buildTagTree } from './buildTagTree'
 import { buildCssString, CssStyle } from './buildCssString'
 import { UserComponentSetting } from './userComponentSetting'
 import { TextCount } from './getCssDataForTag'
-import { updateNode } from './core/updateFigma'
+import { getUpdateableProperties, updateNode } from './core/updateFigma'
 
 let selectedNodes = figma.currentPage.selection
 
@@ -57,19 +57,9 @@ async function generate(node: SceneNode, config: { cssStyle?: CssStyle; unitType
   const generatedCodeStr = buildCode(tag, cssStyle)
   const cssString = buildCssString(tag, cssStyle)
 
-  const commonNodeProperties = {
-    id: node.id,
-    name: node.name,
-    height: node.height,
-    width: node.width
-  }
+  const updateableProperties = getUpdateableProperties(node)
 
-  const nodeProperties = { ...commonNodeProperties }
-
-  console.log('generate nodeProperties')
-  console.log(nodeProperties)
-
-  figma.ui.postMessage({ generatedCodeStr, cssString, cssStyle, unitType, userComponentSettings, nodeProperties })
+  figma.ui.postMessage({ generatedCodeStr, cssString, cssStyle, unitType, userComponentSettings, nodeProperties: updateableProperties })
 }
 
 figma.ui.onmessage = (msg: messageTypes) => {
