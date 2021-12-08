@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { Autocomplete, Button, TextField } from '@material-ui/core'
 import { DataGrid, GridColDef, GridRenderCellParams } from '@mui/x-data-grid'
-import { messageTypes } from '../messagesTypes'
+import { messageTypes } from '../model/messagesTypes'
 import { useStore } from '../hooks/useStore'
 import * as _ from 'lodash'
 import { getConvertedValue } from '../utils/unitTypeUtils'

@@ -1,5 +1,5 @@
-import { STORAGE_KEYS } from './storageKeys'
-import { UserComponentSetting } from './userComponentSetting'
+import { STORAGE_KEYS } from '../model/storageKeys'
+import { UserComponentSetting } from '../model/userComponentSetting'
 import { Tag } from './buildTagTree'
 
 type ComponentSetting = {

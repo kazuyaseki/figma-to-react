@@ -4,7 +4,7 @@
  */
 
 export default {
-  // All imported modules in your tests should be mocked automatically
+  // All modules in your tests should be mocked automatically
   // automock: false,
 
   // Stop running tests after `n` failures

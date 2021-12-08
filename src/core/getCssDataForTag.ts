@@ -1,6 +1,6 @@
 import { buildSizeStringByUnit, UnitType } from './buildSizeStringByUnit'
-import { IMAGE_TAG_PREFIX, IMAGE_TAG_SUFFIX, PRESSABLE_TAG_PREFIX, PRESSABLE_TAG_SUFFIX, TEXT_TAG_SUFFIX } from './utils/constants'
-import { isImageNode } from './utils/isImageNode'
+import { IMAGE_TAG_PREFIX, IMAGE_TAG_SUFFIX, PRESSABLE_TAG_PREFIX, PRESSABLE_TAG_SUFFIX, TEXT_TAG_SUFFIX } from '../utils/constants'
+import { isImageNode } from '../utils/isImageNode'
 
 export type CSSData = {
   className: string

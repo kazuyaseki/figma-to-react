@@ -1,5 +1,5 @@
-import { CssStyle } from './buildCssString'
-import { UnitType } from './buildSizeStringByUnit'
+import { CssStyle } from '../core/buildCssString'
+import { UnitType } from '../core/buildSizeStringByUnit'
 import { UserComponentSetting } from './userComponentSetting'
 export type messageTypes =
   | { type: 'notify-copy-success' }

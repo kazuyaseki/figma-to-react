@@ -1,6 +1,6 @@
 import * as React from 'react'
 import styles from './UserComponentSettingField.css'
-import { UserComponentSetting } from '../userComponentSetting'
+import { UserComponentSetting } from '../model/userComponentSetting'
 import Spacer from './Spacer'
 
 type Props = { onSubmit: (userComponentSetting: UserComponentSetting) => void; onCancel: () => void; initialValue: UserComponentSetting | null }

@@ -1,6 +1,6 @@
 import * as React from 'react'
 import styles from './UserComponentSettingList.css'
-import { UserComponentSetting } from '../userComponentSetting'
+import { UserComponentSetting } from '../model/userComponentSetting'
 import LinkButton from './LinkButton'
 import UserComponentSettingField from './UserComponentSettingField'
 import UserComponentSettingItem from './UserComponentSettingItem'

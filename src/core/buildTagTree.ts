@@ -1,7 +1,7 @@
 import { UnitType } from './buildSizeStringByUnit'
 import { CSSData, getCssDataForTag, TextCount } from './getCssDataForTag'
-import { TEXT_TAG_PREFIX } from './utils/constants'
-import { getItemSpacing, isImageNode } from './utils/isImageNode'
+import { TEXT_TAG_PREFIX } from '../utils/constants'
+import { getItemSpacing, isImageNode } from '../utils/isImageNode'
 
 type Property = {
   name: string

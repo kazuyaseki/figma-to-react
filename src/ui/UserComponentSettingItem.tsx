@@ -1,6 +1,6 @@
 import * as React from 'react'
 import styles from './UserComponentSettingItem.css'
-import { UserComponentSetting } from '../userComponentSetting'
+import { UserComponentSetting } from '../model/userComponentSetting'
 import UserComponentSettingField from './UserComponentSettingField'
 
 type Props = {

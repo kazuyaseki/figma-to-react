@@ -1,9 +1,8 @@
 import { CSSData } from './getCssDataForTag'
 import { Tag } from './buildTagTree'
-import { buildClassName } from './utils/cssUtils'
-import { PRESSABLE_TAG_SUFFIX, TEXT_TAG_SUFFIX } from './utils/constants'
-import { getItemSpacing } from './utils/isImageNode'
-
+import { buildClassName } from '../utils/cssUtils'
+import { PRESSABLE_TAG_SUFFIX, TEXT_TAG_SUFFIX } from '../utils/constants'
+import { getItemSpacing } from '../utils/isImageNode'
 export type CssStyle = 'css' | 'StyleSheet' | 'Restyle' | 'styled-components'
 
 type DataObject = {
@@ -24,7 +23,7 @@ function buildArray(tag: Tag, arr: DataObject[]): DataObject[] {
   return arr
 }
 
-export function buildCssString(tag: Tag, cssStyle: CssStyle): string {
+export function buildCssString(tag: Tag, cssStyle: CssStyle) {
   const dataObjectArray: DataObject[] = buildArray(tag, [])
   const codeTagNames: string[] = []
 
@@ -76,6 +75,10 @@ ${dataObject.cssData.properties.map((property: any) => `  ${property.name}: ${pr
     // FIXME: Spacer shouldn't be needed if gap property is working
     if (cssStyle === 'styled-components' && dataObject.tag.hasItemSpacing) {
       const node = dataObject.tag.node
+
+      console.log('buildCssString Spacer node')
+      console.log(node)
+
       let propertyName = 'height'
 
       if (node.type === 'FRAME' || node.type === 'INSTANCE' || node.type === 'COMPONENT') {
@@ -83,6 +86,12 @@ ${dataObject.cssData.properties.map((property: any) => `  ${property.name}: ${pr
           propertyName = 'width'
         }
       }
+
+      /* FIXME:
+      const linkedToken = getState().getLinkedToken(node.id, propertyName)
+      console.log('buildCssString linkedToken')
+      console.log(linkedToken)
+      */
 
       const spacerStr = `\nconst ${dataObject.cssData?.className.replace(/\s/g, '')}Spacer = styled.View\`
   ${propertyName}: ${getItemSpacing(dataObject.tag.node)}px;
