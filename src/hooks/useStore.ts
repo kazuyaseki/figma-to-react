@@ -36,6 +36,14 @@ export const useStore = create((set: any, get: any) => ({
     const propertiesByNodeId = properties.filter((property: any) => property.nodeId === nodeId)
     return propertiesByNodeId
   },
+  deleteToken: (id: number) =>
+    set((state: any) => {
+      const designToken = state.designTokens.find((designToken: any) => designToken.id === id)
+      const index = state.designTokens.indexOf(designToken)
+      return {
+        designTokens: [...state.designTokens.slice(0, index), ...state.designTokens.slice(index + 1)]
+      }
+    }),
   updateDesignToken: (id: number, tokenName?: string, tokenValue?: any) =>
     set((state: any) => {
       const designToken = state.designTokens.find((designToken: any) => designToken.id === id)
