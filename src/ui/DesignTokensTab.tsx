@@ -9,31 +9,68 @@ const designTokensColumns: GridColDef[] = [
   { field: 'tokenValue', headerName: 'Token Value', width: 300, editable: true }
 ]
 
+const designTokensGroupsColumns: GridColDef[] = [
+  {
+    editable: true,
+    field: 'groupName',
+    headerName: 'Group Name',
+    width: 300
+  }
+]
+
+const designTokensTexts = {
+  noRowsLabel: 'No Design Tokens',
+  // Rows selected footer text
+  footerRowSelected: (count: number) => (count !== 1 ? `${count.toLocaleString()} Design Tokens selected` : `${count.toLocaleString()} Design Token selected`)
+}
+
+const designTokensGroupsTexts = {
+  noRowsLabel: 'No Groups',
+  // Rows selected footer text
+  footerRowSelected: (count: number) => (count !== 1 ? `${count.toLocaleString()} Groups selected` : `${count.toLocaleString()} Group selected`)
+}
+
 export const renderDesignTokensTab = () => {
-  const [editRowsModel, setEditRowsModel] = React.useState<any>({})
+  const [editDesignTokensRowsModel, setEditDesignTokensRowsModel] = React.useState<any>({})
+  const [editDesignTokensGroupsRowsModel, setEditDesignTokensGroupsRowsModel] = React.useState<any>({})
   const [selectionModel, setSelectionModel] = React.useState([])
+  const [groupSelectionModel, setGroupSelectionModel] = React.useState([])
 
   const addDesignToken = useStore((state) => state.addDesignToken)
+  const addDesignTokenGroup = useStore((state) => state.addDesignTokenGroup)
   const designTokens = useStore((state) => state.designTokens)
   const designTokensCounter = useStore((state) => state.designTokensCounter)
+  const designTokensGroups = useStore((state) => state.designTokensGroups)
+  const designTokensGroupsCounter = useStore((state) => state.designTokensGroupsCounter)
   const deleteToken = useStore((state) => state.deleteToken)
+  const deleteTokenGroup = useStore((state) => state.deleteTokenGroup)
   const updateDesignToken = useStore((state) => state.updateDesignToken)
+  const updateDesignTokenGroup = useStore((state) => state.updateDesignTokenGroup)
 
   React.useEffect(() => {
-    console.log('editRowsModel')
-    console.log(editRowsModel)
-    const objectKeys = Object.keys(editRowsModel)
-    console.log('objectKeys')
-    console.log(objectKeys)
+    const objectKeys = Object.keys(editDesignTokensRowsModel)
     if (objectKeys.length !== 0) {
       const designTokenId = objectKeys[0]
-      const row = editRowsModel[designTokenId]
+      const row = editDesignTokensRowsModel[designTokenId]
       updateDesignToken(Number(designTokenId), row.tokenName?.value, row.tokenValue?.value)
     }
-  }, [editRowsModel])
+  }, [editDesignTokensRowsModel])
 
-  const onEditRowsModelChange = React.useCallback((model) => {
-    setEditRowsModel(model)
+  React.useEffect(() => {
+    const objectKeys = Object.keys(editDesignTokensGroupsRowsModel)
+    if (objectKeys.length !== 0) {
+      const groupId = objectKeys[0]
+      const row = editDesignTokensGroupsRowsModel[groupId]
+      updateDesignTokenGroup(Number(groupId), row.groupName?.value)
+    }
+  }, [editDesignTokensGroupsRowsModel])
+
+  const onEditDesignTokensRowsModelChange = React.useCallback((model) => {
+    setEditDesignTokensRowsModel(model)
+  }, [])
+
+  const onEditDesignTokensGroupsRowsModelChange = React.useCallback((model) => {
+    setEditDesignTokensGroupsRowsModel(model)
   }, [])
 
   const onPressAddAToken = () => {
@@ -45,29 +82,66 @@ export const renderDesignTokensTab = () => {
     deleteToken(selectionModel[0])
   }
 
+  const onPressAddATokenGroup = () => {
+    const groupName = 'exampleGroup' + designTokensGroupsCounter
+    addDesignTokenGroup(groupName)
+  }
+
+  const onPressDeleteTokenGroup = () => {
+    deleteTokenGroup(groupSelectionModel[0])
+  }
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
-      <div style={{ height: 500 }}>
-        <DataGrid
-          columns={designTokensColumns}
-          editRowsModel={editRowsModel}
-          onEditRowsModelChange={onEditRowsModelChange}
-          onSelectionModelChange={(newSelectionModel: any) => {
-            console.log('onSelectionModelChange')
-            console.log(newSelectionModel)
-            setSelectionModel(newSelectionModel)
-          }}
-          rows={designTokens}
-          selectionModel={selectionModel}
-        />
+      <div>
+        <div style={{ height: 300 }}>
+          <DataGrid
+            columns={designTokensColumns}
+            editRowsModel={editDesignTokensRowsModel}
+            localeText={designTokensTexts}
+            onEditRowsModelChange={onEditDesignTokensRowsModelChange}
+            onSelectionModelChange={(newSelectionModel: any) => {
+              setSelectionModel(newSelectionModel)
+            }}
+            rows={designTokens}
+            rowsPerPageOptions={[100]}
+            selectionModel={selectionModel}
+          />
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'center', margin: '20px 0px' }}>
+          <Button variant="outlined" onClick={onPressAddAToken} style={{ marginRight: '20px' }}>
+            ADD A TOKEN
+          </Button>
+          <Button disabled={_.isEmpty(selectionModel)} variant="outlined" onClick={onPressDeleteToken}>
+            DELETE TOKEN
+          </Button>
+        </div>
       </div>
-      <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
-        <Button variant="outlined" onClick={onPressAddAToken} style={{ marginRight: '20px' }}>
-          ADD A TOKEN
-        </Button>
-        <Button disabled={_.isEmpty(selectionModel)} variant="outlined" onClick={onPressDeleteToken}>
-          DELETE TOKEN
-        </Button>
+      <div style={{ display: 'flex' }}>
+        <div style={{ display: 'flex', flex: 2, height: 250 }}>
+          <DataGrid
+            columns={designTokensGroupsColumns}
+            editRowsModel={editDesignTokensGroupsRowsModel}
+            headerHeight={0}
+            hideFooter
+            localeText={designTokensGroupsTexts}
+            onEditRowsModelChange={onEditDesignTokensGroupsRowsModelChange}
+            onSelectionModelChange={(newGroupSelectionModel: any) => {
+              setGroupSelectionModel(newGroupSelectionModel)
+            }}
+            rows={designTokensGroups}
+            rowsPerPageOptions={[100]}
+            selectionModel={groupSelectionModel}
+          />
+        </div>
+        <div style={{ display: 'flex', flex: 1, flexDirection: 'column', justifyContent: 'center', margin: '20px 10px 0px 10px' }}>
+          <Button variant="outlined" onClick={onPressAddATokenGroup}>
+            ADD A GROUP
+          </Button>
+          <Button disabled={_.isEmpty(groupSelectionModel)} variant="outlined" onClick={onPressDeleteTokenGroup} style={{ marginTop: '20px' }}>
+            DELETE GROUP
+          </Button>
+        </div>
       </div>
     </div>
   )

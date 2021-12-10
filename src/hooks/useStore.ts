@@ -3,13 +3,20 @@ import * as _ from 'lodash'
 
 export const useStore = create((set: any, get: any) => ({
   designTokensCounter: 0,
+  designTokensGroupsCounter: 0,
   designTokens: [],
+  designTokensGroups: [],
   properties: [],
 
   addDesignToken: (tokenName: string, tokenValue: any) =>
     set((state: any) => ({
       designTokens: [...state.designTokens, { id: state.designTokensCounter, tokenName, tokenValue }],
       designTokensCounter: state.designTokensCounter + 1
+    })),
+  addDesignTokenGroup: (groupName: string) =>
+    set((state: any) => ({
+      designTokensGroups: [...state.designTokensGroups, { id: state.designTokensGroupsCounter, groupName }],
+      designTokensGroupsCounter: state.designTokensGroupsCounter + 1
     })),
   getDesignTokenByName: (tokenName: string) => {
     const designTokens = get().designTokens
@@ -44,6 +51,14 @@ export const useStore = create((set: any, get: any) => ({
         designTokens: [...state.designTokens.slice(0, index), ...state.designTokens.slice(index + 1)]
       }
     }),
+  deleteTokenGroup: (id: number) =>
+    set((state: any) => {
+      const designTokenGroup = state.designTokensGroups.find((designTokenGroup: any) => designTokenGroup.id === id)
+      const index = state.designTokensGroups.indexOf(designTokenGroup)
+      return {
+        designTokensGroups: [...state.designTokensGroups.slice(0, index), ...state.designTokensGroups.slice(index + 1)]
+      }
+    }),
   updateDesignToken: (id: number, tokenName?: string, tokenValue?: any) =>
     set((state: any) => {
       const designToken = state.designTokens.find((designToken: any) => designToken.id === id)
@@ -59,6 +74,19 @@ export const useStore = create((set: any, get: any) => ({
       } else if (tokenValueChanged) {
         return {
           designTokens: state.designTokens.map((token: any) => (token === designToken ? { id, tokenName: designToken.tokenName, tokenValue: tokenValue } : token))
+        }
+      }
+    }),
+  updateDesignTokenGroup: (id: number, groupName?: string) =>
+    set((state: any) => {
+      const designTokenGroup = state.designTokensGroups.find((designTokenGroup: any) => designTokenGroup.id === id)
+      const groupNameChanged = !_.isEmpty(groupName) && groupName !== designTokenGroup.groupName
+      if (groupNameChanged) {
+        const groupNameAlreadyExists = state.designTokensGroups.find((designTokenGroup: any) => designTokenGroup.groupName === groupName)
+        if (!groupNameAlreadyExists) {
+          return {
+            designTokensGroups: state.designTokensGroups.map((group: any) => (group === designTokenGroup ? { id, groupName } : group))
+          }
         }
       }
     }),
