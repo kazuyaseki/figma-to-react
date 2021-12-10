@@ -5,8 +5,8 @@ import * as React from 'react'
 import { useStore } from '../hooks/useStore'
 
 const designTokensColumns: GridColDef[] = [
-  { field: 'tokenName', headerName: 'Token Name', width: 300, editable: true },
-  { field: 'tokenValue', headerName: 'Token Value', width: 300, editable: true }
+  { field: 'tokenName', headerName: 'Token Name', width: 200, editable: true },
+  { field: 'tokenValue', headerName: 'Token Value', width: 200, editable: true }
 ]
 
 const designTokensGroupsColumns: GridColDef[] = [
@@ -92,9 +92,9 @@ export const renderDesignTokensTab = () => {
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', margin: '20px' }}>
       <div>
-        <div style={{ height: 300 }}>
+        <div style={{ height: 550 }}>
           <DataGrid
             columns={designTokensColumns}
             editRowsModel={editDesignTokensRowsModel}
@@ -108,7 +108,7 @@ export const renderDesignTokensTab = () => {
             selectionModel={selectionModel}
           />
         </div>
-        <div style={{ display: 'flex', justifyContent: 'center', margin: '20px 0px' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
           <Button variant="outlined" onClick={onPressAddAToken} style={{ marginRight: '20px' }}>
             ADD A TOKEN
           </Button>
@@ -117,8 +117,8 @@ export const renderDesignTokensTab = () => {
           </Button>
         </div>
       </div>
-      <div style={{ display: 'flex' }}>
-        <div style={{ display: 'flex', flex: 2, height: 250 }}>
+      <div style={{ margin: '20px 0px' }}>
+        <div style={{ display: 'flex', flex: 2, height: 300 }}>
           <DataGrid
             columns={designTokensGroupsColumns}
             editRowsModel={editDesignTokensGroupsRowsModel}
@@ -134,11 +134,11 @@ export const renderDesignTokensTab = () => {
             selectionModel={groupSelectionModel}
           />
         </div>
-        <div style={{ display: 'flex', flex: 1, flexDirection: 'column', justifyContent: 'center', margin: '20px 10px 0px 10px' }}>
+        <div style={{ display: 'flex', flex: 1, flexDirection: 'row', justifyContent: 'center', margin: '20px 10px 0px 10px' }}>
           <Button variant="outlined" onClick={onPressAddATokenGroup}>
             ADD A GROUP
           </Button>
-          <Button disabled={_.isEmpty(groupSelectionModel)} variant="outlined" onClick={onPressDeleteTokenGroup} style={{ marginTop: '20px' }}>
+          <Button disabled={_.isEmpty(groupSelectionModel)} variant="outlined" onClick={onPressDeleteTokenGroup} style={{ marginLeft: '20px' }}>
             DELETE GROUP
           </Button>
         </div>
