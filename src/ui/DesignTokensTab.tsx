@@ -1,22 +1,8 @@
-import { Button } from '@material-ui/core'
-import { DataGrid, GridColDef } from '@mui/x-data-grid'
+import { Autocomplete, Button, TextField } from '@material-ui/core'
+import { DataGrid, GridColDef, GridRenderCellParams, GridRowModel } from '@mui/x-data-grid'
 import * as _ from 'lodash'
 import * as React from 'react'
 import { useStore } from '../hooks/useStore'
-
-const designTokensColumns: GridColDef[] = [
-  { field: 'tokenName', headerName: 'Token Name', width: 200, editable: true },
-  { field: 'tokenValue', headerName: 'Token Value', width: 200, editable: true }
-]
-
-const designTokensGroupsColumns: GridColDef[] = [
-  {
-    editable: true,
-    field: 'groupName',
-    headerName: 'Group Name',
-    width: 300
-  }
-]
 
 const designTokensTexts = {
   noRowsLabel: 'No Design Tokens',
@@ -42,6 +28,7 @@ export const renderDesignTokensTab = () => {
   const designTokensCounter = useStore((state) => state.designTokensCounter)
   const designTokensGroups = useStore((state) => state.designTokensGroups)
   const designTokensGroupsCounter = useStore((state) => state.designTokensGroupsCounter)
+  const getDesignTokenById = useStore((state) => state.getDesignTokenById)
   const deleteToken = useStore((state) => state.deleteToken)
   const deleteTokenGroup = useStore((state) => state.deleteTokenGroup)
   const updateDesignToken = useStore((state) => state.updateDesignToken)
@@ -52,7 +39,7 @@ export const renderDesignTokensTab = () => {
     if (objectKeys.length !== 0) {
       const designTokenId = objectKeys[0]
       const row = editDesignTokensRowsModel[designTokenId]
-      updateDesignToken(Number(designTokenId), row.tokenName?.value, row.tokenValue?.value)
+      updateDesignToken(Number(designTokenId), row.tokenName?.value, row.tokenValue?.value, row.tokenGroup?.value)
     }
   }, [editDesignTokensRowsModel])
 
@@ -64,6 +51,49 @@ export const renderDesignTokensTab = () => {
       updateDesignTokenGroup(Number(groupId), row.groupName?.value)
     }
   }, [editDesignTokensGroupsRowsModel])
+
+  const designTokensColumns: GridColDef[] = [
+    { field: 'tokenName', headerName: 'Token Name', width: 200, editable: true },
+    { field: 'tokenValue', headerName: 'Token Value', width: 150, editable: true },
+    {
+      field: 'tokenGroup',
+      headerName: 'Token Group',
+      width: 200,
+      renderCell: (params: GridRenderCellParams) => (
+        <Autocomplete
+          id="combo-token-groups"
+          onChange={(event, newValue) => {
+            const row = params.row
+            onChangeLinkedTokenGroup(row, newValue)
+          }}
+          options={designTokensGroups.map((group: any) => group.groupName)}
+          renderInput={(params) => <TextField {...params} />}
+          sx={{ width: 250 }}
+          value={getAutocompleteValue(params)}
+        />
+      )
+    }
+  ]
+
+  const designTokensGroupsColumns: GridColDef[] = [
+    {
+      editable: true,
+      field: 'groupName',
+      headerName: 'Group Name',
+      width: 300
+    }
+  ]
+
+  const getAutocompleteValue = (params: any) => {
+    const row = params.row
+    const designToken: any = designTokens.find((designToken: any) => designToken.id === row.id)
+    return designToken?.tokenGroup || null
+  }
+
+  const onChangeLinkedTokenGroup = (row: GridRowModel, tokenGroup: any) => {
+    const designToken = getDesignTokenById(row.id)
+    updateDesignToken(designToken.id, designToken.tokenName, designToken.tokenValue, tokenGroup)
+  }
 
   const onEditDesignTokensRowsModelChange = React.useCallback((model) => {
     setEditDesignTokensRowsModel(model)

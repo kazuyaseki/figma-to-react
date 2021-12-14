@@ -10,7 +10,7 @@ export const useStore = create((set: any, get: any) => ({
 
   addDesignToken: (tokenName: string, tokenValue: any) =>
     set((state: any) => ({
-      designTokens: [...state.designTokens, { id: state.designTokensCounter, tokenName, tokenValue }],
+      designTokens: [...state.designTokens, { id: state.designTokensCounter, tokenName, tokenValue, tokenGroup: undefined }],
       designTokensCounter: state.designTokensCounter + 1
     })),
   addDesignTokenGroup: (groupName: string) =>
@@ -18,6 +18,11 @@ export const useStore = create((set: any, get: any) => ({
       designTokensGroups: [...state.designTokensGroups, { id: state.designTokensGroupsCounter, groupName }],
       designTokensGroupsCounter: state.designTokensGroupsCounter + 1
     })),
+  getDesignTokenById: (tokenId: string) => {
+    const designTokens = get().designTokens
+    const designToken = designTokens.find((designToken: any) => designToken.id === tokenId)
+    return designToken
+  },
   getDesignTokenByName: (tokenName: string) => {
     const designTokens = get().designTokens
     const designToken = designTokens.find((designToken: any) => designToken.tokenName === tokenName)
@@ -59,21 +64,26 @@ export const useStore = create((set: any, get: any) => ({
         designTokensGroups: [...state.designTokensGroups.slice(0, index), ...state.designTokensGroups.slice(index + 1)]
       }
     }),
-  updateDesignToken: (id: number, tokenName?: string, tokenValue?: any) =>
+  updateDesignToken: (id: number, tokenName?: string, tokenValue?: any, tokenGroup?: any) =>
     set((state: any) => {
       const designToken = state.designTokens.find((designToken: any) => designToken.id === id)
       const tokenNameChanged = !_.isEmpty(tokenName) && tokenName !== designToken.tokenName
       const tokenValueChanged = !_.isEmpty(tokenValue) && tokenValue !== designToken.tokenValue
+      const tokenGroupChanged = tokenGroup !== undefined && tokenGroup !== designToken.tokenGroup
       if (tokenNameChanged) {
         const tokenNameAlreadyExists = state.designTokens.find((designToken: any) => designToken.tokenName === tokenName)
         if (!tokenNameAlreadyExists) {
           return {
-            designTokens: state.designTokens.map((token: any) => (token === designToken ? { id, tokenName: tokenName, tokenValue: designToken.tokenValue } : token))
+            designTokens: state.designTokens.map((token: any) => (token === designToken ? { ...token, tokenName } : token))
           }
         }
       } else if (tokenValueChanged) {
         return {
-          designTokens: state.designTokens.map((token: any) => (token === designToken ? { id, tokenName: designToken.tokenName, tokenValue: tokenValue } : token))
+          designTokens: state.designTokens.map((token: any) => (token === designToken ? { ...token, tokenValue } : token))
+        }
+      } else if (tokenGroupChanged) {
+        return {
+          designTokens: state.designTokens.map((token: any) => (token === designToken ? { ...token, tokenGroup } : token))
         }
       }
     }),
