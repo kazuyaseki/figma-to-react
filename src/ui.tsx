@@ -16,6 +16,7 @@ import Tab from '@material-ui/core/Tab'
 import { renderDesignTokensTab } from './ui/DesignTokensTab'
 import { renderPropertiesTab } from './ui/PropertiesTab'
 import * as _ from 'lodash'
+import { useStore } from './hooks/useStore'
 
 function escapeHtml(str: string) {
   str = str.replace(/&/g, '&amp;')
@@ -69,20 +70,36 @@ const App: React.VFC = () => {
   const [userComponentSettings, setUserComponentSettings] = React.useState<UserComponentSetting[]>([])
   const textRef = React.useRef<HTMLTextAreaElement>(null)
 
+  const setDesignTokens = useStore((state) => state.setDesignTokens)
+
   // set initial values taken from figma storage
   React.useEffect(() => {
     onmessage = (event) => {
+      console.log('ui.tsx onmessage event')
+      console.log(event)
+
       setCssStyle(event.data.pluginMessage.cssStyle)
       setUnitType(event.data.pluginMessage.unitType)
-
       const codeStr = event.data.pluginMessage.generatedCodeStr + '\n\n' + event.data.pluginMessage.cssString
       setCode(codeStr)
-
       setUserComponentSettings(event.data.pluginMessage.userComponentSettings)
-
       setNodeProperties(event.data.pluginMessage.nodeProperties)
+
+      const { sharedPluginData } = event.data.pluginMessage
+
+      if (sharedPluginData) {
+        updateStoreFromSharedPluginData(sharedPluginData)
+      }
     }
   }, [])
+
+  const updateStoreFromSharedPluginData = (sharedPluginData: any) => {
+    console.log('ui.tsx updateStoreFromSharedPluginData sharedPluginData')
+    console.log(sharedPluginData)
+    if (sharedPluginData?.designTokens && sharedPluginData?.designTokensCounter) {
+      setDesignTokens(sharedPluginData.designTokens, sharedPluginData.designTokensCounter)
+    }
+  }
 
   const handleTabChange = (event: any, newValue: any) => {
     setTabValue(newValue)
@@ -139,7 +156,7 @@ const App: React.VFC = () => {
         </Tabs>
       </Box>
       <TabPanel value={tabValue} index={0}>
-        {renderDesignTokensTab()}
+        {renderDesignTokensTab(parent)}
       </TabPanel>
       <TabPanel value={tabValue} index={1}>
         {renderPropertiesTab(nodeProperties, parent)}

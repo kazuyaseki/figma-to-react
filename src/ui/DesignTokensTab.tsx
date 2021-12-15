@@ -2,6 +2,7 @@ import { Autocomplete, Button, TextField } from '@material-ui/core'
 import { DataGrid, GridColDef, GridRenderCellParams, GridRowModel } from '@mui/x-data-grid'
 import * as _ from 'lodash'
 import * as React from 'react'
+import { updateSharedPluginData } from '../core/updateSharedPluginData'
 import { useStore } from '../hooks/useStore'
 
 const designTokensTexts = {
@@ -16,7 +17,7 @@ const designTokensGroupsTexts = {
   footerRowSelected: (count: number) => (count !== 1 ? `${count.toLocaleString()} Groups selected` : `${count.toLocaleString()} Group selected`)
 }
 
-export const renderDesignTokensTab = () => {
+export const renderDesignTokensTab = (parent: any) => {
   const [editDesignTokensRowsModel, setEditDesignTokensRowsModel] = React.useState<any>({})
   const [editDesignTokensGroupsRowsModel, setEditDesignTokensGroupsRowsModel] = React.useState<any>({})
   const [selectionModel, setSelectionModel] = React.useState([])
@@ -33,6 +34,10 @@ export const renderDesignTokensTab = () => {
   const deleteTokenGroup = useStore((state) => state.deleteTokenGroup)
   const updateDesignToken = useStore((state) => state.updateDesignToken)
   const updateDesignTokenGroup = useStore((state) => state.updateDesignTokenGroup)
+
+  React.useEffect(() => {
+    updateSharedPluginData(parent, designTokens, designTokensCounter)
+  }, [designTokens, designTokensCounter])
 
   React.useEffect(() => {
     const objectKeys = Object.keys(editDesignTokensRowsModel)

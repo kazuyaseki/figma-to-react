@@ -9,6 +9,8 @@ import { UserComponentSetting } from './model/userComponentSetting'
 import { TextCount } from './core/getCssDataForTag'
 import { getUpdateableProperties, updateNode } from './core/updateFigma'
 
+const figmaDocument = figma.root
+
 let selectedNodes = figma.currentPage.selection
 
 function init() {
@@ -17,12 +19,47 @@ function init() {
   if (selectedNodes.length > 1) {
     figma.notify('Figma To React Native - Please select only 1 node')
     figma.closePlugin()
+  } else {
+    //figmaDocument.setSharedPluginData('ftrn', 'designTokens', '')
+    //figmaDocument.setSharedPluginData('ftrn', 'designTokensCounter', '')
+    const sharedPluginData = getSharedPluginData()
+    figma.ui.postMessage({ nodeProperties: {}, sharedPluginData })
+    if (selectedNodes.length === 1) {
+      generate(selectedNodes[0], {})
+    }
+  }
+}
+
+figma.ui.onmessage = (msg: messageTypes) => {
+  if (msg.type === 'notify-copy-success') {
+    figma.notify('copied to clipboard👍')
+  } else if (msg.type === 'new-css-style-set') {
+    figma.clientStorage.setAsync(STORAGE_KEYS.CSS_STYLE_KEY, msg.cssStyle)
+    generate(selectedNodes[0], { cssStyle: msg.cssStyle })
+  } else if (msg.type === 'new-unit-type-set') {
+    figma.clientStorage.setAsync(STORAGE_KEYS.UNIT_TYPE_KEY, msg.unitType)
+    generate(selectedNodes[0], { unitType: msg.unitType })
+  } else if (msg.type === 'update-user-component-settings') {
+    figma.clientStorage.setAsync(STORAGE_KEYS.USER_COMPONENT_SETTINGS_KEY, msg.userComponentSettings)
+    generate(selectedNodes[0], {})
+  } else if (msg.type === 'update-node-properties') {
+    figma.clientStorage.setAsync(STORAGE_KEYS.UPDATE_NODE_PROPERTIES_KEY, msg.nodeProperties)
+    updateNode(selectedNodes[0], msg.nodeProperties)
+  } else if (msg.type === 'set-shared-plugin-data') {
+    figmaDocument.setSharedPluginData('ftrn', msg.key, msg.value)
+  }
+}
+
+figma.on('selectionchange', () => {
+  selectedNodes = figma.currentPage.selection
+  if (selectedNodes.length > 1) {
+    figma.notify('Figma to React Native - Please select only 1 node')
   } else if (selectedNodes.length === 0) {
-    figma.notify('Figma To React Native - Please select a node')
+    figma.ui.postMessage({ nodeProperties: {} })
   } else {
     generate(selectedNodes[0], {})
   }
-}
+})
 
 async function generate(node: SceneNode, config: { cssStyle?: CssStyle; unitType?: UnitType }) {
   let cssStyle = config.cssStyle
@@ -62,42 +99,18 @@ async function generate(node: SceneNode, config: { cssStyle?: CssStyle; unitType
   figma.ui.postMessage({ generatedCodeStr, cssString, cssStyle, unitType, userComponentSettings, nodeProperties: updateableProperties })
 }
 
-figma.ui.onmessage = (msg: messageTypes) => {
-  console.log('onmessage msg')
-  console.log(msg)
-
-  if (msg.type === 'notify-copy-success') {
-    figma.notify('copied to clipboard👍')
+function getSharedPluginData() {
+  const designTokens = figmaDocument.getSharedPluginData('ftrn', 'designTokens')
+  const designTokensArray = designTokens ? JSON.parse(designTokens) : []
+  const designTokensCounter = figmaDocument.getSharedPluginData('ftrn', 'designTokensCounter')
+  const sharedPluginData = {
+    designTokens: designTokensArray,
+    designTokensCounter: Number(designTokensCounter)
   }
-  if (msg.type === 'new-css-style-set') {
-    figma.clientStorage.setAsync(STORAGE_KEYS.CSS_STYLE_KEY, msg.cssStyle)
-    generate(selectedNodes[0], { cssStyle: msg.cssStyle })
-  }
-  if (msg.type === 'new-unit-type-set') {
-    figma.clientStorage.setAsync(STORAGE_KEYS.UNIT_TYPE_KEY, msg.unitType)
-    generate(selectedNodes[0], { unitType: msg.unitType })
-  }
-  if (msg.type === 'update-user-component-settings') {
-    figma.clientStorage.setAsync(STORAGE_KEYS.USER_COMPONENT_SETTINGS_KEY, msg.userComponentSettings)
-    generate(selectedNodes[0], {})
-  }
-  if (msg.type === 'update-node-properties') {
-    figma.clientStorage.setAsync(STORAGE_KEYS.UPDATE_NODE_PROPERTIES_KEY, msg.nodeProperties)
-    updateNode(selectedNodes[0], msg.nodeProperties)
-  }
+  console.log('getSharedPluginData() sharedPluginData')
+  console.log(sharedPluginData)
+  return sharedPluginData
 }
-
-figma.on('selectionchange', () => {
-  selectedNodes = figma.currentPage.selection
-  if (selectedNodes.length > 1) {
-    figma.notify('Please select only 1 node')
-  } else if (selectedNodes.length === 0) {
-    figma.notify('Please select a node')
-    figma.ui.postMessage({ nodeProperties: {} })
-  } else {
-    generate(selectedNodes[0], {})
-  }
-})
 
 // Load Plugin
 init()

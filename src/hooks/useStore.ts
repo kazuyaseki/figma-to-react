@@ -64,6 +64,11 @@ export const useStore = create((set: any, get: any) => ({
         designTokensGroups: [...state.designTokensGroups.slice(0, index), ...state.designTokensGroups.slice(index + 1)]
       }
     }),
+  setDesignTokens: (designTokens: any, designTokensCounter: number) =>
+    set((state: any) => ({
+      designTokens,
+      designTokensCounter
+    })),
   updateDesignToken: (id: number, tokenName?: string, tokenValue?: any, tokenGroup?: any) =>
     set((state: any) => {
       const designToken = state.designTokens.find((designToken: any) => designToken.id === id)
