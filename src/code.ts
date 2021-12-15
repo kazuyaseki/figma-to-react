@@ -20,8 +20,12 @@ function init() {
     figma.notify('Figma To React Native - Please select only 1 node')
     figma.closePlugin()
   } else {
-    //figmaDocument.setSharedPluginData('ftrn', 'designTokens', '')
-    //figmaDocument.setSharedPluginData('ftrn', 'designTokensCounter', '')
+    /*
+    figmaDocument.setSharedPluginData('ftrn', 'designTokens', '')
+    figmaDocument.setSharedPluginData('ftrn', 'designTokensCounter', '')
+    figmaDocument.setSharedPluginData('ftrn', 'designTokensGroups', '')
+    figmaDocument.setSharedPluginData('ftrn', 'designTokensGroupsCounter', '')
+    */
     const sharedPluginData = getSharedPluginData()
     figma.ui.postMessage({ nodeProperties: {}, sharedPluginData })
     if (selectedNodes.length === 1) {
@@ -101,14 +105,17 @@ async function generate(node: SceneNode, config: { cssStyle?: CssStyle; unitType
 
 function getSharedPluginData() {
   const designTokens = figmaDocument.getSharedPluginData('ftrn', 'designTokens')
-  const designTokensArray = designTokens ? JSON.parse(designTokens) : []
   const designTokensCounter = figmaDocument.getSharedPluginData('ftrn', 'designTokensCounter')
+  const designTokensGroups = figmaDocument.getSharedPluginData('ftrn', 'designTokensGroups')
+  const designTokensGroupsCounter = figmaDocument.getSharedPluginData('ftrn', 'designTokensGroupsCounter')
+
   const sharedPluginData = {
-    designTokens: designTokensArray,
-    designTokensCounter: Number(designTokensCounter)
+    designTokens: designTokens ? JSON.parse(designTokens) : [],
+    designTokensCounter: Number(designTokensCounter),
+    designTokensGroups: designTokensGroups ? JSON.parse(designTokensGroups) : [],
+    designTokensGroupsCounter: Number(designTokensGroupsCounter)
   }
-  console.log('getSharedPluginData() sharedPluginData')
-  console.log(sharedPluginData)
+
   return sharedPluginData
 }
 

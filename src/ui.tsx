@@ -17,6 +17,7 @@ import { renderDesignTokensTab } from './ui/DesignTokensTab'
 import { renderPropertiesTab } from './ui/PropertiesTab'
 import * as _ from 'lodash'
 import { useStore } from './hooks/useStore'
+import { Store } from './model/Store'
 
 function escapeHtml(str: string) {
   str = str.replace(/&/g, '&amp;')
@@ -71,6 +72,7 @@ const App: React.VFC = () => {
   const textRef = React.useRef<HTMLTextAreaElement>(null)
 
   const setDesignTokens = useStore((state) => state.setDesignTokens)
+  const setDesignTokensGroups = useStore((state) => state.setDesignTokensGroups)
 
   // set initial values taken from figma storage
   React.useEffect(() => {
@@ -93,11 +95,16 @@ const App: React.VFC = () => {
     }
   }, [])
 
-  const updateStoreFromSharedPluginData = (sharedPluginData: any) => {
+  const updateStoreFromSharedPluginData = (sharedPluginData: Store) => {
     console.log('ui.tsx updateStoreFromSharedPluginData sharedPluginData')
     console.log(sharedPluginData)
-    if (sharedPluginData?.designTokens && sharedPluginData?.designTokensCounter) {
-      setDesignTokens(sharedPluginData.designTokens, sharedPluginData.designTokensCounter)
+    const { designTokens, designTokensCounter, designTokensGroups, designTokensGroupsCounter } = sharedPluginData
+
+    if (designTokens && designTokensCounter) {
+      setDesignTokens(designTokens, designTokensCounter)
+    }
+    if (designTokensGroups && designTokensGroupsCounter) {
+      setDesignTokensGroups(designTokensGroups, designTokensGroupsCounter)
     }
   }
 

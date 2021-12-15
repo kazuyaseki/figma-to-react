@@ -4,6 +4,7 @@ import * as _ from 'lodash'
 import * as React from 'react'
 import { updateSharedPluginData } from '../core/updateSharedPluginData'
 import { useStore } from '../hooks/useStore'
+import { Store } from '../model/Store'
 
 const designTokensTexts = {
   noRowsLabel: 'No Design Tokens',
@@ -36,8 +37,15 @@ export const renderDesignTokensTab = (parent: any) => {
   const updateDesignTokenGroup = useStore((state) => state.updateDesignTokenGroup)
 
   React.useEffect(() => {
-    updateSharedPluginData(parent, designTokens, designTokensCounter)
-  }, [designTokens, designTokensCounter])
+    const updatedData: Store = {
+      designTokens,
+      designTokensCounter,
+      designTokensGroups,
+      designTokensGroupsCounter
+    }
+
+    updateSharedPluginData(parent, updatedData)
+  }, [designTokens, designTokensCounter, designTokensGroups, designTokensGroupsCounter])
 
   React.useEffect(() => {
     const objectKeys = Object.keys(editDesignTokensRowsModel)
@@ -90,9 +98,18 @@ export const renderDesignTokensTab = (parent: any) => {
   ]
 
   const getAutocompleteValue = (params: any) => {
+    console.log('getAutocompleteValue params')
+    console.log(params)
     const row = params.row
     const designToken: any = designTokens.find((designToken: any) => designToken.id === row.id)
-    return designToken?.tokenGroup || null
+    const designTokenGroupName = designToken?.tokenGroup
+    if (designTokenGroupName) {
+      const groupExists = designTokensGroups.find((currentGroup: any) => designTokenGroupName === currentGroup.groupName)
+      if (groupExists) {
+        return designTokenGroupName
+      }
+    }
+    return null
   }
 
   const onChangeLinkedTokenGroup = (row: GridRowModel, tokenGroup: any) => {
