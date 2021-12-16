@@ -109,8 +109,7 @@ export const renderPropertiesTab = (nodeProperties: any, parent: any) => {
               <DataGrid
                 columns={propertiesColumns}
                 getRowClassName={(params) => {
-                  console.log('getRowClassName')
-                  console.log(params)
+                  // FIXME: test class name doesn't make sense
                   return `test`
                 }}
                 rows={getPropertiesByNodeId(nodeProperties['id'])}

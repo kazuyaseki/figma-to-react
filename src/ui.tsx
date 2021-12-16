@@ -170,7 +170,7 @@ const App: React.VFC = () => {
           <p className={styles.generatedCode}>// No Figma Node selected</p>
         ) : (
           <div>
-            <div className={styles.code}>
+            <div className={styles.container}>
               <textarea className={styles.textareaForClipboard} ref={textRef} value={code} readOnly />
               <p className={styles.generatedCode} dangerouslySetInnerHTML={{ __html: syntaxHighlightedCode }} />
 

@@ -110,10 +110,10 @@ async function generate(node: SceneNode, config: { cssStyle?: CssStyle; unitType
 }
 
 function updateTokensFromFigmaStyles(sharedPluginData: Store) {
-  updateColorsTokensFromFigmaStyles(sharedPluginData, figma.getLocalPaintStyles())
-  updateEffectsTokensFromFigmaStyles(sharedPluginData, figma.getLocalEffectStyles())
-  updateGridsTokensFromFigmaStyles(sharedPluginData, figma.getLocalGridStyles())
   updateTextsTokensFromFigmaStyles(sharedPluginData, figma.getLocalTextStyles())
+  updateGridsTokensFromFigmaStyles(sharedPluginData, figma.getLocalGridStyles())
+  updateEffectsTokensFromFigmaStyles(sharedPluginData, figma.getLocalEffectStyles())
+  updateColorsTokensFromFigmaStyles(sharedPluginData, figma.getLocalPaintStyles())
 }
 
 function getSharedPluginData() {
