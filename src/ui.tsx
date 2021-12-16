@@ -78,9 +78,6 @@ const App: React.VFC = () => {
   // set initial values taken from figma storage
   React.useEffect(() => {
     onmessage = (event) => {
-      console.log('ui.tsx onmessage event')
-      console.log(event)
-
       setCssStyle(event.data.pluginMessage.cssStyle)
       setUnitType(event.data.pluginMessage.unitType)
       const codeStr = event.data.pluginMessage.generatedCodeStr + '\n\n' + event.data.pluginMessage.cssString
@@ -97,8 +94,6 @@ const App: React.VFC = () => {
   }, [])
 
   const updateStoreFromSharedPluginData = (sharedPluginData: Store) => {
-    console.log('ui.tsx updateStoreFromSharedPluginData sharedPluginData')
-    console.log(sharedPluginData)
     const { designTokens, designTokensCounter, designTokensGroups, designTokensGroupsCounter } = sharedPluginData
 
     if (designTokens && designTokensCounter) {

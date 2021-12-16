@@ -31,13 +31,7 @@ function init() {
 
     const sharedPluginData = getSharedPluginData()
 
-    console.log('sharedPluginData before addFigmaStyles')
-    console.log(sharedPluginData)
-
     updateTokensFromFigmaStyles(sharedPluginData)
-
-    console.log('sharedPluginData after addFigmaStyles')
-    console.log(sharedPluginData)
 
     figma.ui.postMessage({ nodeProperties: {}, sharedPluginData })
     if (selectedNodes.length === 1) {

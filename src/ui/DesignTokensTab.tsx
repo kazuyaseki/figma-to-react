@@ -67,15 +67,21 @@ export const renderDesignTokensTab = (parent: any) => {
     }
   }, [editDesignTokensGroupsRowsModel])
 
+  const designTokensGroupsFiltered = designTokensGroups.filter((designTokenGroup: any) => !isFigmaStyleGroup(designTokenGroup.groupName))
+
   const designTokensColumns: GridColDef[] = [
     { field: 'tokenName', headerName: 'Token Name', width: 200, editable: true },
     { field: 'tokenValue', headerName: 'Token Value', width: 120, editable: true },
     {
       field: 'tokenGroup',
       headerName: 'Token Group',
-      width: 240,
+      flex: 1,
+      //      width: 240,
       renderCell: (params: GridRenderCellParams) => {
         const groupName = params?.value
+        if (isFigmaStyleGroup(groupName)) {
+          return <p style={{ fontWeight: isFigmaStyleGroup(groupName) ? 'bold' : 'normal' }}>{groupName}</p>
+        }
         return (
           <Autocomplete
             disabled={groupName && isFigmaStyleGroup(groupName)}
@@ -84,7 +90,7 @@ export const renderDesignTokensTab = (parent: any) => {
               const row = params.row
               onChangeLinkedTokenGroup(row, newValue)
             }}
-            options={designTokensGroups.map((group: any) => group.groupName)}
+            options={designTokensGroupsFiltered.map((group: any) => group.groupName)}
             renderInput={(params) => <TextField {...params} size="small" />}
             sx={{ width: 250 }}
             value={getAutocompleteValue(params)}
@@ -99,7 +105,11 @@ export const renderDesignTokensTab = (parent: any) => {
       editable: true,
       field: 'groupName',
       headerName: 'Group Name',
-      width: 300
+      flex: 1,
+      renderCell: (params: GridRenderCellParams) => {
+        const groupName = params?.value
+        return <p style={{ fontWeight: isFigmaStyleGroup(groupName) ? 'bold' : 'normal' }}>{groupName}</p>
+      }
     }
   ]
 
@@ -131,7 +141,13 @@ export const renderDesignTokensTab = (parent: any) => {
   }, [])
 
   const onEditDesignTokensGroupsRowsModelChange = React.useCallback((model) => {
-    setEditDesignTokensGroupsRowsModel(model)
+    const key = Object.keys(model)[0]
+    const groupName = model[key]?.groupName?.value
+    if (groupName && isFigmaStyleGroup(groupName)) {
+      alert(`You can't edit groups automatically imported by Figma`)
+    } else {
+      setEditDesignTokensGroupsRowsModel(model)
+    }
   }, [])
 
   const onPressAddAToken = () => {
