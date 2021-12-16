@@ -4,7 +4,9 @@ import * as _ from 'lodash'
 import * as React from 'react'
 import { updateSharedPluginData } from '../core/updateSharedPluginData'
 import { useStore } from '../hooks/useStore'
+import { isFigmaStyleGroup } from '../model/FigmaStyleGroup'
 import { Store } from '../model/Store'
+import { isNotANumber } from '../utils/unitTypeUtils'
 
 const designTokensTexts = {
   noRowsLabel: 'No Design Tokens',
@@ -67,24 +69,28 @@ export const renderDesignTokensTab = (parent: any) => {
 
   const designTokensColumns: GridColDef[] = [
     { field: 'tokenName', headerName: 'Token Name', width: 200, editable: true },
-    { field: 'tokenValue', headerName: 'Token Value', width: 150, editable: true },
+    { field: 'tokenValue', headerName: 'Token Value', width: 120, editable: true },
     {
       field: 'tokenGroup',
       headerName: 'Token Group',
-      width: 200,
-      renderCell: (params: GridRenderCellParams) => (
-        <Autocomplete
-          id="combo-token-groups"
-          onChange={(event, newValue) => {
-            const row = params.row
-            onChangeLinkedTokenGroup(row, newValue)
-          }}
-          options={designTokensGroups.map((group: any) => group.groupName)}
-          renderInput={(params) => <TextField {...params} />}
-          sx={{ width: 250 }}
-          value={getAutocompleteValue(params)}
-        />
-      )
+      width: 240,
+      renderCell: (params: GridRenderCellParams) => {
+        const groupName = params?.value
+        return (
+          <Autocomplete
+            disabled={groupName && isFigmaStyleGroup(groupName)}
+            id="combo-token-groups"
+            onChange={(event, newValue) => {
+              const row = params.row
+              onChangeLinkedTokenGroup(row, newValue)
+            }}
+            options={designTokensGroups.map((group: any) => group.groupName)}
+            renderInput={(params) => <TextField {...params} size="small" />}
+            sx={{ width: 250 }}
+            value={getAutocompleteValue(params)}
+          />
+        )
+      }
     }
   ]
 
@@ -98,8 +104,6 @@ export const renderDesignTokensTab = (parent: any) => {
   ]
 
   const getAutocompleteValue = (params: any) => {
-    console.log('getAutocompleteValue params')
-    console.log(params)
     const row = params.row
     const designToken: any = designTokens.find((designToken: any) => designToken.id === row.id)
     const designTokenGroupName = designToken?.tokenGroup
@@ -118,7 +122,12 @@ export const renderDesignTokensTab = (parent: any) => {
   }
 
   const onEditDesignTokensRowsModelChange = React.useCallback((model) => {
-    setEditDesignTokensRowsModel(model)
+    const key = Object.keys(model)[0]
+    if (key !== undefined && isNotANumber(key)) {
+      alert(`You can't edit tokens automatically imported by Figma`)
+    } else {
+      setEditDesignTokensRowsModel(model)
+    }
   }, [])
 
   const onEditDesignTokensGroupsRowsModelChange = React.useCallback((model) => {

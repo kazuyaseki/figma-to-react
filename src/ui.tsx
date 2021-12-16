@@ -18,6 +18,7 @@ import { renderPropertiesTab } from './ui/PropertiesTab'
 import * as _ from 'lodash'
 import { useStore } from './hooks/useStore'
 import { Store } from './model/Store'
+import { renderSyncTab } from './ui/SyncTab'
 
 function escapeHtml(str: string) {
   str = str.replace(/&/g, '&amp;')
@@ -67,7 +68,7 @@ const App: React.VFC = () => {
   const [nodeProperties, setNodeProperties] = React.useState({})
   const [selectedCssStyle, setCssStyle] = React.useState<CssStyle>('css')
   const [selectedUnitType, setUnitType] = React.useState<UnitType>('px')
-  const [tabValue, setTabValue] = React.useState(2)
+  const [tabValue, setTabValue] = React.useState(0)
   const [userComponentSettings, setUserComponentSettings] = React.useState<UserComponentSetting[]>([])
   const textRef = React.useRef<HTMLTextAreaElement>(null)
 
@@ -160,6 +161,7 @@ const App: React.VFC = () => {
           <Tab label="Design Tokens" />
           <Tab label="Properties" />
           <Tab label="Code" />
+          <Tab label="Sync" />
         </Tabs>
       </Box>
       <TabPanel value={tabValue} index={0}>
@@ -238,6 +240,9 @@ const App: React.VFC = () => {
             </div>
           </div>
         )}
+      </TabPanel>
+      <TabPanel value={tabValue} index={3}>
+        {renderSyncTab(parent)}
       </TabPanel>
     </Box>
   )

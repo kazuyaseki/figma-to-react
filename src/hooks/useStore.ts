@@ -18,6 +18,11 @@ export const useStore = create((set: any, get: any) => ({
       designTokensGroups: [...state.designTokensGroups, { id: state.designTokensGroupsCounter, groupName }],
       designTokensGroupsCounter: state.designTokensGroupsCounter + 1
     })),
+  getDesignTokensByGroup: (groupName: string) => {
+    const designTokens = get().designTokens
+    const designTokensByGroup = designTokens.filter((designToken: any) => designToken.tokenGroup === groupName)
+    return designTokensByGroup
+  },
   getDesignTokenById: (tokenId: string) => {
     const designTokens = get().designTokens
     const designToken = designTokens.find((designToken: any) => designToken.id === tokenId)
@@ -48,7 +53,7 @@ export const useStore = create((set: any, get: any) => ({
     const propertiesByNodeId = properties.filter((property: any) => property.nodeId === nodeId)
     return propertiesByNodeId
   },
-  deleteToken: (id: number) =>
+  deleteToken: (id: any) =>
     set((state: any) => {
       const designToken = state.designTokens.find((designToken: any) => designToken.id === id)
       const index = state.designTokens.indexOf(designToken)
@@ -56,7 +61,7 @@ export const useStore = create((set: any, get: any) => ({
         designTokens: [...state.designTokens.slice(0, index), ...state.designTokens.slice(index + 1)]
       }
     }),
-  deleteTokenGroup: (id: number) =>
+  deleteTokenGroup: (id: any) =>
     set((state: any) => {
       const designTokenGroup = state.designTokensGroups.find((designTokenGroup: any) => designTokenGroup.id === id)
       const index = state.designTokensGroups.indexOf(designTokenGroup)
@@ -74,7 +79,7 @@ export const useStore = create((set: any, get: any) => ({
       designTokensGroups,
       designTokensGroupsCounter
     })),
-  updateDesignToken: (id: number, tokenName?: string, tokenValue?: any, tokenGroup?: any) =>
+  updateDesignToken: (id: any, tokenName?: string, tokenValue?: any, tokenGroup?: any) =>
     set((state: any) => {
       const designToken = state.designTokens.find((designToken: any) => designToken.id === id)
       const tokenNameChanged = !_.isEmpty(tokenName) && tokenName !== designToken.tokenName
@@ -97,7 +102,7 @@ export const useStore = create((set: any, get: any) => ({
         }
       }
     }),
-  updateDesignTokenGroup: (id: number, groupName?: string) =>
+  updateDesignTokenGroup: (id: any, groupName?: string) =>
     set((state: any) => {
       const designTokenGroup = state.designTokensGroups.find((designTokenGroup: any) => designTokenGroup.id === id)
       const groupNameChanged = !_.isEmpty(groupName) && groupName !== designTokenGroup.groupName

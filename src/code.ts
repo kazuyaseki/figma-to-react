@@ -8,13 +8,15 @@ import { buildCssString, CssStyle } from './core/buildCssString'
 import { UserComponentSetting } from './model/userComponentSetting'
 import { TextCount } from './core/getCssDataForTag'
 import { getUpdateableProperties, updateNode } from './core/updateFigma'
+import { Store } from './model/Store'
+import { updateColorsTokensFromFigmaStyles, updateEffectsTokensFromFigmaStyles, updateGridsTokensFromFigmaStyles, updateTextsTokensFromFigmaStyles } from './core/handleFigmaStyles'
 
 const figmaDocument = figma.root
 
 let selectedNodes = figma.currentPage.selection
 
 function init() {
-  figma.showUI(__html__, { width: 640, height: 700 })
+  figma.showUI(__html__, { width: 640, height: 1080 })
 
   if (selectedNodes.length > 1) {
     figma.notify('Figma To React Native - Please select only 1 node')
@@ -26,7 +28,17 @@ function init() {
     figmaDocument.setSharedPluginData('ftrn', 'designTokensGroups', '')
     figmaDocument.setSharedPluginData('ftrn', 'designTokensGroupsCounter', '')
     */
+
     const sharedPluginData = getSharedPluginData()
+
+    console.log('sharedPluginData before addFigmaStyles')
+    console.log(sharedPluginData)
+
+    updateTokensFromFigmaStyles(sharedPluginData)
+
+    console.log('sharedPluginData after addFigmaStyles')
+    console.log(sharedPluginData)
+
     figma.ui.postMessage({ nodeProperties: {}, sharedPluginData })
     if (selectedNodes.length === 1) {
       generate(selectedNodes[0], {})
@@ -101,6 +113,13 @@ async function generate(node: SceneNode, config: { cssStyle?: CssStyle; unitType
   const updateableProperties = getUpdateableProperties(node)
 
   figma.ui.postMessage({ generatedCodeStr, cssString, cssStyle, unitType, userComponentSettings, nodeProperties: updateableProperties })
+}
+
+function updateTokensFromFigmaStyles(sharedPluginData: Store) {
+  updateColorsTokensFromFigmaStyles(sharedPluginData, figma.getLocalPaintStyles())
+  updateEffectsTokensFromFigmaStyles(sharedPluginData, figma.getLocalEffectStyles())
+  updateGridsTokensFromFigmaStyles(sharedPluginData, figma.getLocalGridStyles())
+  updateTextsTokensFromFigmaStyles(sharedPluginData, figma.getLocalTextStyles())
 }
 
 function getSharedPluginData() {

@@ -1,5 +1,5 @@
 export type DesignToken = {
-  id: number
+  id: any
   tokenName: string
   tokenValue: any
   tokenGroup?: string
