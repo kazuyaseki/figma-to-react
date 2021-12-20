@@ -8,3 +8,5 @@ export type messageTypes =
   | { type: 'set-shared-plugin-data'; key: any; value: any }
   | { type: 'update-node-properties'; nodeProperties: any }
   | { type: 'update-user-component-settings'; userComponentSettings: UserComponentSetting[] }
+  | { type: 'store-provider-settings'; providerSettings: any }
+  | { type: 'load-provider-settings' }

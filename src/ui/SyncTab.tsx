@@ -7,14 +7,13 @@ import Spacer from './Spacer'
 import { buildDesignTokensJson } from '../core/buildDesignTokensJson'
 import { Autocomplete, Button, TextField } from '@material-ui/core'
 
-export const renderSyncTab = (parent: any) => {
+export const renderSyncTab = (storedProviderSettings: any, parent: any) => {
+  const [branchField, setBranchField] = React.useState('')
   const [code, setCode] = React.useState('')
-
-  const branchFieldRef = React.useRef(null)
-  const personalAccessTokenFieldRef = React.useRef(null)
-  const repositoryNameFieldRef = React.useRef(null)
-  const usernameFieldRef = React.useRef(null)
-  const workflowNameFieldRef = React.useRef(null)
+  const [repositoryField, setRepositoryField] = React.useState('')
+  const [tokenField, setTokenField] = React.useState('')
+  const [usernameField, setUsernameField] = React.useState('')
+  const [workflowField, setWorkflowField] = React.useState('')
 
   const textRef = React.useRef<HTMLTextAreaElement>(null)
 
@@ -22,7 +21,19 @@ export const renderSyncTab = (parent: any) => {
   const designTokensGroups = useStore((state) => state.designTokensGroups)
   const getDesignTokensByGroup = useStore((state) => state.getDesignTokensByGroup)
 
-  // set initial values taken from figma storage
+  React.useEffect(() => {
+    console.log('SyncTab useEffect providerSettings')
+    console.log(storedProviderSettings)
+    if (!_.isEmpty(storedProviderSettings)) {
+      const { branch, repo, token, user, workflow } = storedProviderSettings
+      setBranchField(branch)
+      setRepositoryField(repo)
+      setTokenField(token)
+      setUsernameField(user)
+      setWorkflowField(workflow)
+    }
+  }, [storedProviderSettings])
+
   React.useEffect(() => {
     const designTokensJson = buildDesignTokensJson(designTokens, designTokensGroups, getDesignTokensByGroup)
     const codeStr = JSON.stringify(designTokensJson, null, 2)
@@ -48,11 +59,11 @@ export const renderSyncTab = (parent: any) => {
   }
 
   const onPressSendToProvider = async () => {
-    const branch = branchFieldRef?.current?.value
-    const user = usernameFieldRef?.current?.value
-    const repo = repositoryNameFieldRef?.current?.value
-    const token = personalAccessTokenFieldRef?.current?.value
-    const workflow = workflowNameFieldRef?.current?.value
+    const branch = branchField
+    const user = usernameField
+    const repo = repositoryField
+    const token = tokenField
+    const workflow = workflowField
 
     const url = `https://api.github.com/repos/${user}/${repo}/actions/workflows/${workflow}/dispatches`
 
@@ -80,6 +91,27 @@ export const renderSyncTab = (parent: any) => {
         else alert(text)
       })
       .catch((error) => alert(error))
+  }
+
+  const onPressClearSettings = () => {
+    setBranchField('')
+    setUsernameField('')
+    setRepositoryField('')
+    setTokenField('')
+    setWorkflowField('')
+  }
+
+  const onPressStoreSettings = () => {
+    const providerSettings = {
+      branch: branchField,
+      user: usernameField,
+      repo: repositoryField,
+      token: tokenField,
+      workflow: workflowField
+    }
+
+    const msg: messageTypes = { type: 'store-provider-settings', providerSettings }
+    parent.postMessage({ pluginMessage: msg }, '*')
   }
 
   const syntaxHighlightedCode = React.useMemo(() => code, [code])
@@ -134,50 +166,77 @@ export const renderSyncTab = (parent: any) => {
             </div>
             <div style={{ display: 'flex', alignItems: 'center' }}>
               <div style={{ flex: 1 }}>
-                <p>Personal Access Token</p>
-              </div>
-              <div style={{ flex: 1 }}>
-                <TextField id="personalAccessToken" inputRef={personalAccessTokenFieldRef} size="small" style={{ backgroundColor: '#fff' }} />
-              </div>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center' }}>
-              <div style={{ flex: 1 }}>
-                <p>GitHub Username</p>
-              </div>
-              <div style={{ flex: 1 }}>
-                <TextField id="username" inputRef={usernameFieldRef} size="small" style={{ backgroundColor: '#fff' }} />
+                <TextField
+                  id="personalAccessToken"
+                  label="Personal Access Token"
+                  onChange={(evt) => {
+                    setTokenField(evt.target.value)
+                  }}
+                  value={tokenField}
+                  size="small"
+                  style={{ backgroundColor: '#fff', width: '100%' }}
+                />
               </div>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center' }}>
+            <div style={{ alignItems: 'center', display: 'flex', gap: '20px' }}>
               <div style={{ flex: 1 }}>
-                <p>GitHub Repository name</p>
+                <TextField
+                  id="username"
+                  label="Username"
+                  onChange={(evt) => {
+                    setUsernameField(evt.target.value)
+                  }}
+                  value={usernameField}
+                  size="small"
+                  style={{ backgroundColor: '#fff', width: '100%' }}
+                />
               </div>
               <div style={{ flex: 1 }}>
-                <TextField id="repositoryName" inputRef={repositoryNameFieldRef} size="small" style={{ backgroundColor: '#fff' }} />
+                <TextField
+                  id="repositoryName"
+                  label="Repository"
+                  onChange={(evt) => {
+                    setRepositoryField(evt.target.value)
+                  }}
+                  value={repositoryField}
+                  size="small"
+                  style={{ backgroundColor: '#fff', width: '100%' }}
+                />
               </div>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center' }}>
+            <div style={{ alignItems: 'center', display: 'flex', gap: '20px' }}>
               <div style={{ flex: 1 }}>
-                <p>GitHub Workflow filename</p>
+                <TextField
+                  id="workflowName"
+                  label="Workflow filename"
+                  onChange={(evt) => {
+                    setWorkflowField(evt.target.value)
+                  }}
+                  placeholder="main.yml"
+                  size="small"
+                  style={{ backgroundColor: '#fff', width: '100%' }}
+                  value={workflowField}
+                />
               </div>
               <div style={{ flex: 1 }}>
-                <TextField id="workflowName" inputRef={workflowNameFieldRef} placeholder="main.yml" size="small" style={{ backgroundColor: '#fff' }} />
+                <TextField
+                  id="branch"
+                  label="Branch"
+                  onChange={(evt) => {
+                    setBranchField(evt.target.value)
+                  }}
+                  placeholder="main"
+                  size="small"
+                  style={{ backgroundColor: '#fff', width: '100%' }}
+                  value={branchField}
+                />
               </div>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center' }}>
-              <div style={{ flex: 1 }}>
-                <p>GitHub Branch</p>
-              </div>
-              <div style={{ flex: 1 }}>
-                <TextField id="branch" inputRef={branchFieldRef} size="small" placeholder="main" style={{ backgroundColor: '#fff' }} />
-              </div>
-            </div>
-            <Spacer axis="vertical" size={12} />
             <div style={{ display: 'flex', gap: '20px', justifyContent: 'center' }}>
-              <Button disabled variant="outlined" onClick={onPressCopyToClipboard}>
+              <Button variant="outlined" onClick={onPressStoreSettings}>
                 STORE SETTINGS
               </Button>
-              <Button disabled variant="outlined" onClick={onPressExportToJson}>
+              <Button variant="outlined" onClick={onPressClearSettings}>
                 CLEAR SETTINGS
               </Button>
               <Button variant="contained" onClick={onPressSendToProvider}>

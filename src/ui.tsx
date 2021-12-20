@@ -66,6 +66,7 @@ const unitTypes: { value: UnitType; label: string; disabled: boolean }[] = [
 const App: React.VFC = () => {
   const [code, setCode] = React.useState('')
   const [nodeProperties, setNodeProperties] = React.useState({})
+  const [providerSettings, setProviderSettings] = React.useState({})
   const [selectedCssStyle, setCssStyle] = React.useState<CssStyle>('css')
   const [selectedUnitType, setUnitType] = React.useState<UnitType>('px')
   const [tabValue, setTabValue] = React.useState(0)
@@ -84,6 +85,15 @@ const App: React.VFC = () => {
       setCode(codeStr)
       setUserComponentSettings(event.data.pluginMessage.userComponentSettings)
       setNodeProperties(event.data.pluginMessage.nodeProperties)
+
+      const pluginMessageProviderSettings = event.data.pluginMessage.providerSettings
+
+      console.log('pluginMessageProviderSettings')
+      console.log(pluginMessageProviderSettings)
+
+      if (pluginMessageProviderSettings) {
+        setProviderSettings(pluginMessageProviderSettings)
+      }
 
       const { sharedPluginData } = event.data.pluginMessage
 
@@ -237,7 +247,7 @@ const App: React.VFC = () => {
         )}
       </TabPanel>
       <TabPanel value={tabValue} index={3}>
-        {renderSyncTab(parent)}
+        {renderSyncTab(providerSettings, parent)}
       </TabPanel>
     </Box>
   )

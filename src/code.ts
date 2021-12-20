@@ -29,20 +29,23 @@ function init() {
     figmaDocument.setSharedPluginData('ftrn', 'designTokensGroupsCounter', '')
     */
 
-    const sharedPluginData = getSharedPluginData()
+    getProviderSettings().then((providerSettings) => {
+      console.log('code.ts init providerSettings')
+      console.log(providerSettings)
+      const sharedPluginData = getSharedPluginData()
+      updateTokensFromFigmaStyles(sharedPluginData)
+      figma.ui.postMessage({ providerSettings, nodeProperties: {}, sharedPluginData })
 
-    updateTokensFromFigmaStyles(sharedPluginData)
-
-    figma.ui.postMessage({ nodeProperties: {}, sharedPluginData })
-    if (selectedNodes.length === 1) {
-      generate(selectedNodes[0], {})
-    }
+      if (selectedNodes.length === 1) {
+        generate(selectedNodes[0], {})
+      }
+    })
   }
 }
 
 figma.ui.onmessage = (msg: messageTypes) => {
   if (msg.type === 'notify-copy-success') {
-    figma.notify('copied to clipboard👍')
+    figma.notify('Figma To React Native - Copied to Clipboard 👍')
   } else if (msg.type === 'new-css-style-set') {
     figma.clientStorage.setAsync(STORAGE_KEYS.CSS_STYLE_KEY, msg.cssStyle)
     generate(selectedNodes[0], { cssStyle: msg.cssStyle })
@@ -57,6 +60,9 @@ figma.ui.onmessage = (msg: messageTypes) => {
     updateNode(selectedNodes[0], msg.nodeProperties)
   } else if (msg.type === 'set-shared-plugin-data') {
     figmaDocument.setSharedPluginData('ftrn', msg.key, msg.value)
+  } else if (msg.type === 'store-provider-settings') {
+    figma.clientStorage.setAsync(STORAGE_KEYS.PROVIDER_SETTINGS_KEY, msg.providerSettings)
+    figma.notify('Figma to React Native - Provider Settings successfully stored')
   }
 }
 
@@ -107,6 +113,11 @@ async function generate(node: SceneNode, config: { cssStyle?: CssStyle; unitType
   const updateableProperties = getUpdateableProperties(node)
 
   figma.ui.postMessage({ generatedCodeStr, cssString, cssStyle, unitType, userComponentSettings, nodeProperties: updateableProperties })
+}
+
+async function getProviderSettings() {
+  const providerSettings = await figma.clientStorage.getAsync(STORAGE_KEYS.PROVIDER_SETTINGS_KEY)
+  return providerSettings
 }
 
 function updateTokensFromFigmaStyles(sharedPluginData: Store) {
