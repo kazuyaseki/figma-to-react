@@ -12,7 +12,7 @@ export function updateColorsTokensFromFigmaStyles(sharedPluginData: Store, local
   if (localPaintStyles.length > 0) {
     const figmaColorsGroup = sharedPluginData.designTokensGroups?.find((designTokenGroup: DesignTokenGroup) => designTokenGroup.groupName === GROUP_COLORS)
 
-    if (!figmaColorsGroup) {
+    if (!figmaColorsGroup && sharedPluginData.designTokensGroupsCounter !== undefined) {
       // Add new group
       sharedPluginData.designTokensGroups?.unshift({ id: sharedPluginData.designTokensGroupsCounter, groupName: GROUP_COLORS })
       sharedPluginData.designTokensGroupsCounter += 1
@@ -45,7 +45,9 @@ export function updateColorsTokensFromFigmaStyles(sharedPluginData: Store, local
               tokenValue: rgbaToHex(rgbaString).toUpperCase(),
               tokenGroup: GROUP_COLORS
             })
-            sharedPluginData.designTokensCounter += 1
+            if (sharedPluginData.designTokensCounter !== undefined) {
+              sharedPluginData.designTokensCounter += 1
+            }
           }
         }
       }
@@ -57,7 +59,7 @@ export function updateEffectsTokensFromFigmaStyles(sharedPluginData: Store, loca
   if (localEffectStyles.length > 0) {
     const figmaEffectsGroup = sharedPluginData.designTokensGroups?.find((designTokenGroup: DesignTokenGroup) => designTokenGroup.groupName === GROUP_EFFECTS)
 
-    if (!figmaEffectsGroup) {
+    if (!figmaEffectsGroup && sharedPluginData.designTokensGroupsCounter !== undefined) {
       // Add new group
       sharedPluginData.designTokensGroups?.unshift({ id: sharedPluginData.designTokensGroupsCounter, groupName: GROUP_EFFECTS })
       sharedPluginData.designTokensGroupsCounter += 1
@@ -98,7 +100,9 @@ export function updateEffectsTokensFromFigmaStyles(sharedPluginData: Store, loca
               tokenValue: effectValue,
               tokenGroup: GROUP_EFFECTS
             })
-            sharedPluginData.designTokensCounter += 1
+            if (sharedPluginData.designTokensCounter !== undefined) {
+              sharedPluginData.designTokensCounter += 1
+            }
           }
         }
       }
@@ -110,7 +114,7 @@ export function updateGridsTokensFromFigmaStyles(sharedPluginData: Store, localG
   if (localGridStyles.length > 0) {
     const figmaGridsGroup = sharedPluginData.designTokensGroups?.find((designTokenGroup: DesignTokenGroup) => designTokenGroup.groupName === GROUP_GRIDS)
 
-    if (!figmaGridsGroup) {
+    if (!figmaGridsGroup && sharedPluginData.designTokensGroupsCounter !== undefined) {
       // Add new group
       sharedPluginData.designTokensGroups?.unshift({ id: sharedPluginData.designTokensGroupsCounter, groupName: GROUP_GRIDS })
       sharedPluginData.designTokensGroupsCounter += 1
@@ -143,7 +147,9 @@ export function updateGridsTokensFromFigmaStyles(sharedPluginData: Store, localG
               tokenValue: gridValue,
               tokenGroup: GROUP_GRIDS
             })
-            sharedPluginData.designTokensCounter += 1
+            if (sharedPluginData.designTokensCounter !== undefined) {
+              sharedPluginData.designTokensCounter += 1
+            }
           }
         }
       }
@@ -155,7 +161,7 @@ export function updateTextsTokensFromFigmaStyles(sharedPluginData: Store, localT
   if (localTextStyles.length > 0) {
     const figmaTextsGroup = sharedPluginData.designTokensGroups?.find((designTokenGroup: DesignTokenGroup) => designTokenGroup.groupName === GROUP_TEXTS)
 
-    if (!figmaTextsGroup) {
+    if (!figmaTextsGroup && sharedPluginData.designTokensGroupsCounter) {
       // Add new group
       sharedPluginData.designTokensGroups?.unshift({ id: sharedPluginData.designTokensGroupsCounter, groupName: GROUP_TEXTS })
       sharedPluginData.designTokensGroupsCounter += 1
@@ -184,7 +190,9 @@ export function updateTextsTokensFromFigmaStyles(sharedPluginData: Store, localT
           tokenValue: textValue,
           tokenGroup: GROUP_TEXTS
         })
-        sharedPluginData.designTokensCounter += 1
+        if (sharedPluginData.designTokensCounter !== undefined) {
+          sharedPluginData.designTokensCounter += 1
+        }
       }
     })
   }

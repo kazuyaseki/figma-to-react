@@ -75,6 +75,7 @@ const App: React.VFC = () => {
 
   const setDesignTokens = useStore((state) => state.setDesignTokens)
   const setDesignTokensGroups = useStore((state) => state.setDesignTokensGroups)
+  const setProperties = useStore((state) => state.setProperties)
 
   // set initial values taken from figma storage
   React.useEffect(() => {
@@ -104,13 +105,16 @@ const App: React.VFC = () => {
   }, [])
 
   const updateStoreFromSharedPluginData = (sharedPluginData: Store) => {
-    const { designTokens, designTokensCounter, designTokensGroups, designTokensGroupsCounter } = sharedPluginData
+    const { designTokens, designTokensCounter, designTokensGroups, designTokensGroupsCounter, properties } = sharedPluginData
 
     if (designTokens && designTokensCounter) {
       setDesignTokens(designTokens, designTokensCounter)
     }
     if (designTokensGroups && designTokensGroupsCounter) {
       setDesignTokensGroups(designTokensGroups, designTokensGroupsCounter)
+    }
+    if (properties) {
+      setProperties(properties)
     }
   }
 

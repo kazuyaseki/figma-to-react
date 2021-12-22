@@ -2,9 +2,11 @@ import * as React from 'react'
 import { Autocomplete, Box, Button, TextField } from '@material-ui/core'
 import { DataGrid, GridColDef, GridRenderCellParams, GridRowModel } from '@mui/x-data-grid'
 import { messageTypes } from '../model/messagesTypes'
+import { updateSharedPluginData } from '../core/updateSharedPluginData'
 import { useStore } from '../hooks/useStore'
 import * as _ from 'lodash'
 import { getConvertedValue } from '../utils/unitTypeUtils'
+import { Store } from '../model/Store'
 
 export const renderPropertiesTab = (nodeProperties: any, parent: any) => {
   const [changedRows, setChangedRows] = React.useState([])
@@ -17,6 +19,11 @@ export const renderPropertiesTab = (nodeProperties: any, parent: any) => {
   const getPropertiesByNodeId = useStore((state) => state.getPropertiesByNodeId)
   const getPropertyByName = useStore((state) => state.getPropertyByName)
   const updateProperty = useStore((state) => state.updateProperty)
+
+  React.useEffect(() => {
+    console.log('PropertiesTab useEffect() properties')
+    console.log(properties)
+  }, [properties])
 
   React.useEffect(() => {
     updateProperties()
@@ -54,7 +61,17 @@ export const renderPropertiesTab = (nodeProperties: any, parent: any) => {
   const onChangeLinkedToken = (row: GridRowModel, linkedToken: any) => {
     const designToken = getDesignTokenByName(linkedToken)
     const nodeOriginalValue = nodeProperties[row.id]
-    updateProperty(row.nodeId, row.id, designToken?.tokenValue || nodeOriginalValue, linkedToken)
+    const value = designToken?.tokenValue || nodeOriginalValue
+
+    updateProperty(row.nodeId, row.id, value, linkedToken)
+
+    const property = { nodeId: row.nodeId, id: row.id, value, linkedToken }
+
+    const updatedData: Store = {
+      properties: [property]
+    }
+
+    updateSharedPluginData(parent, updatedData)
   }
 
   const updateFigmaProperties = () => {

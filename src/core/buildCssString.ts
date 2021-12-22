@@ -3,6 +3,7 @@ import { Tag } from './buildTagTree'
 import { buildClassName } from '../utils/cssUtils'
 import { PRESSABLE_TAG_SUFFIX, TEXT_TAG_SUFFIX } from '../utils/constants'
 import { getItemSpacing } from '../utils/isImageNode'
+import { Store } from '../model/Store'
 export type CssStyle = 'css' | 'StyleSheet' | 'Restyle' | 'styled-components'
 
 type DataObject = {
@@ -23,7 +24,7 @@ function buildArray(tag: Tag, arr: DataObject[]): DataObject[] {
   return arr
 }
 
-export function buildCssString(tag: Tag, cssStyle: CssStyle) {
+export function buildCssString(tag: Tag, cssStyle: CssStyle, sharedPluginData: Store) {
   const dataObjectArray: DataObject[] = buildArray(tag, [])
   const codeTagNames: string[] = []
 
@@ -87,10 +88,21 @@ ${dataObject.cssData.properties.map((property: any) => `  ${property.name}: ${pr
         }
       }
 
+      console.log('sharedPluginData')
+      console.log(sharedPluginData)
+
       /* FIXME:
-      const linkedToken = getState().getLinkedToken(node.id, propertyName)
-      console.log('buildCssString linkedToken')
-      console.log(linkedToken)
+      const propertiesByNodeId = sharedPluginData.properties?.filter((property: any) => property.nodeId === node.id)
+      const property = propertiesByNodeId?.find((currentProperty: any) => propertyName === currentProperty.id)
+
+      console.log('property')
+      console.log(property)
+
+      if (property?.linkedToken) {
+        console.log('property linkedToken exists')
+        //        const designTokens = sharedPluginData.designTokens
+        //        const designToken = designTokens.find((designToken: any) => designToken.tokenName === property.linkedToken)
+      }
       */
 
       const spacerStr = `\nconst ${dataObject.cssData?.className.replace(/\s/g, '')}Spacer = styled.View\`

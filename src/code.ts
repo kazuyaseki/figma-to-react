@@ -10,6 +10,7 @@ import { TextCount } from './core/getCssDataForTag'
 import { getUpdateableProperties, updateNode } from './core/updateFigma'
 import { Store } from './model/Store'
 import { updateColorsTokensFromFigmaStyles, updateEffectsTokensFromFigmaStyles, updateGridsTokensFromFigmaStyles, updateTextsTokensFromFigmaStyles } from './core/handleFigmaStyles'
+import * as _ from 'lodash'
 
 const figmaDocument = figma.root
 
@@ -18,24 +19,16 @@ let selectedNodes = figma.currentPage.selection
 function init() {
   figma.showUI(__html__, { width: 640, height: 1080 })
 
+  //  figmaDocument.setSharedPluginData('ftrn', 'properties', '[]')
+
   if (selectedNodes.length > 1) {
     figma.notify('Figma To React Native - Please select only 1 node')
     figma.closePlugin()
   } else {
-    /*
-    figmaDocument.setSharedPluginData('ftrn', 'designTokens', '')
-    figmaDocument.setSharedPluginData('ftrn', 'designTokensCounter', '')
-    figmaDocument.setSharedPluginData('ftrn', 'designTokensGroups', '')
-    figmaDocument.setSharedPluginData('ftrn', 'designTokensGroupsCounter', '')
-    */
-
     getProviderSettings().then((providerSettings) => {
-      console.log('code.ts init providerSettings')
-      console.log(providerSettings)
       const sharedPluginData = getSharedPluginData()
       updateTokensFromFigmaStyles(sharedPluginData)
       figma.ui.postMessage({ providerSettings, nodeProperties: {}, sharedPluginData })
-
       if (selectedNodes.length === 1) {
         generate(selectedNodes[0], {})
       }
@@ -59,7 +52,15 @@ figma.ui.onmessage = (msg: messageTypes) => {
     figma.clientStorage.setAsync(STORAGE_KEYS.UPDATE_NODE_PROPERTIES_KEY, msg.nodeProperties)
     updateNode(selectedNodes[0], msg.nodeProperties)
   } else if (msg.type === 'set-shared-plugin-data') {
-    figmaDocument.setSharedPluginData('ftrn', msg.key, msg.value)
+    if (msg.key === 'properties') {
+      const currentProperties = JSON.parse(figmaDocument.getSharedPluginData('ftrn', 'properties'))
+      const newProperties = JSON.parse(msg.value)
+      const result = _.unionWith(newProperties, currentProperties, (first: any, second: any) => first.nodeId === second.nodeId && first.id === second.id)
+      const newValue = JSON.stringify(result)
+      figmaDocument.setSharedPluginData('ftrn', msg.key, newValue)
+    } else {
+      figmaDocument.setSharedPluginData('ftrn', msg.key, msg.value)
+    }
   } else if (msg.type === 'store-provider-settings') {
     figma.clientStorage.setAsync(STORAGE_KEYS.PROVIDER_SETTINGS_KEY, msg.providerSettings)
     figma.notify('Figma to React Native - Provider Settings successfully stored')
@@ -71,7 +72,8 @@ figma.on('selectionchange', () => {
   if (selectedNodes.length > 1) {
     figma.notify('Figma to React Native - Please select only 1 node')
   } else if (selectedNodes.length === 0) {
-    figma.ui.postMessage({ nodeProperties: {} })
+    const sharedPluginData = getSharedPluginData()
+    figma.ui.postMessage({ nodeProperties: {}, sharedPluginData })
   } else {
     generate(selectedNodes[0], {})
   }
@@ -100,6 +102,8 @@ async function generate(node: SceneNode, config: { cssStyle?: CssStyle; unitType
 
   const textCount = new TextCount()
 
+  const sharedPluginData = getSharedPluginData()
+
   const originalTagTree = buildTagTree(node, unitType, textCount)
   if (originalTagTree === null) {
     figma.notify('Please select a visible node')
@@ -108,11 +112,11 @@ async function generate(node: SceneNode, config: { cssStyle?: CssStyle; unitType
 
   const tag = await modifyTreeForComponent(originalTagTree, figma)
   const generatedCodeStr = buildCode(tag, cssStyle)
-  const cssString = buildCssString(tag, cssStyle)
+  const cssString = buildCssString(tag, cssStyle, sharedPluginData)
 
   const updateableProperties = getUpdateableProperties(node)
 
-  figma.ui.postMessage({ generatedCodeStr, cssString, cssStyle, unitType, userComponentSettings, nodeProperties: updateableProperties })
+  figma.ui.postMessage({ generatedCodeStr, cssString, cssStyle, unitType, userComponentSettings, nodeProperties: updateableProperties, sharedPluginData })
 }
 
 async function getProviderSettings() {
@@ -132,12 +136,17 @@ function getSharedPluginData() {
   const designTokensCounter = figmaDocument.getSharedPluginData('ftrn', 'designTokensCounter')
   const designTokensGroups = figmaDocument.getSharedPluginData('ftrn', 'designTokensGroups')
   const designTokensGroupsCounter = figmaDocument.getSharedPluginData('ftrn', 'designTokensGroupsCounter')
+  const properties = figmaDocument.getSharedPluginData('ftrn', 'properties')
 
-  const sharedPluginData = {
+  console.log('getSharedPluginData properties')
+  console.log(properties)
+
+  const sharedPluginData: Store = {
     designTokens: designTokens ? JSON.parse(designTokens) : [],
     designTokensCounter: Number(designTokensCounter),
     designTokensGroups: designTokensGroups ? JSON.parse(designTokensGroups) : [],
-    designTokensGroupsCounter: Number(designTokensGroupsCounter)
+    designTokensGroupsCounter: Number(designTokensGroupsCounter),
+    properties: properties ? JSON.parse(properties) : []
   }
 
   return sharedPluginData

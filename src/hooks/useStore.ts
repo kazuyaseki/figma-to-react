@@ -79,6 +79,10 @@ export const useStore = create((set: any, get: any) => ({
       designTokensGroups,
       designTokensGroupsCounter
     })),
+  setProperties: (properties: any) =>
+    set((state: any) => ({
+      properties: _.unionWith(properties, state.properties, (first: any, second: any) => first.nodeId === second.nodeId && first.id === second.id)
+    })),
   updateDesignToken: (id: any, tokenName?: string, tokenValue?: any, tokenGroup?: any) =>
     set((state: any) => {
       const designToken = state.designTokens.find((designToken: any) => designToken.id === id)

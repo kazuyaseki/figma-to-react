@@ -3,8 +3,8 @@ import { DesignTokenGroup } from './DesignTokenGroup'
 
 export type Store = {
   designTokens?: DesignToken[]
-  designTokensCounter: number
+  designTokensCounter?: number
   designTokensGroups?: DesignTokenGroup[]
-  designTokensGroupsCounter: number
-  properties?: []
+  designTokensGroupsCounter?: number
+  properties?: any[]
 }

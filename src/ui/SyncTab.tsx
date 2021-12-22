@@ -167,46 +167,51 @@ export const renderSyncTab = (storedProviderSettings: any, parent: any) => {
             <div style={{ display: 'flex', alignItems: 'center' }}>
               <div style={{ flex: 1 }}>
                 <TextField
+                  fullWidth
                   id="personalAccessToken"
                   label="Personal Access Token"
                   onChange={(evt) => {
                     setTokenField(evt.target.value)
                   }}
-                  value={tokenField}
                   size="small"
-                  style={{ backgroundColor: '#fff', width: '100%' }}
+                  style={{ backgroundColor: '#fff' }}
+                  type="password"
+                  value={tokenField}
                 />
               </div>
             </div>
             <div style={{ alignItems: 'center', display: 'flex', gap: '20px' }}>
               <div style={{ flex: 1 }}>
                 <TextField
+                  fullWidth
                   id="username"
                   label="Username"
                   onChange={(evt) => {
                     setUsernameField(evt.target.value)
                   }}
-                  value={usernameField}
                   size="small"
-                  style={{ backgroundColor: '#fff', width: '100%' }}
+                  style={{ backgroundColor: '#fff' }}
+                  value={usernameField}
                 />
               </div>
               <div style={{ flex: 1 }}>
                 <TextField
+                  fullWidth
                   id="repositoryName"
                   label="Repository"
                   onChange={(evt) => {
                     setRepositoryField(evt.target.value)
                   }}
-                  value={repositoryField}
                   size="small"
-                  style={{ backgroundColor: '#fff', width: '100%' }}
+                  style={{ backgroundColor: '#fff' }}
+                  value={repositoryField}
                 />
               </div>
             </div>
             <div style={{ alignItems: 'center', display: 'flex', gap: '20px' }}>
               <div style={{ flex: 1 }}>
                 <TextField
+                  fullWidth
                   id="workflowName"
                   label="Workflow filename"
                   onChange={(evt) => {
@@ -214,12 +219,13 @@ export const renderSyncTab = (storedProviderSettings: any, parent: any) => {
                   }}
                   placeholder="main.yml"
                   size="small"
-                  style={{ backgroundColor: '#fff', width: '100%' }}
+                  style={{ backgroundColor: '#fff' }}
                   value={workflowField}
                 />
               </div>
               <div style={{ flex: 1 }}>
                 <TextField
+                  fullWidth
                   id="branch"
                   label="Branch"
                   onChange={(evt) => {
@@ -227,7 +233,7 @@ export const renderSyncTab = (storedProviderSettings: any, parent: any) => {
                   }}
                   placeholder="main"
                   size="small"
-                  style={{ backgroundColor: '#fff', width: '100%' }}
+                  style={{ backgroundColor: '#fff' }}
                   value={branchField}
                 />
               </div>
