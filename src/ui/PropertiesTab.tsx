@@ -90,13 +90,30 @@ export const renderPropertiesTab = (nodeProperties: any, parent: any) => {
   }
 
   const updateProperties = () => {
+    console.log('PropertiesTab.tsx updateProperties()')
+
     const nodeId = nodeProperties['id']
     Object.keys(nodeProperties).map((key) => {
       const value = nodeProperties && nodeProperties[key as keyof unknown]
       if (key !== 'id' && key !== 'name') {
         const designToken = getLinkedToken(nodeId, key)
+        console.log('key ' + key + ' value ' + value + ' nodeId ' + nodeId + ' linkedToken: ')
+        console.log(designToken)
         const newValue = designToken?.tokenValue || value
         updateProperty(nodeId, key, newValue)
+
+        const property = {
+          nodeId,
+          id: key,
+          value: newValue,
+          linkedToken: designToken ? designToken.tokenName : undefined
+        }
+
+        const updatedData: Store = {
+          properties: [property]
+        }
+
+        updateSharedPluginData(parent, updatedData)
       }
     })
   }
