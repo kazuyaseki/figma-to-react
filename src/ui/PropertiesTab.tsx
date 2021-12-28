@@ -31,7 +31,25 @@ export const renderPropertiesTab = (nodeProperties: any, parent: any) => {
 
   const propertiesColumns: GridColDef[] = [
     { field: 'id', headerName: 'Property Name', width: 150 },
-    { field: 'value', headerName: 'Property Value', width: 150 },
+    {
+      field: 'value',
+      headerName: 'Property Value',
+      width: 150,
+      renderCell: (params: GridRenderCellParams) => {
+        const currentKey = params.row.id
+        const currentValueString = String(params.row.value)
+        console.log('renderCell() nodeProperties:')
+        console.log(nodeProperties)
+        if (currentValueString !== String(nodeProperties[currentKey])) {
+          return (
+            <div>
+              <span style={{ fontWeight: 'bold' }}>{currentValueString}</span> ({nodeProperties[currentKey]})
+            </div>
+          )
+        }
+        return <div>{currentValueString}</div>
+      }
+    },
     {
       field: 'linkedToken',
       headerName: 'Linked Token',

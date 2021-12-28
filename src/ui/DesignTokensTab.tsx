@@ -2,11 +2,12 @@ import { Autocomplete, Button, TextField } from '@material-ui/core'
 import { DataGrid, GridColDef, GridRenderCellParams, GridRowModel } from '@mui/x-data-grid'
 import * as _ from 'lodash'
 import * as React from 'react'
+import styles from '../ui.css'
 import { updateSharedPluginData } from '../core/updateSharedPluginData'
 import { useStore } from '../hooks/useStore'
 import { isFigmaStyleGroup } from '../model/FigmaStyleGroup'
 import { Store } from '../model/Store'
-import { isNotANumber } from '../utils/unitTypeUtils'
+import { isHex, isNotANumber } from '../utils/unitTypeUtils'
 
 const designTokensTexts = {
   noRowsLabel: 'No Design Tokens',
@@ -18,6 +19,10 @@ const designTokensGroupsTexts = {
   noRowsLabel: 'No Groups',
   // Rows selected footer text
   footerRowSelected: (count: number) => (count !== 1 ? `${count.toLocaleString()} Groups selected` : `${count.toLocaleString()} Group selected`)
+}
+
+const inspectTokenTexts = {
+  noRowsLabel: 'No Properties Linked To This Token'
 }
 
 export const renderDesignTokensTab = (parent: any) => {
@@ -33,6 +38,7 @@ export const renderDesignTokensTab = (parent: any) => {
   const designTokensGroups = useStore((state) => state.designTokensGroups)
   const designTokensGroupsCounter = useStore((state) => state.designTokensGroupsCounter)
   const getDesignTokenById = useStore((state) => state.getDesignTokenById)
+  const getPropertiesByLinkedToken = useStore((state) => state.getPropertiesByLinkedToken)
   const deleteToken = useStore((state) => state.deleteToken)
   const deleteTokenGroup = useStore((state) => state.deleteTokenGroup)
   const updateDesignToken = useStore((state) => state.updateDesignToken)
@@ -70,13 +76,37 @@ export const renderDesignTokensTab = (parent: any) => {
   const designTokensGroupsFiltered = designTokensGroups.filter((designTokenGroup: any) => !isFigmaStyleGroup(designTokenGroup.groupName))
 
   const designTokensColumns: GridColDef[] = [
-    { field: 'tokenName', headerName: 'Token Name', width: 200, editable: true },
-    { field: 'tokenValue', headerName: 'Token Value', width: 120, editable: true },
+    { field: 'tokenName', headerName: 'Token Name', width: 180, editable: true },
+    {
+      field: 'tokenValue',
+      headerName: 'Token Value',
+      width: 170,
+      editable: true,
+      renderCell: (params: GridRenderCellParams) => {
+        const tokenValue = params?.value
+        if (_.isObject(tokenValue)) {
+          let result = ''
+          Object.keys(tokenValue).map((key) => {
+            const value = tokenValue && tokenValue[key as keyof unknown]
+            result += `${key}: ${value}\n`
+          })
+          return <div style={{ fontSize: '10px', lineHeight: '10px', whiteSpace: 'pre-line' }}>{result}</div>
+        }
+        if (isHex(tokenValue)) {
+          return (
+            <div>
+              <span style={{ backgroundColor: String(tokenValue) }}>{tokenValue}</span>
+            </div>
+          )
+        }
+
+        return <div>{params.value}</div>
+      }
+    },
     {
       field: 'tokenGroup',
       headerName: 'Token Group',
       flex: 1,
-      //      width: 240,
       renderCell: (params: GridRenderCellParams) => {
         const groupName = params?.value
         if (isFigmaStyleGroup(groupName)) {
@@ -111,6 +141,12 @@ export const renderDesignTokensTab = (parent: any) => {
         return <p style={{ fontWeight: isFigmaStyleGroup(groupName) ? 'bold' : 'normal' }}>{groupName}</p>
       }
     }
+  ]
+
+  const inspectTokenColumns: GridColDef[] = [
+    { field: 'nodeId', headerName: 'Node Id', width: 180, editable: false },
+    { field: 'propertyName', headerName: 'Property Name', width: 180, editable: false },
+    { field: 'propertyValue', headerName: 'Property Value', width: 180, editable: false }
   ]
 
   const getAutocompleteValue = (params: any) => {
@@ -168,6 +204,28 @@ export const renderDesignTokensTab = (parent: any) => {
     deleteTokenGroup(groupSelectionModel[0])
   }
 
+  let selectedDesignToken = undefined
+
+  if (selectionModel) {
+    selectedDesignToken = getDesignTokenById(selectionModel[0])
+  }
+
+  const propertiesLinkedToSelectedDesignToken: any = []
+
+  if (selectedDesignToken) {
+    const propertiesByLinkedToken = getPropertiesByLinkedToken(selectedDesignToken.tokenName)
+    let propertiesCounter = 0
+    propertiesByLinkedToken.forEach((property: any) => {
+      propertiesLinkedToSelectedDesignToken.push({
+        id: propertiesCounter,
+        nodeId: property.nodeId,
+        propertyName: property.id,
+        propertyValue: property.value
+      })
+      propertiesCounter += 1
+    })
+  }
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', margin: '20px' }}>
       <div>
@@ -194,8 +252,22 @@ export const renderDesignTokensTab = (parent: any) => {
           </Button>
         </div>
       </div>
+      {!!selectedDesignToken && (
+        <div className={styles.container} style={{ margin: '20px 0px' }}>
+          <p style={{ alignSelf: 'center', fontWeight: 'bold', marginTop: '20px', textAlign: 'center' }}>Inspect Token: '{selectedDesignToken.tokenName}'</p>
+          <div style={{ height: 300, marginTop: '20px' }}>
+            <DataGrid columns={inspectTokenColumns} hideFooter localeText={inspectTokenTexts} rows={propertiesLinkedToSelectedDesignToken} rowsPerPageOptions={[100]} />
+          </div>
+          <div style={{ display: 'flex', flex: 1, flexDirection: 'row', justifyContent: 'center', margin: '20px 0px' }}>
+            <Button disabled={propertiesLinkedToSelectedDesignToken?.length === 0} variant="outlined" onClick={onPressAddATokenGroup}>
+              UPDATE ALL LINKED PROPERTIES
+            </Button>
+          </div>
+        </div>
+      )}
       <div style={{ margin: '20px 0px' }}>
-        <div style={{ display: 'flex', flex: 2, height: 300 }}>
+        <p style={{ alignSelf: 'center', fontWeight: 'bold', textAlign: 'center' }}>Token Groups</p>
+        <div style={{ display: 'flex', flex: 2, height: 300, marginTop: '20px' }}>
           <DataGrid
             columns={designTokensGroupsColumns}
             editRowsModel={editDesignTokensGroupsRowsModel}

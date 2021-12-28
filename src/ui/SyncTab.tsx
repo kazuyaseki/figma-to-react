@@ -118,7 +118,7 @@ export const renderSyncTab = (storedProviderSettings: any, parent: any) => {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', margin: '20px' }}>
-      <div>
+      <div className={styles.container}>
         <p style={{ alignSelf: 'center', fontWeight: 'bold', textAlign: 'center' }}>Design Tokens (Generated JSON)</p>
         {_.isEmpty(designTokensGroups) ? (
           <div style={{ margin: '20px 0px' }}>
@@ -126,7 +126,7 @@ export const renderSyncTab = (storedProviderSettings: any, parent: any) => {
           </div>
         ) : (
           <div style={{ margin: '20px 0px' }}>
-            <div className={styles.container}>
+            <div>
               <textarea className={styles.textareaForClipboard} ref={textRef} value={code} readOnly />
               <p className={styles.generatedCode} dangerouslySetInnerHTML={{ __html: syntaxHighlightedCode }} />
 
@@ -144,10 +144,10 @@ export const renderSyncTab = (storedProviderSettings: any, parent: any) => {
           </div>
         )}
       </div>
-      <div>
+      <div className={styles.container} style={{ margin: '20px 0px' }}>
         <p style={{ alignSelf: 'center', fontWeight: 'bold', textAlign: 'center' }}>Design Tokens (Provider Configuration)</p>
         <div style={{ margin: '20px 0px' }}>
-          <div className={styles.container} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
             <div style={{ display: 'flex', alignItems: 'center' }}>
               <div style={{ flex: 1 }}>
                 <p>Provider</p>

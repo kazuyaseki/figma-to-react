@@ -1,10 +1,20 @@
-import { trim } from 'lodash'
+import { is } from 'immer/dist/internal'
+import { isString, trim } from 'lodash'
 
 export function getConvertedValue(value: string) {
   if (isNotANumber(value)) {
     return value
   }
   return Number(value)
+}
+
+export function isHex(value: any) {
+  if (isString(value)) {
+    const hexValueToEvaluate = value.length > 7 ? value.substring(0, 7) : value
+    const reg = /^#[0-9A-F]{6}$/i
+    return reg.test(hexValueToEvaluate)
+  }
+  return false
 }
 
 export function isNotANumber(value: string) {

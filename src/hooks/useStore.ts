@@ -18,6 +18,22 @@ export const useStore = create((set: any, get: any) => ({
       designTokensGroups: [...state.designTokensGroups, { id: state.designTokensGroupsCounter, groupName }],
       designTokensGroupsCounter: state.designTokensGroupsCounter + 1
     })),
+  deleteToken: (id: any) =>
+    set((state: any) => {
+      const designToken = state.designTokens.find((designToken: any) => designToken.id === id)
+      const index = state.designTokens.indexOf(designToken)
+      return {
+        designTokens: [...state.designTokens.slice(0, index), ...state.designTokens.slice(index + 1)]
+      }
+    }),
+  deleteTokenGroup: (id: any) =>
+    set((state: any) => {
+      const designTokenGroup = state.designTokensGroups.find((designTokenGroup: any) => designTokenGroup.id === id)
+      const index = state.designTokensGroups.indexOf(designTokenGroup)
+      return {
+        designTokensGroups: [...state.designTokensGroups.slice(0, index), ...state.designTokensGroups.slice(index + 1)]
+      }
+    }),
   getDesignTokensByGroup: (groupName: string) => {
     const designTokens = get().designTokens
     const designTokensByGroup = designTokens.filter((designToken: any) => designToken.tokenGroup === groupName)
@@ -48,27 +64,16 @@ export const useStore = create((set: any, get: any) => ({
     const property = properties.find((currentProperty: any) => propertyName === currentProperty.id)
     return property
   },
+  getPropertiesByLinkedToken: (linkedToken: string) => {
+    const properties = get().properties
+    const propertiesByLinkedToken = properties.filter((property: any) => property.linkedToken === linkedToken)
+    return propertiesByLinkedToken
+  },
   getPropertiesByNodeId: (nodeId: string) => {
     const properties = get().properties
     const propertiesByNodeId = properties.filter((property: any) => property.nodeId === nodeId)
     return propertiesByNodeId
   },
-  deleteToken: (id: any) =>
-    set((state: any) => {
-      const designToken = state.designTokens.find((designToken: any) => designToken.id === id)
-      const index = state.designTokens.indexOf(designToken)
-      return {
-        designTokens: [...state.designTokens.slice(0, index), ...state.designTokens.slice(index + 1)]
-      }
-    }),
-  deleteTokenGroup: (id: any) =>
-    set((state: any) => {
-      const designTokenGroup = state.designTokensGroups.find((designTokenGroup: any) => designTokenGroup.id === id)
-      const index = state.designTokensGroups.indexOf(designTokenGroup)
-      return {
-        designTokensGroups: [...state.designTokensGroups.slice(0, index), ...state.designTokensGroups.slice(index + 1)]
-      }
-    }),
   setDesignTokens: (designTokens: any, designTokensCounter: number) =>
     set((state: any) => ({
       designTokens,
