@@ -6,5 +6,6 @@ export type Store = {
   designTokensCounter?: number
   designTokensGroups?: DesignTokenGroup[]
   designTokensGroupsCounter?: number
+  nodes?: any[]
   properties?: any[]
 }

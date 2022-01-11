@@ -17,17 +17,17 @@ const figmaDocument = figma.root
 let selectedNodes = figma.currentPage.selection
 
 function init() {
-  figma.showUI(__html__, { width: 640, height: 1080 })
+  const sharedPluginData = getSharedPluginData()
+  updateNodes(sharedPluginData)
+  updateTokensFromFigmaStyles(sharedPluginData)
 
-  //  figmaDocument.setSharedPluginData('ftrn', 'properties', '[]')
+  figma.showUI(__html__, { width: 640, height: 1080 })
 
   if (selectedNodes.length > 1) {
     figma.notify('Figma To React Native - Please select only 1 node')
     figma.closePlugin()
   } else {
     getProviderSettings().then((providerSettings) => {
-      const sharedPluginData = getSharedPluginData()
-      updateTokensFromFigmaStyles(sharedPluginData)
       figma.ui.postMessage({ providerSettings, nodeProperties: {}, sharedPluginData })
       if (selectedNodes.length === 1) {
         generate(selectedNodes[0], {})
@@ -48,6 +48,9 @@ figma.ui.onmessage = (msg: messageTypes) => {
   } else if (msg.type === 'update-user-component-settings') {
     figma.clientStorage.setAsync(STORAGE_KEYS.USER_COMPONENT_SETTINGS_KEY, msg.userComponentSettings)
     generate(selectedNodes[0], {})
+  } else if (msg.type === 'update-all-linked-properties') {
+    figma.clientStorage.setAsync(STORAGE_KEYS.UPDATE_ALL_LINKED_PROPERTIES_KEY, msg.linkedProperties)
+    updateAllLinkedProperties(msg.linkedProperties)
   } else if (msg.type === 'update-node-properties') {
     figma.clientStorage.setAsync(STORAGE_KEYS.UPDATE_NODE_PROPERTIES_KEY, msg.nodeProperties)
     updateNode(selectedNodes[0], msg.nodeProperties)
@@ -73,6 +76,8 @@ figma.on('selectionchange', () => {
     figma.notify('Figma to React Native - Please select only 1 node')
   } else if (selectedNodes.length === 0) {
     const sharedPluginData = getSharedPluginData()
+    updateNodes(sharedPluginData)
+    updateTokensFromFigmaStyles(sharedPluginData)
     figma.ui.postMessage({ nodeProperties: {}, sharedPluginData })
   } else {
     generate(selectedNodes[0], {})
@@ -80,6 +85,10 @@ figma.on('selectionchange', () => {
 })
 
 async function generate(node: SceneNode, config: { cssStyle?: CssStyle; unitType?: UnitType }) {
+  if (!node) {
+    return
+  }
+
   let cssStyle = config.cssStyle
   if (!cssStyle) {
     cssStyle = await figma.clientStorage.getAsync(STORAGE_KEYS.CSS_STYLE_KEY)
@@ -103,6 +112,8 @@ async function generate(node: SceneNode, config: { cssStyle?: CssStyle; unitType
   const textCount = new TextCount()
 
   const sharedPluginData = getSharedPluginData()
+  updateNodes(sharedPluginData)
+  updateTokensFromFigmaStyles(sharedPluginData)
 
   const originalTagTree = buildTagTree(node, unitType, textCount)
   if (originalTagTree === null) {
@@ -124,6 +135,46 @@ async function getProviderSettings() {
   return providerSettings
 }
 
+function updateAllLinkedProperties(linkedProperties: any) {
+  for (let index = 0; index < linkedProperties.length; index++) {
+    const figmaNodes = figmaDocument.findAll((node) => node.name === linkedProperties[index].nodeName)
+    figmaNodes.forEach((node: PageNode | SceneNode) => {
+      const figmaNodePage = getNodePage(node)
+      if (figmaNodePage.name === linkedProperties[index].nodePage && node.type !== 'PAGE') {
+        const propertyName = linkedProperties[index]['propertyName']
+        const newPropertyObject: any = {}
+        newPropertyObject[propertyName] = linkedProperties[index].propertyValue
+        updateNode(node, newPropertyObject)
+      }
+    })
+  }
+}
+
+function updateNodes(sharedPluginData: Store) {
+  const properties = sharedPluginData.properties
+  const nodesInfos: any = []
+  properties?.forEach((property: any) => {
+    const figmaNode = figmaDocument.findOne((node) => node.id === property.nodeId)
+    if (figmaNode) {
+      const figmaNodePage = getNodePage(figmaNode)
+      const index = nodesInfos.findIndex((currentNode: any) => currentNode.id === property.nodeId)
+      const nodeInfo = {
+        id: figmaNode.id,
+        name: figmaNode.name,
+        page: figmaNodePage.name,
+        type: figmaNode.type
+      }
+      if (index === -1) {
+        nodesInfos.push(nodeInfo)
+      } else {
+        nodesInfos[index] = nodeInfo
+      }
+    }
+  })
+
+  sharedPluginData.nodes = nodesInfos
+}
+
 function updateTokensFromFigmaStyles(sharedPluginData: Store) {
   updateTextsTokensFromFigmaStyles(sharedPluginData, figma.getLocalTextStyles())
   updateGridsTokensFromFigmaStyles(sharedPluginData, figma.getLocalGridStyles())
@@ -131,21 +182,27 @@ function updateTokensFromFigmaStyles(sharedPluginData: Store) {
   updateColorsTokensFromFigmaStyles(sharedPluginData, figma.getLocalPaintStyles())
 }
 
+function getNodePage(node: any) {
+  while (node && node.type !== 'PAGE') {
+    node = node.parent
+  }
+  return node
+}
+
 function getSharedPluginData() {
   const designTokens = figmaDocument.getSharedPluginData('ftrn', 'designTokens')
   const designTokensCounter = figmaDocument.getSharedPluginData('ftrn', 'designTokensCounter')
   const designTokensGroups = figmaDocument.getSharedPluginData('ftrn', 'designTokensGroups')
   const designTokensGroupsCounter = figmaDocument.getSharedPluginData('ftrn', 'designTokensGroupsCounter')
+  const nodes = figmaDocument.getSharedPluginData('ftrn', 'nodes')
   const properties = figmaDocument.getSharedPluginData('ftrn', 'properties')
-
-  console.log('getSharedPluginData properties')
-  console.log(properties)
 
   const sharedPluginData: Store = {
     designTokens: designTokens ? JSON.parse(designTokens) : [],
     designTokensCounter: Number(designTokensCounter),
     designTokensGroups: designTokensGroups ? JSON.parse(designTokensGroups) : [],
     designTokensGroupsCounter: Number(designTokensGroupsCounter),
+    nodes: nodes ? JSON.parse(nodes) : [],
     properties: properties ? JSON.parse(properties) : []
   }
 

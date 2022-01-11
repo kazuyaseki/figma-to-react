@@ -8,6 +8,7 @@ import { useStore } from '../hooks/useStore'
 import { isFigmaStyleGroup } from '../model/FigmaStyleGroup'
 import { Store } from '../model/Store'
 import { isHex, isNotANumber } from '../utils/unitTypeUtils'
+import { messageTypes } from '../model/messagesTypes'
 
 const designTokensTexts = {
   noRowsLabel: 'No Design Tokens',
@@ -31,16 +32,19 @@ export const renderDesignTokensTab = (parent: any) => {
   const [selectionModel, setSelectionModel] = React.useState([])
   const [groupSelectionModel, setGroupSelectionModel] = React.useState([])
 
-  const addDesignToken = useStore((state) => state.addDesignToken)
-  const addDesignTokenGroup = useStore((state) => state.addDesignTokenGroup)
   const designTokens = useStore((state) => state.designTokens)
   const designTokensCounter = useStore((state) => state.designTokensCounter)
   const designTokensGroups = useStore((state) => state.designTokensGroups)
   const designTokensGroupsCounter = useStore((state) => state.designTokensGroupsCounter)
-  const getDesignTokenById = useStore((state) => state.getDesignTokenById)
-  const getPropertiesByLinkedToken = useStore((state) => state.getPropertiesByLinkedToken)
+  const nodes = useStore((state) => state.nodes)
+
+  const addDesignToken = useStore((state) => state.addDesignToken)
+  const addDesignTokenGroup = useStore((state) => state.addDesignTokenGroup)
   const deleteToken = useStore((state) => state.deleteToken)
   const deleteTokenGroup = useStore((state) => state.deleteTokenGroup)
+  const getDesignTokenById = useStore((state) => state.getDesignTokenById)
+  const getNodeById = useStore((state) => state.getNodeById)
+  const getPropertiesByLinkedToken = useStore((state) => state.getPropertiesByLinkedToken)
   const updateDesignToken = useStore((state) => state.updateDesignToken)
   const updateDesignTokenGroup = useStore((state) => state.updateDesignTokenGroup)
 
@@ -49,11 +53,12 @@ export const renderDesignTokensTab = (parent: any) => {
       designTokens,
       designTokensCounter,
       designTokensGroups,
-      designTokensGroupsCounter
+      designTokensGroupsCounter,
+      nodes
     }
 
     updateSharedPluginData(parent, updatedData)
-  }, [designTokens, designTokensCounter, designTokensGroups, designTokensGroupsCounter])
+  }, [designTokens, designTokensCounter, designTokensGroups, designTokensGroupsCounter, nodes])
 
   React.useEffect(() => {
     const objectKeys = Object.keys(editDesignTokensRowsModel)
@@ -144,9 +149,27 @@ export const renderDesignTokensTab = (parent: any) => {
   ]
 
   const inspectTokenColumns: GridColDef[] = [
-    { field: 'nodeId', headerName: 'Node Id', width: 180, editable: false },
-    { field: 'propertyName', headerName: 'Property Name', width: 180, editable: false },
-    { field: 'propertyValue', headerName: 'Property Value', width: 180, editable: false }
+    { field: 'nodeName', headerName: 'Node Name', width: 150, editable: false },
+    { field: 'nodePage', headerName: 'Node Page', width: 120, editable: false },
+    { field: 'propertyName', headerName: 'Property Name', width: 150, editable: false },
+    {
+      field: 'propertyValue',
+      headerName: 'Property Value',
+      editable: false,
+      flex: 1,
+      renderCell: (params: GridRenderCellParams) => {
+        const currentPropertyValue = String(params.row.propertyValue)
+        const currentDesignToken = getDesignTokenById(selectionModel[0])
+        if (currentPropertyValue !== currentDesignToken.tokenValue) {
+          return (
+            <div>
+              <span style={{ fontWeight: 'bold' }}>{currentDesignToken.tokenValue}</span> ({currentPropertyValue})
+            </div>
+          )
+        }
+        return <div>{currentPropertyValue}</div>
+      }
+    }
   ]
 
   const getAutocompleteValue = (params: any) => {
@@ -191,17 +214,35 @@ export const renderDesignTokensTab = (parent: any) => {
     addDesignToken(tokenName, 10)
   }
 
-  const onPressDeleteToken = () => {
-    deleteToken(selectionModel[0])
-  }
-
   const onPressAddATokenGroup = () => {
     const groupName = 'exampleGroup' + designTokensGroupsCounter
     addDesignTokenGroup(groupName)
   }
 
+  const onPressDeleteToken = () => {
+    deleteToken(selectionModel[0])
+  }
+
   const onPressDeleteTokenGroup = () => {
     deleteTokenGroup(groupSelectionModel[0])
+  }
+
+  const onPressUpdateAllLinkedProperties = () => {
+    const selectedDesignToken = getDesignTokenById(selectionModel[0])
+
+    console.log('propertiesLinkedToSelectedDesignToken:')
+    console.log(propertiesLinkedToSelectedDesignToken)
+
+    for (let index = 0; index < propertiesLinkedToSelectedDesignToken.length; index++) {
+      console.log('element.propertyValue: ')
+      console.log(propertiesLinkedToSelectedDesignToken[index].propertyValue)
+      console.log('selectedDesignToken.tokenValue: ')
+      console.log(selectedDesignToken.tokenValue)
+      propertiesLinkedToSelectedDesignToken[index].propertyValue = selectedDesignToken.tokenValue
+    }
+
+    const msg: messageTypes = { type: 'update-all-linked-properties', linkedProperties: propertiesLinkedToSelectedDesignToken }
+    parent.postMessage({ pluginMessage: msg }, '*')
   }
 
   let selectedDesignToken = undefined
@@ -216,9 +257,11 @@ export const renderDesignTokensTab = (parent: any) => {
     const propertiesByLinkedToken = getPropertiesByLinkedToken(selectedDesignToken.tokenName)
     let propertiesCounter = 0
     propertiesByLinkedToken.forEach((property: any) => {
+      const nodeInfo = getNodeById(property.nodeId)
       propertiesLinkedToSelectedDesignToken.push({
         id: propertiesCounter,
-        nodeId: property.nodeId,
+        nodeName: nodeInfo?.name || property.nodeId,
+        nodePage: nodeInfo?.page || '',
         propertyName: property.id,
         propertyValue: property.value
       })
@@ -259,7 +302,7 @@ export const renderDesignTokensTab = (parent: any) => {
             <DataGrid columns={inspectTokenColumns} hideFooter localeText={inspectTokenTexts} rows={propertiesLinkedToSelectedDesignToken} rowsPerPageOptions={[100]} />
           </div>
           <div style={{ display: 'flex', flex: 1, flexDirection: 'row', justifyContent: 'center', margin: '20px 0px' }}>
-            <Button disabled={propertiesLinkedToSelectedDesignToken?.length === 0} variant="outlined" onClick={onPressAddATokenGroup}>
+            <Button disabled={propertiesLinkedToSelectedDesignToken?.length === 0} variant="outlined" onClick={onPressUpdateAllLinkedProperties}>
               UPDATE ALL LINKED PROPERTIES
             </Button>
           </div>

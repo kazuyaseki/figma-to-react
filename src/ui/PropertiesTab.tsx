@@ -21,11 +21,6 @@ export const renderPropertiesTab = (nodeProperties: any, parent: any) => {
   const updateProperty = useStore((state) => state.updateProperty)
 
   React.useEffect(() => {
-    console.log('PropertiesTab useEffect() properties')
-    console.log(properties)
-  }, [properties])
-
-  React.useEffect(() => {
     updateProperties()
   }, [designTokens, nodeProperties])
 
@@ -38,8 +33,6 @@ export const renderPropertiesTab = (nodeProperties: any, parent: any) => {
       renderCell: (params: GridRenderCellParams) => {
         const currentKey = params.row.id
         const currentValueString = String(params.row.value)
-        console.log('renderCell() nodeProperties:')
-        console.log(nodeProperties)
         if (currentValueString !== String(nodeProperties[currentKey])) {
           return (
             <div>
@@ -108,15 +101,11 @@ export const renderPropertiesTab = (nodeProperties: any, parent: any) => {
   }
 
   const updateProperties = () => {
-    console.log('PropertiesTab.tsx updateProperties()')
-
     const nodeId = nodeProperties['id']
     Object.keys(nodeProperties).map((key) => {
       const value = nodeProperties && nodeProperties[key as keyof unknown]
       if (key !== 'id' && key !== 'name') {
         const designToken = getLinkedToken(nodeId, key)
-        console.log('key ' + key + ' value ' + value + ' nodeId ' + nodeId + ' linkedToken: ')
-        console.log(designToken)
         const newValue = designToken?.tokenValue || value
         updateProperty(nodeId, key, newValue)
 

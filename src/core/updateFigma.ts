@@ -1,3 +1,5 @@
+import { getConvertedValue } from '../utils/unitTypeUtils'
+
 export function getUpdateableProperties(node: SceneNode) {
   let updateableProperties = {
     id: node.id,
@@ -53,7 +55,7 @@ function getUpdatedPluginProperties(node: SceneNode, properties: any) {
       const newPropertyValue = value
       const originalPropertyValue = (node as any)[key]
       if (newPropertyValue !== originalPropertyValue) {
-        updatedProperties[key] = newPropertyValue
+        updatedProperties[key] = getConvertedValue(newPropertyValue)
       }
     }
   })

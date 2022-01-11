@@ -6,6 +6,7 @@ export const useStore = create((set: any, get: any) => ({
   designTokensGroupsCounter: 0,
   designTokens: [],
   designTokensGroups: [],
+  nodes: [],
   properties: [],
 
   addDesignToken: (tokenName: string, tokenValue: any) =>
@@ -59,6 +60,11 @@ export const useStore = create((set: any, get: any) => ({
     }
     return undefined
   },
+  getNodeById: (nodeId: string) => {
+    const nodes = get().nodes
+    const nodeById = nodes.find((node: any) => node.id === nodeId)
+    return nodeById
+  },
   getPropertyByName: (nodeId: string, propertyName: string) => {
     const properties = get().getPropertiesByNodeId(nodeId)
     const property = properties.find((currentProperty: any) => propertyName === currentProperty.id)
@@ -83,6 +89,10 @@ export const useStore = create((set: any, get: any) => ({
     set((state: any) => ({
       designTokensGroups,
       designTokensGroupsCounter
+    })),
+  setNodes: (nodes: any) =>
+    set((state: any) => ({
+      nodes
     })),
   setProperties: (properties: any) =>
     set((state: any) => ({

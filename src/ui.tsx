@@ -75,6 +75,7 @@ const App: React.VFC = () => {
 
   const setDesignTokens = useStore((state) => state.setDesignTokens)
   const setDesignTokensGroups = useStore((state) => state.setDesignTokensGroups)
+  const setNodes = useStore((state) => state.setNodes)
   const setProperties = useStore((state) => state.setProperties)
 
   // set initial values taken from figma storage
@@ -89,9 +90,6 @@ const App: React.VFC = () => {
 
       const pluginMessageProviderSettings = event.data.pluginMessage.providerSettings
 
-      console.log('pluginMessageProviderSettings')
-      console.log(pluginMessageProviderSettings)
-
       if (pluginMessageProviderSettings) {
         setProviderSettings(pluginMessageProviderSettings)
       }
@@ -105,7 +103,7 @@ const App: React.VFC = () => {
   }, [])
 
   const updateStoreFromSharedPluginData = (sharedPluginData: Store) => {
-    const { designTokens, designTokensCounter, designTokensGroups, designTokensGroupsCounter, properties } = sharedPluginData
+    const { designTokens, designTokensCounter, designTokensGroups, designTokensGroupsCounter, nodes, properties } = sharedPluginData
 
     if (designTokens && designTokensCounter) {
       setDesignTokens(designTokens, designTokensCounter)
@@ -113,6 +111,10 @@ const App: React.VFC = () => {
     if (designTokensGroups && designTokensGroupsCounter) {
       setDesignTokensGroups(designTokensGroups, designTokensGroupsCounter)
     }
+    if (!_.isEmpty(nodes)) {
+      setNodes(nodes)
+    }
+
     if (properties) {
       setProperties(properties)
     }
