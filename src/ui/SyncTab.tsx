@@ -4,26 +4,26 @@ import styles from '../ui.css'
 import { useStore } from '../hooks/useStore'
 import { messageTypes } from '../model/messagesTypes'
 import Spacer from './Spacer'
-import { buildDesignTokensJson } from '../core/buildDesignTokensJson'
+import { buildDesignTokensJson, buildRestyleThemeObject } from '../core/buildDesignTokensJson'
 import { Autocomplete, Button, TextField } from '@material-ui/core'
 
 export const renderSyncTab = (storedProviderSettings: any, parent: any) => {
   const [branchField, setBranchField] = React.useState('')
-  const [code, setCode] = React.useState('')
+  const [designTokensCode, setDesignTokensCode] = React.useState('')
   const [repositoryField, setRepositoryField] = React.useState('')
+  const [restyleThemeCode, setRestyleThemeCode] = React.useState('')
   const [tokenField, setTokenField] = React.useState('')
   const [usernameField, setUsernameField] = React.useState('')
   const [workflowField, setWorkflowField] = React.useState('')
 
-  const textRef = React.useRef<HTMLTextAreaElement>(null)
+  const designTokensTextRef = React.useRef<HTMLTextAreaElement>(null)
+  const restyleThemeTextRef = React.useRef<HTMLTextAreaElement>(null)
 
   const designTokens = useStore((state) => state.designTokens)
   const designTokensGroups = useStore((state) => state.designTokensGroups)
   const getDesignTokensByGroup = useStore((state) => state.getDesignTokensByGroup)
 
   React.useEffect(() => {
-    console.log('SyncTab useEffect providerSettings')
-    console.log(storedProviderSettings)
     if (!_.isEmpty(storedProviderSettings)) {
       const { branch, repo, token, user, workflow } = storedProviderSettings
       setBranchField(branch)
@@ -36,13 +36,34 @@ export const renderSyncTab = (storedProviderSettings: any, parent: any) => {
 
   React.useEffect(() => {
     const designTokensJson = buildDesignTokensJson(designTokens, designTokensGroups, getDesignTokensByGroup)
-    const codeStr = JSON.stringify(designTokensJson, null, 2)
-    setCode(codeStr)
+    const designTokensCodeStr = JSON.stringify(designTokensJson, null, 2)
+    const restyleThemeObject = buildRestyleThemeObject(designTokensJson)
+    const restyleThemeObjectStr = JSON.stringify(restyleThemeObject, null, 2).replaceAll('"', '').trim()
+    const restyleThemeCodeStr = `import tokens from './tokens.json';
+import { createTheme } from '@shopify/restyle';
+
+const theme = createTheme(${restyleThemeObjectStr});
+
+export type Theme = typeof theme;
+export default theme;
+`
+
+    setDesignTokensCode(designTokensCodeStr)
+    setRestyleThemeCode(restyleThemeCodeStr)
   }, [designTokens, designTokensGroups])
 
-  const onPressCopyToClipboard = () => {
-    if (textRef.current) {
-      textRef.current.select()
+  const onPressCopyDesignTokensToClipboard = () => {
+    if (designTokensTextRef.current) {
+      designTokensTextRef.current.select()
+      document.execCommand('copy')
+      const msg: messageTypes = { type: 'notify-copy-success' }
+      parent.postMessage(msg, '*')
+    }
+  }
+
+  const onPressCopyRestyleThemeToClipboard = () => {
+    if (restyleThemeTextRef.current) {
+      restyleThemeTextRef.current.select()
       document.execCommand('copy')
       const msg: messageTypes = { type: 'notify-copy-success' }
       parent.postMessage(msg, '*')
@@ -51,9 +72,18 @@ export const renderSyncTab = (storedProviderSettings: any, parent: any) => {
 
   const onPressExportToJson = () => {
     const element = document.createElement('a')
-    const textFile = new Blob([syntaxHighlightedCode], { type: 'text/plain' }) //pass data from localStorage API to blob
+    const textFile = new Blob([syntaxHighlightedDesignTokensCode], { type: 'text/plain' }) //pass data from localStorage API to blob
     element.href = URL.createObjectURL(textFile)
     element.download = 'tokens.json'
+    document.body.appendChild(element)
+    element.click()
+  }
+
+  const onPressExportToTypescript = () => {
+    const element = document.createElement('a')
+    const textFile = new Blob([syntaxHighlightedRestyleThemeCode], { type: 'text/plain' }) //pass data from localStorage API to blob
+    element.href = URL.createObjectURL(textFile)
+    element.download = 'theme.ts'
     document.body.appendChild(element)
     element.click()
   }
@@ -71,7 +101,8 @@ export const renderSyncTab = (storedProviderSettings: any, parent: any) => {
       ref: branch,
       inputs: {
         branch,
-        message: syntaxHighlightedCode
+        tokens: syntaxHighlightedDesignTokensCode,
+        theme: syntaxHighlightedRestyleThemeCode
       }
     }
 
@@ -87,7 +118,7 @@ export const renderSyncTab = (storedProviderSettings: any, parent: any) => {
     })
       .then(async (res) => {
         const text = await res.text()
-        if (res.status >= 200 && res.status < 300) alert('Design Tokens successfully sent to provider!')
+        if (res.status >= 200 && res.status < 300) alert('Generated Files successfully sent to provider!')
         else alert(text)
       })
       .catch((error) => alert(error))
@@ -114,7 +145,8 @@ export const renderSyncTab = (storedProviderSettings: any, parent: any) => {
     parent.postMessage({ pluginMessage: msg }, '*')
   }
 
-  const syntaxHighlightedCode = React.useMemo(() => code, [code])
+  const syntaxHighlightedDesignTokensCode = React.useMemo(() => designTokensCode, [designTokensCode])
+  const syntaxHighlightedRestyleThemeCode = React.useMemo(() => restyleThemeCode, [restyleThemeCode])
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', margin: '20px' }}>
@@ -127,13 +159,13 @@ export const renderSyncTab = (storedProviderSettings: any, parent: any) => {
         ) : (
           <div style={{ margin: '20px 0px' }}>
             <div>
-              <textarea className={styles.textareaForClipboard} ref={textRef} value={code} readOnly />
-              <p className={styles.generatedCode} dangerouslySetInnerHTML={{ __html: syntaxHighlightedCode }} />
+              <textarea className={styles.textareaForClipboard} ref={designTokensTextRef} value={designTokensCode} readOnly />
+              <p className={styles.generatedCode} dangerouslySetInnerHTML={{ __html: syntaxHighlightedDesignTokensCode }} />
 
               <Spacer axis="vertical" size={12} />
 
               <div style={{ display: 'flex', gap: '20px', justifyContent: 'center', marginTop: '20px' }}>
-                <Button variant="outlined" onClick={onPressCopyToClipboard}>
+                <Button variant="outlined" onClick={onPressCopyDesignTokensToClipboard}>
                   COPY TO CLIPBOARD
                 </Button>
                 <Button variant="outlined" onClick={onPressExportToJson}>
@@ -145,7 +177,33 @@ export const renderSyncTab = (storedProviderSettings: any, parent: any) => {
         )}
       </div>
       <div className={styles.container} style={{ margin: '20px 0px' }}>
-        <p style={{ alignSelf: 'center', fontWeight: 'bold', textAlign: 'center' }}>Design Tokens (Provider Configuration)</p>
+        <p style={{ alignSelf: 'center', fontWeight: 'bold', textAlign: 'center' }}>Restyle Theme (Generated JS)</p>
+        {_.isEmpty(syntaxHighlightedRestyleThemeCode) ? (
+          <div style={{ margin: '20px 0px' }}>
+            <p className={styles.generatedCode}>// No Restyle Theme Code</p>
+          </div>
+        ) : (
+          <div style={{ margin: '20px 0px' }}>
+            <div>
+              <textarea className={styles.textareaForClipboard} ref={restyleThemeTextRef} value={restyleThemeCode} readOnly />
+              <p className={styles.generatedCode} dangerouslySetInnerHTML={{ __html: syntaxHighlightedRestyleThemeCode }} />
+
+              <Spacer axis="vertical" size={12} />
+
+              <div style={{ display: 'flex', gap: '20px', justifyContent: 'center', marginTop: '20px' }}>
+                <Button variant="outlined" onClick={onPressCopyRestyleThemeToClipboard}>
+                  COPY TO CLIPBOARD
+                </Button>
+                <Button variant="outlined" onClick={onPressExportToTypescript}>
+                  EXPORT TO TYPESCRIPT
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+      <div className={styles.container} style={{ margin: '20px 0px' }}>
+        <p style={{ alignSelf: 'center', fontWeight: 'bold', textAlign: 'center' }}>Provider Configuration</p>
         <div style={{ margin: '20px 0px' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
             <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -240,10 +298,10 @@ export const renderSyncTab = (storedProviderSettings: any, parent: any) => {
             </div>
             <div style={{ display: 'flex', gap: '20px', justifyContent: 'center' }}>
               <Button variant="outlined" onClick={onPressStoreSettings}>
-                STORE SETTINGS
+                SAVE
               </Button>
               <Button variant="outlined" onClick={onPressClearSettings}>
-                CLEAR SETTINGS
+                CLEAR
               </Button>
               <Button variant="contained" onClick={onPressSendToProvider}>
                 SEND TO PROVIDER

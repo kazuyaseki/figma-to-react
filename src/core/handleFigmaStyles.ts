@@ -1,20 +1,16 @@
 import { DesignToken } from '../model/DesignToken'
 import { DesignTokenGroup } from '../model/DesignTokenGroup'
+import { COLOR_STYLES_GROUP_NAME, EFFECT_STYLES_GROUP_NAME, GRID_STYLES_GROUP_NAME, TEXT_STYLES_GROUP_NAME } from '../model/FigmaStyleGroup'
 import { Store } from '../model/Store'
 import { rgbaToHex } from '../utils/unitTypeUtils'
 
-const GROUP_COLORS = 'FigmaColors'
-const GROUP_EFFECTS = 'FigmaEffects'
-const GROUP_GRIDS = 'FigmaGrids'
-const GROUP_TEXTS = 'FigmaTexts'
-
 export function updateColorsTokensFromFigmaStyles(sharedPluginData: Store, localPaintStyles: PaintStyle[]) {
   if (localPaintStyles.length > 0) {
-    const figmaColorsGroup = sharedPluginData.designTokensGroups?.find((designTokenGroup: DesignTokenGroup) => designTokenGroup.groupName === GROUP_COLORS)
+    const figmaColorsGroup = sharedPluginData.designTokensGroups?.find((designTokenGroup: DesignTokenGroup) => designTokenGroup.groupName === COLOR_STYLES_GROUP_NAME)
 
     if (!figmaColorsGroup && sharedPluginData.designTokensGroupsCounter !== undefined) {
       // Add new group
-      sharedPluginData.designTokensGroups?.unshift({ id: sharedPluginData.designTokensGroupsCounter, groupName: GROUP_COLORS })
+      sharedPluginData.designTokensGroups?.unshift({ id: sharedPluginData.designTokensGroupsCounter, groupName: COLOR_STYLES_GROUP_NAME })
       sharedPluginData.designTokensGroupsCounter += 1
     }
 
@@ -30,7 +26,9 @@ export function updateColorsTokensFromFigmaStyles(sharedPluginData: Store, local
           const blueValue = Math.floor(paint.color.b * 255)
           const opacityValue = paint.opacity?.toFixed(2) || 1.0
 
-          const figmaColorDesignToken = sharedPluginData.designTokens?.find((designToken: DesignToken) => designToken.tokenGroup === GROUP_COLORS && designToken.id === colorId)
+          const figmaColorDesignToken = sharedPluginData.designTokens?.find(
+            (designToken: DesignToken) => designToken.tokenGroup === COLOR_STYLES_GROUP_NAME && designToken.id === colorId
+          )
 
           const rgbaString = `rgba(${redValue}, ${greenValue}, ${blueValue}, ${opacityValue})`
 
@@ -43,7 +41,7 @@ export function updateColorsTokensFromFigmaStyles(sharedPluginData: Store, local
               id: colorId,
               tokenName: colorName,
               tokenValue: rgbaToHex(rgbaString).toUpperCase(),
-              tokenGroup: GROUP_COLORS
+              tokenGroup: COLOR_STYLES_GROUP_NAME
             })
             if (sharedPluginData.designTokensCounter !== undefined) {
               sharedPluginData.designTokensCounter += 1
@@ -57,11 +55,11 @@ export function updateColorsTokensFromFigmaStyles(sharedPluginData: Store, local
 
 export function updateEffectsTokensFromFigmaStyles(sharedPluginData: Store, localEffectStyles: EffectStyle[]) {
   if (localEffectStyles.length > 0) {
-    const figmaEffectsGroup = sharedPluginData.designTokensGroups?.find((designTokenGroup: DesignTokenGroup) => designTokenGroup.groupName === GROUP_EFFECTS)
+    const figmaEffectsGroup = sharedPluginData.designTokensGroups?.find((designTokenGroup: DesignTokenGroup) => designTokenGroup.groupName === EFFECT_STYLES_GROUP_NAME)
 
     if (!figmaEffectsGroup && sharedPluginData.designTokensGroupsCounter !== undefined) {
       // Add new group
-      sharedPluginData.designTokensGroups?.unshift({ id: sharedPluginData.designTokensGroupsCounter, groupName: GROUP_EFFECTS })
+      sharedPluginData.designTokensGroups?.unshift({ id: sharedPluginData.designTokensGroupsCounter, groupName: EFFECT_STYLES_GROUP_NAME })
       sharedPluginData.designTokensGroupsCounter += 1
     }
 
@@ -87,7 +85,9 @@ export function updateEffectsTokensFromFigmaStyles(sharedPluginData: Store, loca
             effectValue = { ...effectValue, color: effectColor }
           }
 
-          const figmaEffectDesignToken = sharedPluginData.designTokens?.find((designToken: DesignToken) => designToken.tokenGroup === GROUP_EFFECTS && designToken.id === effectId)
+          const figmaEffectDesignToken = sharedPluginData.designTokens?.find(
+            (designToken: DesignToken) => designToken.tokenGroup === EFFECT_STYLES_GROUP_NAME && designToken.id === effectId
+          )
 
           if (figmaEffectDesignToken) {
             figmaEffectDesignToken.tokenName = effectName
@@ -98,7 +98,7 @@ export function updateEffectsTokensFromFigmaStyles(sharedPluginData: Store, loca
               id: effectId,
               tokenName: effectName,
               tokenValue: effectValue,
-              tokenGroup: GROUP_EFFECTS
+              tokenGroup: EFFECT_STYLES_GROUP_NAME
             })
             if (sharedPluginData.designTokensCounter !== undefined) {
               sharedPluginData.designTokensCounter += 1
@@ -112,11 +112,11 @@ export function updateEffectsTokensFromFigmaStyles(sharedPluginData: Store, loca
 
 export function updateGridsTokensFromFigmaStyles(sharedPluginData: Store, localGridStyles: GridStyle[]) {
   if (localGridStyles.length > 0) {
-    const figmaGridsGroup = sharedPluginData.designTokensGroups?.find((designTokenGroup: DesignTokenGroup) => designTokenGroup.groupName === GROUP_GRIDS)
+    const figmaGridsGroup = sharedPluginData.designTokensGroups?.find((designTokenGroup: DesignTokenGroup) => designTokenGroup.groupName === GRID_STYLES_GROUP_NAME)
 
     if (!figmaGridsGroup && sharedPluginData.designTokensGroupsCounter !== undefined) {
       // Add new group
-      sharedPluginData.designTokensGroups?.unshift({ id: sharedPluginData.designTokensGroupsCounter, groupName: GROUP_GRIDS })
+      sharedPluginData.designTokensGroups?.unshift({ id: sharedPluginData.designTokensGroupsCounter, groupName: GRID_STYLES_GROUP_NAME })
       sharedPluginData.designTokensGroupsCounter += 1
     }
 
@@ -134,7 +134,9 @@ export function updateGridsTokensFromFigmaStyles(sharedPluginData: Store, localG
             pattern: grid.pattern
           }
 
-          const figmaGridDesignToken = sharedPluginData.designTokens?.find((designToken: DesignToken) => designToken.tokenGroup === GROUP_GRIDS && designToken.id === gridId)
+          const figmaGridDesignToken = sharedPluginData.designTokens?.find(
+            (designToken: DesignToken) => designToken.tokenGroup === GRID_STYLES_GROUP_NAME && designToken.id === gridId
+          )
 
           if (figmaGridDesignToken) {
             figmaGridDesignToken.tokenName = gridName
@@ -145,7 +147,7 @@ export function updateGridsTokensFromFigmaStyles(sharedPluginData: Store, localG
               id: gridId,
               tokenName: gridName,
               tokenValue: gridValue,
-              tokenGroup: GROUP_GRIDS
+              tokenGroup: GRID_STYLES_GROUP_NAME
             })
             if (sharedPluginData.designTokensCounter !== undefined) {
               sharedPluginData.designTokensCounter += 1
@@ -159,11 +161,11 @@ export function updateGridsTokensFromFigmaStyles(sharedPluginData: Store, localG
 
 export function updateTextsTokensFromFigmaStyles(sharedPluginData: Store, localTextStyles: TextStyle[]) {
   if (localTextStyles.length > 0) {
-    const figmaTextsGroup = sharedPluginData.designTokensGroups?.find((designTokenGroup: DesignTokenGroup) => designTokenGroup.groupName === GROUP_TEXTS)
+    const figmaTextsGroup = sharedPluginData.designTokensGroups?.find((designTokenGroup: DesignTokenGroup) => designTokenGroup.groupName === TEXT_STYLES_GROUP_NAME)
 
     if (!figmaTextsGroup && sharedPluginData.designTokensGroupsCounter) {
       // Add new group
-      sharedPluginData.designTokensGroups?.unshift({ id: sharedPluginData.designTokensGroupsCounter, groupName: GROUP_TEXTS })
+      sharedPluginData.designTokensGroups?.unshift({ id: sharedPluginData.designTokensGroupsCounter, groupName: TEXT_STYLES_GROUP_NAME })
       sharedPluginData.designTokensGroupsCounter += 1
     }
 
@@ -177,7 +179,7 @@ export function updateTextsTokensFromFigmaStyles(sharedPluginData: Store, localT
         fontSize: textStyle.fontSize
       }
 
-      const figmaTextDesignToken = sharedPluginData.designTokens?.find((designToken: DesignToken) => designToken.tokenGroup === GROUP_TEXTS && designToken.id === textId)
+      const figmaTextDesignToken = sharedPluginData.designTokens?.find((designToken: DesignToken) => designToken.tokenGroup === TEXT_STYLES_GROUP_NAME && designToken.id === textId)
 
       if (figmaTextDesignToken) {
         figmaTextDesignToken.tokenName = textName
@@ -188,7 +190,7 @@ export function updateTextsTokensFromFigmaStyles(sharedPluginData: Store, localT
           id: textId,
           tokenName: textName,
           tokenValue: textValue,
-          tokenGroup: GROUP_TEXTS
+          tokenGroup: TEXT_STYLES_GROUP_NAME
         })
         if (sharedPluginData.designTokensCounter !== undefined) {
           sharedPluginData.designTokensCounter += 1
