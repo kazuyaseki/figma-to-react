@@ -7,8 +7,9 @@ import { updateSharedPluginData } from '../core/updateSharedPluginData'
 import { useStore } from '../hooks/useStore'
 import { isFigmaStyleGroup } from '../model/FigmaStyleGroup'
 import { Store } from '../model/Store'
-import { isHex, isNotANumber } from '../utils/unitTypeUtils'
+import { hexToRgb, isDarkColor, isHex, isNotANumber } from '../utils/unitTypeUtils'
 import { messageTypes } from '../model/messagesTypes'
+import { getFigmaObjectAsString } from '../utils/isImageNode'
 
 const designTokensTexts = {
   noRowsLabel: 'No Design Tokens',
@@ -93,14 +94,23 @@ export const renderDesignTokensTab = (parent: any) => {
           let result = ''
           Object.keys(tokenValue).map((key) => {
             const value = tokenValue && tokenValue[key as keyof unknown]
-            result += `${key}: ${value}\n`
+            if (_.isObject(value)) {
+              result += getFigmaObjectAsString(key, value)
+            } else {
+              result += `${key}: ${value}\n`
+            }
           })
-          return <div style={{ fontSize: '10px', lineHeight: '10px', whiteSpace: 'pre-line' }}>{result}</div>
+          return <div style={{ fontSize: '9px', lineHeight: '10px', whiteSpace: 'pre-line' }}>{result}</div>
         }
         if (isHex(tokenValue)) {
+          let textColor = 'black'
+          const rgbValue = hexToRgb(tokenValue)
+          if (rgbValue && isDarkColor(rgbValue)) {
+            textColor = 'white'
+          }
           return (
             <div>
-              <span style={{ backgroundColor: String(tokenValue) }}>{tokenValue}</span>
+              <span style={{ backgroundColor: String(tokenValue), color: textColor }}>{tokenValue}</span>
             </div>
           )
         }

@@ -1,7 +1,7 @@
 {
-  "name": "react-codegen",
-  "version": "1.0.0",
-  "description": "Your Figma plugin",
+  "name": "figma-to-react-native",
+  "version": "1.2.0",
+  "description": "Figma To React Native plugin",
   "main": "code.js",
   "scripts": {
     "dev": "webpack --mode=development --watch",

@@ -173,10 +173,18 @@ export function updateTextsTokensFromFigmaStyles(sharedPluginData: Store, localT
       const textId = textStyle.id
       const textName = textStyle.name
 
-      const textValue = {
+      const textValue: any = {
         fontFamily: textStyle.fontName.family,
         fontWeight: textStyle.fontName.style,
         fontSize: textStyle.fontSize
+      }
+
+      if (textStyle.lineHeight && textStyle.lineHeight.unit === 'PIXELS') {
+        textValue['lineHeight'] = textStyle.lineHeight.value
+      }
+
+      if (textStyle.letterSpacing && textStyle.letterSpacing.unit === 'PIXELS') {
+        textValue['letterSpacing'] = textStyle.letterSpacing.value
       }
 
       const figmaTextDesignToken = sharedPluginData.designTokens?.find((designToken: DesignToken) => designToken.tokenGroup === TEXT_STYLES_GROUP_NAME && designToken.id === textId)

@@ -1,5 +1,14 @@
 import { IMAGE_TAG_PREFIX } from './constants'
 
+export function getFigmaObjectAsString(objectKey: string, object: any) {
+  let result = ''
+  Object.keys(object).map((key) => {
+    const value = object && object[key as keyof unknown]
+    result += `${objectKey} ${key}: ${value}\n`
+  })
+  return result
+}
+
 export function getItemSpacing(node: SceneNode): number {
   if (node.type === 'FRAME' || node.type === 'INSTANCE' || node.type === 'COMPONENT') {
     if (node.layoutMode !== 'NONE') {

@@ -1,4 +1,3 @@
-import { is } from 'immer/dist/internal'
 import { isString, trim } from 'lodash'
 
 export function getConvertedValue(value: string) {
@@ -6,6 +5,14 @@ export function getConvertedValue(value: string) {
     return value
   }
   return Number(value)
+}
+
+export function isDarkColor(rgb: number[]) {
+  const brightness = Math.round((rgb[0] * 299 + rgb[1] * 587 + rgb[2] * 114) / 1000)
+  if (brightness > 125) {
+    return false
+  }
+  return true
 }
 
 export function isHex(value: any) {
@@ -47,4 +54,20 @@ export function rgbaToHex(rgba: string) {
   })
 
   return '#' + outParts.join('')
+}
+
+export function hexToRgb(hex: string) {
+  let hexMax6Digits = hex
+  if (hex.length > 7) {
+    hexMax6Digits = hex.substring(0, 7)
+  }
+
+  // Expand shorthand form (e.g. "03F") to full form (e.g. "0033FF")
+  const shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i
+  hexMax6Digits = hexMax6Digits.replace(shorthandRegex, function (m, r, g, b) {
+    return r + r + g + g + b + b
+  })
+
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hexMax6Digits)
+  return result ? [parseInt(result[1], 16), parseInt(result[2], 16), parseInt(result[3], 16)] : null
 }
