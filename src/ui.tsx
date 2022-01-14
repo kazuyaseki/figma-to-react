@@ -53,7 +53,7 @@ function insertSyntaxHighlightText(text: string) {
 
 const cssStyles: { value: CssStyle; label: string; disabled: boolean }[] = [
   { value: 'StyleSheet', label: 'StyleSheet', disabled: true },
-  { value: 'Restyle', label: 'Restyle', disabled: true },
+  { value: 'Restyle', label: 'Restyle', disabled: false },
   { value: 'styled-components', label: 'styled-components', disabled: false }
 ]
 

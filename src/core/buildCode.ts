@@ -79,18 +79,28 @@ function buildJsxString(tag: Tag, cssStyle: CssStyle, level: number) {
   if (!tag) {
     return ''
   }
-  const spaceString = buildSpaces(4, level)
-  const hasChildren = tag.children.length > 0
 
-  const tagName = getTagName(tag, cssStyle)
-  const className = getClassName(tag, cssStyle)
-  const properties = tag.properties.map(buildPropertyString).join('')
-
-  const openingTag = `${spaceString}<${tagName}${className}${properties}${hasChildren || tag.isText ? `` : ' /'}>`
-  const childTags = buildChildTagsString(tag, cssStyle, level)
-  const closingTag = hasChildren || tag.isText ? `${!tag.isText ? '\n' + spaceString : ''}</${tagName}>` : ''
-
-  return openingTag + childTags + closingTag
+  if (cssStyle === 'styled-components') {
+    const spaceString = buildSpaces(4, level)
+    const hasChildren = tag.children.length > 0
+    const tagName = getTagName(tag, cssStyle)
+    const className = getClassName(tag, cssStyle)
+    const properties = tag.properties.map(buildPropertyString).join('')
+    const openingTag = `${spaceString}<${tagName}${className}${properties}${hasChildren || tag.isText ? `` : ' /'}>`
+    const childTags = buildChildTagsString(tag, cssStyle, level)
+    const closingTag = hasChildren || tag.isText ? `${!tag.isText ? '\n' + spaceString : ''}</${tagName}>` : ''
+    return openingTag + childTags + closingTag
+  } else if (cssStyle === 'Restyle') {
+    const spaceString = buildSpaces(4, level)
+    const hasChildren = tag.children.length > 0
+    const tagName = getTagName(tag, cssStyle)
+    const className = getClassName(tag, cssStyle)
+    const properties = tag.properties.map(buildPropertyString).join('')
+    const openingTag = `${spaceString}<${tagName}${className}${properties}${hasChildren || tag.isText ? `` : ' /'}>`
+    const childTags = buildChildTagsString(tag, cssStyle, level)
+    const closingTag = hasChildren || tag.isText ? `${!tag.isText ? '\n' + spaceString : ''}</${tagName}>` : ''
+    return openingTag + childTags + closingTag
+  }
 }
 
 export function buildCode(tag: Tag, css: CssStyle): string {

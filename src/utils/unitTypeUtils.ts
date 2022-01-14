@@ -1,4 +1,5 @@
 import { isString, trim } from 'lodash'
+import { buildSizeStringByUnit, UnitType } from '../core/buildSizeStringByUnit'
 
 export function getConvertedValue(value: string) {
   if (isNotANumber(value)) {
@@ -29,6 +30,12 @@ export function isNotANumber(value: string) {
     return true
   }
   return false
+}
+
+export function rgbValueToHex(value: number) {
+  return Math.floor(value * 255)
+    .toString(16)
+    .padStart(2, '0')
 }
 
 export function rgbaToHex(rgba: string) {
@@ -70,4 +77,64 @@ export function hexToRgb(hex: string) {
 
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hexMax6Digits)
   return result ? [parseInt(result[1], 16), parseInt(result[2], 16), parseInt(result[3], 16)] : null
+}
+
+export function getBorderRadiusString(node: FrameNode | RectangleNode | ComponentNode | InstanceNode, unitType: UnitType) {
+  if (node.cornerRadius !== 0) {
+    if (typeof node.cornerRadius !== 'number') {
+      return `${buildSizeStringByUnit(node.topLeftRadius, unitType)} ${buildSizeStringByUnit(node.topRightRadius, unitType)} ${buildSizeStringByUnit(
+        node.bottomRightRadius,
+        unitType
+      )} ${buildSizeStringByUnit(node.bottomLeftRadius, unitType)}`
+    }
+    return `${buildSizeStringByUnit(node.cornerRadius, unitType)}`
+  }
+  return null
+}
+
+export function getBoxShadowString(node: FrameNode | RectangleNode | ComponentNode | InstanceNode, unitType: UnitType) {
+  if (node.effects.length > 0 && node.effects[0].type === 'DROP_SHADOW') {
+    const dropShadowEffect = node.effects[0] as ShadowEffect
+
+    let resultString = ''
+
+    if (dropShadowEffect.offset) {
+      resultString += `${buildSizeStringByUnit(dropShadowEffect.offset.x, unitType)} ${buildSizeStringByUnit(dropShadowEffect.offset.y, unitType)} `
+    }
+    if (dropShadowEffect.radius) {
+      resultString += `${buildSizeStringByUnit(dropShadowEffect.radius, unitType)} `
+    }
+    if (dropShadowEffect.color) {
+      resultString += buildColorString(dropShadowEffect)
+    }
+    return resultString
+  }
+  return null
+}
+
+export function buildColorString(source: any) {
+  const isSolidPaint = (source as Paint).type === 'SOLID'
+
+  if (isSolidPaint) {
+    const solidPaint = source as SolidPaint
+    if (solidPaint.opacity !== undefined && solidPaint.opacity < 1) {
+      return `rgba(${Math.floor(solidPaint.color.r * 255)}, ${Math.floor(solidPaint.color.g * 255)}, ${Math.floor(solidPaint.color.b * 255)}, ${Number(solidPaint.opacity).toFixed(
+        2
+      )})`
+    }
+    return `#${rgbValueToHex(solidPaint.color.r)}${rgbValueToHex(solidPaint.color.g)}${rgbValueToHex(solidPaint.color.b)}`
+  }
+
+  const isDropShadow = (source as ShadowEffect).type === 'DROP_SHADOW'
+  if (isDropShadow) {
+    const shadowEffect = source as ShadowEffect
+    if (shadowEffect.color.a !== undefined && shadowEffect.color.a < 1) {
+      return `rgba(${Math.floor(shadowEffect.color.r * 255)}, ${Math.floor(shadowEffect.color.g * 255)}, ${Math.floor(shadowEffect.color.b * 255)}, ${Number(
+        shadowEffect.color.a
+      ).toFixed(2)})`
+    }
+    return `#${rgbValueToHex(shadowEffect.color.r)}${rgbValueToHex(shadowEffect.color.g)}${rgbValueToHex(shadowEffect.color.b)}`
+  }
+
+  return ''
 }

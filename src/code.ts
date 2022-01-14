@@ -56,7 +56,8 @@ figma.ui.onmessage = (msg: messageTypes) => {
     updateNode(selectedNodes[0], msg.nodeProperties)
   } else if (msg.type === 'set-shared-plugin-data') {
     if (msg.key === 'properties') {
-      const currentProperties = JSON.parse(figmaDocument.getSharedPluginData('ftrn', 'properties'))
+      const sharedPluginDataProperties = figmaDocument.getSharedPluginData('ftrn', 'properties')
+      const currentProperties = _.isEmpty(sharedPluginDataProperties) ? [] : JSON.parse(sharedPluginDataProperties)
       const newProperties = JSON.parse(msg.value)
       const result = _.unionWith(newProperties, currentProperties, (first: any, second: any) => first.nodeId === second.nodeId && first.id === second.id)
       const newValue = JSON.stringify(result)
@@ -112,10 +113,11 @@ async function generate(node: SceneNode, config: { cssStyle?: CssStyle; unitType
   const textCount = new TextCount()
 
   const sharedPluginData = getSharedPluginData()
+
   updateNodes(sharedPluginData)
   updateTokensFromFigmaStyles(sharedPluginData)
 
-  const originalTagTree = buildTagTree(node, unitType, textCount)
+  const originalTagTree = buildTagTree(node, unitType, textCount, cssStyle)
   if (originalTagTree === null) {
     figma.notify('Please select a visible node')
     return
@@ -209,5 +211,17 @@ function getSharedPluginData() {
   return sharedPluginData
 }
 
-// Load Plugin
-init()
+// Check Menu option
+if (figma.command === 'open') {
+  init()
+} else if (figma.command === 'erase') {
+  // Clear everything
+  figmaDocument.setSharedPluginData('ftrn', 'designTokensCounter', '0')
+  figmaDocument.setSharedPluginData('ftrn', 'designTokensGroupsCounter', '0')
+  figmaDocument.setSharedPluginData('ftrn', 'designTokens', '')
+  figmaDocument.setSharedPluginData('ftrn', 'designTokensGroups', '')
+  figmaDocument.setSharedPluginData('ftrn', 'nodes', '')
+  figmaDocument.setSharedPluginData('ftrn', 'properties', '')
+  figma.notify('Figma to React Native - Document Data successfully erased')
+  figma.closePlugin()
+}

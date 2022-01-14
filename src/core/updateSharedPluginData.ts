@@ -7,6 +7,7 @@ export const updateSharedPluginData = (parent: any, updatedData: Store) => {
   console.log(updatedData)
 
   const { designTokens, designTokensCounter, designTokensGroups, designTokensGroupsCounter, nodes, properties } = updatedData
+
   if (designTokens && designTokensCounter) {
     const designTokensString = JSON.stringify(designTokens)
     const designTokensMsg: messageTypes = { type: 'set-shared-plugin-data', key: 'designTokens', value: designTokensString }

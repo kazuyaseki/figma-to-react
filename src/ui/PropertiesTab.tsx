@@ -108,18 +108,15 @@ export const renderPropertiesTab = (nodeProperties: any, parent: any) => {
         const designToken = getLinkedToken(nodeId, key)
         const newValue = designToken?.tokenValue || value
         updateProperty(nodeId, key, newValue)
-
         const property = {
           nodeId,
           id: key,
           value: newValue,
           linkedToken: designToken ? designToken.tokenName : undefined
         }
-
         const updatedData: Store = {
           properties: [property]
         }
-
         updateSharedPluginData(parent, updatedData)
       }
     })

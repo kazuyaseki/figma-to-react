@@ -1,6 +1,18 @@
 import { buildSizeStringByUnit, UnitType } from './buildSizeStringByUnit'
-import { IMAGE_TAG_PREFIX, IMAGE_TAG_SUFFIX, PRESSABLE_TAG_PREFIX, PRESSABLE_TAG_SUFFIX, TEXT_TAG_SUFFIX } from '../utils/constants'
+import {
+  alignItemsCssValues,
+  IMAGE_TAG_PREFIX,
+  IMAGE_TAG_SUFFIX,
+  justifyContentCssValues,
+  PRESSABLE_TAG_PREFIX,
+  PRESSABLE_TAG_SUFFIX,
+  textAlignCssValues,
+  textDecorationCssValues,
+  textVerticalAlignCssValues,
+  TEXT_TAG_SUFFIX
+} from '../utils/constants'
 import { isImageNode } from '../utils/isImageNode'
+import { buildColorString, getBorderRadiusString, getBoxShadowString } from '../utils/unitTypeUtils'
 
 export type CSSData = {
   className: string
@@ -19,37 +31,6 @@ export class TextCount {
   increment() {
     this.count++
   }
-}
-
-const alignItemsCssValues = {
-  MIN: 'flex-start',
-  MAX: 'flex-end',
-  CENTER: 'center'
-}
-
-const justifyContentCssValues = {
-  MIN: 'flex-start',
-  MAX: 'flex-end',
-  CENTER: 'center',
-  SPACE_BETWEEN: 'space-between'
-}
-
-const textAlignCssValues = {
-  LEFT: 'left',
-  RIGHT: 'right',
-  CENTER: 'center',
-  JUSTIFIED: 'justify'
-}
-
-const textDecorationCssValues = {
-  UNDERLINE: 'underline',
-  STRIKETHROUGH: 'line-through'
-}
-
-const textVerticalAlignCssValues = {
-  TOP: 'top',
-  CENTER: 'middle',
-  BOTTOM: 'bottom'
 }
 
 export function getCssDataForTag(node: SceneNode, unitType: UnitType, textCount: TextCount): CSSData {
@@ -76,8 +57,6 @@ export function getCssDataForTag(node: SceneNode, unitType: UnitType, textCount:
       }
 
       if (node.layoutMode !== 'NONE') {
-        console.log('node.name ' + node.name)
-        console.log(node)
         properties.push({ name: 'flex-direction', value: node.layoutMode === 'HORIZONTAL' ? 'row' : 'column' })
         properties.push({ name: 'justify-content', value: justifyContentCssValues[node.primaryAxisAlignItems] })
         properties.push({ name: 'align-items', value: alignItemsCssValues[node.counterAxisAlignItems] })
@@ -255,70 +234,4 @@ export function getCssDataForTag(node: SceneNode, unitType: UnitType, textCount:
   }
 
   return { className: '', properties: [] }
-}
-
-function getBorderRadiusString(node: FrameNode | RectangleNode | ComponentNode | InstanceNode, unitType: UnitType) {
-  if (node.cornerRadius !== 0) {
-    if (typeof node.cornerRadius !== 'number') {
-      return `${buildSizeStringByUnit(node.topLeftRadius, unitType)} ${buildSizeStringByUnit(node.topRightRadius, unitType)} ${buildSizeStringByUnit(
-        node.bottomRightRadius,
-        unitType
-      )} ${buildSizeStringByUnit(node.bottomLeftRadius, unitType)}`
-    }
-    return `${buildSizeStringByUnit(node.cornerRadius, unitType)}`
-  }
-  return null
-}
-
-function getBoxShadowString(node: FrameNode | RectangleNode | ComponentNode | InstanceNode, unitType: UnitType) {
-  if (node.effects.length > 0 && node.effects[0].type === 'DROP_SHADOW') {
-    const dropShadowEffect = node.effects[0] as ShadowEffect
-
-    let resultString = ''
-
-    if (dropShadowEffect.offset) {
-      resultString += `${buildSizeStringByUnit(dropShadowEffect.offset.x, unitType)} ${buildSizeStringByUnit(dropShadowEffect.offset.y, unitType)} `
-    }
-    if (dropShadowEffect.radius) {
-      resultString += `${buildSizeStringByUnit(dropShadowEffect.radius, unitType)} `
-    }
-    if (dropShadowEffect.color) {
-      resultString += buildColorString(dropShadowEffect)
-    }
-    return resultString
-  }
-  return null
-}
-
-function rgbValueToHex(value: number) {
-  return Math.floor(value * 255)
-    .toString(16)
-    .padStart(2, '0')
-}
-
-function buildColorString(source: any) {
-  const isSolidPaint = (source as Paint).type === 'SOLID'
-
-  if (isSolidPaint) {
-    const solidPaint = source as SolidPaint
-    if (solidPaint.opacity !== undefined && solidPaint.opacity < 1) {
-      return `rgba(${Math.floor(solidPaint.color.r * 255)}, ${Math.floor(solidPaint.color.g * 255)}, ${Math.floor(solidPaint.color.b * 255)}, ${Number(solidPaint.opacity).toFixed(
-        2
-      )})`
-    }
-    return `#${rgbValueToHex(solidPaint.color.r)}${rgbValueToHex(solidPaint.color.g)}${rgbValueToHex(solidPaint.color.b)}`
-  }
-
-  const isDropShadow = (source as ShadowEffect).type === 'DROP_SHADOW'
-  if (isDropShadow) {
-    const shadowEffect = source as ShadowEffect
-    if (shadowEffect.color.a !== undefined && shadowEffect.color.a < 1) {
-      return `rgba(${Math.floor(shadowEffect.color.r * 255)}, ${Math.floor(shadowEffect.color.g * 255)}, ${Math.floor(shadowEffect.color.b * 255)}, ${Number(
-        shadowEffect.color.a
-      ).toFixed(2)})`
-    }
-    return `#${rgbValueToHex(shadowEffect.color.r)}${rgbValueToHex(shadowEffect.color.g)}${rgbValueToHex(shadowEffect.color.b)}`
-  }
-
-  return ''
 }

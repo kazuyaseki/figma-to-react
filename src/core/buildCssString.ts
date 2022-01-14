@@ -31,7 +31,7 @@ export function buildCssString(tag: Tag, cssStyle: CssStyle, sharedPluginData: S
   let codeStr = ''
 
   if (!dataObjectArray) {
-    return codeStr
+    return ''
   }
 
   dataObjectArray.forEach((dataObject: DataObject) => {
@@ -45,71 +45,10 @@ export function buildCssString(tag: Tag, cssStyle: CssStyle, sharedPluginData: S
       return
     }
 
-    let reactNativeComponent = 'View'
-
     if (cssStyle === 'styled-components') {
-      /*
-       * FIXME: Image still not implemented
-      if (tag.isImg || cssData?.className.endsWith(IMAGE_TAG_SUFFIX)) {
-        reactNativeComponent = 'Image'
-      }
-      */
-      if (tag.isText || dataObject.cssData?.className.endsWith(TEXT_TAG_SUFFIX)) {
-        reactNativeComponent = 'Text'
-      } else if (dataObject.cssData?.className.endsWith(PRESSABLE_TAG_SUFFIX)) {
-        reactNativeComponent = 'Pressable'
-      }
-    }
-
-    const currentStr =
-      cssStyle === 'styled-components'
-        ? `const ${codeTagName} = styled.${reactNativeComponent}\`
-${dataObject.cssData.properties.map((property: any) => `  ${property.name}: ${property.value};`).join('\n')}
-\`\n`
-        : `.${codeTagName} {
-${dataObject.cssData.properties.map((property: any) => `  ${property.name}: ${property.value};`).join('\n')}
-}\n`
-
-    codeStr += currentStr
-    codeTagNames.push(codeTagName)
-
-    // FIXME: Spacer shouldn't be needed if gap property is working
-    if (cssStyle === 'styled-components' && dataObject.tag.hasItemSpacing) {
-      const node = dataObject.tag.node
-
-      console.log('buildCssString Spacer node')
-      console.log(node)
-
-      let propertyName = 'height'
-
-      if (node.type === 'FRAME' || node.type === 'INSTANCE' || node.type === 'COMPONENT') {
-        if (node.layoutMode === 'HORIZONTAL') {
-          propertyName = 'width'
-        }
-      }
-
-      console.log('sharedPluginData')
-      console.log(sharedPluginData)
-
-      /* FIXME:
-      const propertiesByNodeId = sharedPluginData.properties?.filter((property: any) => property.nodeId === node.id)
-      const property = propertiesByNodeId?.find((currentProperty: any) => propertyName === currentProperty.id)
-
-      console.log('property')
-      console.log(property)
-
-      if (property?.linkedToken) {
-        console.log('property linkedToken exists')
-        //        const designTokens = sharedPluginData.designTokens
-        //        const designToken = designTokens.find((designToken: any) => designToken.tokenName === property.linkedToken)
-      }
-      */
-
-      const spacerStr = `\nconst ${dataObject.cssData?.className.replace(/\s/g, '')}Spacer = styled.View\`
-  ${propertyName}: ${getItemSpacing(dataObject.tag.node)}px;
-\`\n\n`
-
-      codeStr += spacerStr
+      codeStr += getStyledComponentsCodeString(tag, dataObject, codeTagName, codeTagNames)
+    } else if (cssStyle === 'Restyle') {
+      codeStr += getRestyleCodeString(tag, dataObject, codeTagName, codeTagNames)
     }
   })
 
@@ -117,8 +56,90 @@ ${dataObject.cssData.properties.map((property: any) => `  ${property.name}: ${pr
 }
 
 export function getCodeTagName(className: string, style: CssStyle) {
-  if (style === 'styled-components') {
+  if (style === 'styled-components' || style === 'Restyle') {
     return className.replace(/\s/g, '')
   }
   return buildClassName(className)
+}
+
+function getRestyleCodeString(tag: Tag, dataObject: DataObject, codeTagName: string, codeTagNames: string[]) {
+  let result = ''
+
+  let reactNativeComponent = 'Box'
+
+  if (tag.isText || dataObject.cssData?.className.endsWith(TEXT_TAG_SUFFIX)) {
+    reactNativeComponent = 'Text'
+  } else if (dataObject.cssData?.className.endsWith(PRESSABLE_TAG_SUFFIX)) {
+    reactNativeComponent = 'Pressable'
+  }
+
+  if (reactNativeComponent === 'Box') {
+    const currentStr = `const ${codeTagName} = createBox<Theme>();\n`
+    result += currentStr
+  } else if (reactNativeComponent === 'Text') {
+    const currentStr = `const ${codeTagName} = createText<Theme>();\n`
+    result += currentStr
+  } else if (reactNativeComponent === 'Pressable') {
+    const currentStr = `const ${codeTagName} = createBox<Theme, PressableProps>(Pressable);\n`
+    result += currentStr
+  }
+
+  codeTagNames.push(codeTagName)
+
+  return result
+}
+
+function getStyledComponentsCodeString(tag: Tag, dataObject: DataObject, codeTagName: string, codeTagNames: string[]) {
+  let result = ''
+
+  let reactNativeComponent = 'View'
+  /*
+   * FIXME: Image still not implemented
+  if (tag.isImg || cssData?.className.endsWith(IMAGE_TAG_SUFFIX)) {
+    reactNativeComponent = 'Image'
+  }
+  */
+  if (tag.isText || dataObject.cssData?.className.endsWith(TEXT_TAG_SUFFIX)) {
+    reactNativeComponent = 'Text'
+  } else if (dataObject.cssData?.className.endsWith(PRESSABLE_TAG_SUFFIX)) {
+    reactNativeComponent = 'Pressable'
+  }
+
+  const currentStr = `const ${codeTagName} = styled.${reactNativeComponent}\`
+${dataObject.cssData.properties.map((property: any) => `  ${property.name}: ${property.value};`).join('\n')}
+\`\n`
+
+  result += currentStr
+  codeTagNames.push(codeTagName)
+
+  // FIXME: Spacer shouldn't be needed if gap property is working
+  if (dataObject.tag.hasItemSpacing) {
+    const node = dataObject.tag.node
+
+    let propertyName = 'height'
+
+    if (node.type === 'FRAME' || node.type === 'INSTANCE' || node.type === 'COMPONENT') {
+      if (node.layoutMode === 'HORIZONTAL') {
+        propertyName = 'width'
+      }
+    }
+
+    /* FIXME: replace values by design tokens
+    const propertiesByNodeId = sharedPluginData.properties?.filter((property: any) => property.nodeId === node.id)
+    const property = propertiesByNodeId?.find((currentProperty: any) => propertyName === currentProperty.id)
+
+    if (property?.linkedToken) {
+      //        const designTokens = sharedPluginData.designTokens
+      //        const designToken = designTokens.find((designToken: any) => designToken.tokenName === property.linkedToken)
+    }
+  */
+
+    const spacerStr = `\nconst ${dataObject.cssData?.className.replace(/\s/g, '')}Spacer = styled.View\`
+${propertyName}: ${getItemSpacing(dataObject.tag.node)}px;
+\`\n\n`
+
+    result += spacerStr
+  }
+
+  return result
 }
