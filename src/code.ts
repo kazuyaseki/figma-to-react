@@ -117,7 +117,7 @@ async function generate(node: SceneNode, config: { cssStyle?: CssStyle; unitType
   updateNodes(sharedPluginData)
   updateTokensFromFigmaStyles(sharedPluginData)
 
-  const originalTagTree = buildTagTree(node, unitType, textCount, cssStyle)
+  const originalTagTree = buildTagTree(node, unitType, textCount, cssStyle, sharedPluginData)
   if (originalTagTree === null) {
     figma.notify('Please select a visible node')
     return

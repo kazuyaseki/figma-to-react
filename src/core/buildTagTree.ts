@@ -1,8 +1,19 @@
 import { UnitType } from './buildSizeStringByUnit'
 import { CSSData, getCssDataForTag, TextCount } from './getCssDataForTag'
-import { alignItemsCssValues, IMAGE_TAG_PREFIX, justifyContentCssValues, PRESSABLE_TAG_PREFIX, TEXT_TAG_PREFIX } from '../utils/constants'
+import {
+  alignItemsCssValues,
+  IMAGE_TAG_PREFIX,
+  IMAGE_TAG_SUFFIX,
+  justifyContentCssValues,
+  PRESSABLE_TAG_PREFIX,
+  PRESSABLE_TAG_SUFFIX,
+  TEXT_TAG_PREFIX,
+  TEXT_TAG_SUFFIX
+} from '../utils/constants'
 import { getItemSpacing, isImageNode } from '../utils/isImageNode'
 import { CssStyle } from './buildCssString'
+import * as _ from 'lodash'
+import { Store } from '../model/Store'
 
 type Property = {
   name: string
@@ -23,20 +34,21 @@ export type Tag = {
   textCharacters: string | null
 }
 
-export function buildTagTree(node: SceneNode, unitType: UnitType, textCount: TextCount, cssStyle?: CssStyle): Tag | null {
+export function buildTagTree(node: SceneNode, unitType: UnitType, textCount: TextCount, cssStyle?: CssStyle, sharedPluginData?: Store): Tag | null {
   if (!node.visible) {
     return null
   }
 
+  const childTags: Tag[] = []
   const hasItemSpacing = getItemSpacing(node) > 0
   const isImg = isImageNode(node)
   const properties: Property[] = []
 
-  const childTags: Tag[] = []
+  let nodeName = node.name
 
   if ('children' in node && !isImg) {
     node.children.forEach((child) => {
-      const childTag = buildTagTree(child, unitType, textCount, cssStyle)
+      const childTag = buildTagTree(child, unitType, textCount, cssStyle, sharedPluginData)
       if (childTag) {
         childTags.push(childTag)
       }
@@ -44,6 +56,8 @@ export function buildTagTree(node: SceneNode, unitType: UnitType, textCount: Tex
   }
 
   if (cssStyle === 'Restyle') {
+    const style: any = {}
+
     // skip vector since it's often displayed as an img tag
     if (node.visible && node.type !== 'VECTOR') {
       if (node.type === 'FRAME' || node.type === 'INSTANCE' || node.type === 'COMPONENT') {
@@ -72,23 +86,22 @@ export function buildTagTree(node: SceneNode, unitType: UnitType, textCount: Tex
           if (!node.name.startsWith(PRESSABLE_TAG_PREFIX) && (node.layoutGrow > 0 || node.layoutAlign === 'INHERIT')) {
             properties.push({ name: 'flex', value: node.layoutGrow === 0 ? '1' : `${node.layoutGrow}` })
           }
-          /*
-          if (node.paddingTop === node.paddingBottom && node.paddingTop === node.paddingLeft && node.paddingTop === node.paddingRight) {
-            if (node.paddingTop > 0) {
-              properties.push({ name: 'padding', value: `${buildSizeStringByUnit(node.paddingTop, unitType)}` })
+
+          const spacingKeys = ['paddingTop', 'paddingBottom', 'paddingLeft', 'paddingRight']
+
+          spacingKeys.forEach((key: any) => {
+            if (node[key as keyof unknown] > 0) {
+              const propertiesByNodeId = sharedPluginData?.properties?.filter((property: any) => property.nodeId === node.id)
+              const property = propertiesByNodeId?.find((currentProperty: any) => key === currentProperty.id)
+
+              if (property?.linkedToken) {
+                properties.push({ name: key, value: property.linkedToken })
+              } else {
+                style[key] = node.paddingTop
+              }
             }
-          } else if (node.paddingTop === node.paddingBottom && node.paddingLeft === node.paddingRight) {
-            properties.push({ name: 'padding', value: `${buildSizeStringByUnit(node.paddingTop, unitType)} ${buildSizeStringByUnit(node.paddingLeft, unitType)}` })
-          } else {
-            properties.push({
-              name: 'padding',
-              value: `${buildSizeStringByUnit(node.paddingTop, unitType)} ${buildSizeStringByUnit(node.paddingRight, unitType)} ${buildSizeStringByUnit(
-                node.paddingBottom,
-                unitType
-              )} ${buildSizeStringByUnit(node.paddingLeft, unitType)}`
-            })
-          }
-          */
+          })
+
           /* FIXME: gap is currently not supported on React Native styled-components
           if (node.primaryAxisAlignItems !== 'SPACE_BETWEEN' && node.itemSpacing > 0) {
             properties.push({ name: 'gap', value: buildSizeStringByUnit(node.itemSpacing, unitType) })
@@ -108,7 +121,7 @@ export function buildTagTree(node: SceneNode, unitType: UnitType, textCount: Tex
 
       // FIXME: Just a workaround while Image is not implemented, use a Gray View as placeholder
       if (node.name.startsWith(IMAGE_TAG_PREFIX)) {
-        properties.push({ name: 'style', notStringValue: true, value: `{ backgroundColor: 'gray' }` })
+        style['backgroundColor'] = `'gray'`
       }
 
       // FIXME: this workaround for Pressable should't be needed in the future
@@ -116,10 +129,36 @@ export function buildTagTree(node: SceneNode, unitType: UnitType, textCount: Tex
         properties.push({ name: 'width', value: Math.floor(node.width) + 'px' })
       }
     }
+
+    if (!_.isEmpty(style)) {
+      properties.push({ name: 'style', notStringValue: true, value: JSON.stringify(style).replaceAll('"', '') })
+    }
+
+    // Fix node name if needed
+
+    if (isImageNode(node)) {
+      if (node.name.startsWith(IMAGE_TAG_PREFIX)) {
+        nodeName = node.name.substring(IMAGE_TAG_PREFIX.length, node.name.length)
+      }
+      if (!node.name.endsWith(IMAGE_TAG_SUFFIX)) {
+        nodeName += IMAGE_TAG_SUFFIX
+      }
+    }
+
+    if (node.type === 'TEXT' && !node.name.endsWith(TEXT_TAG_SUFFIX)) {
+      nodeName = node.name + TEXT_TAG_SUFFIX
+    }
+
+    if (node.name.startsWith(PRESSABLE_TAG_PREFIX)) {
+      nodeName = node.name.substring(PRESSABLE_TAG_PREFIX.length, node.name.length)
+      if (!node.name.endsWith(PRESSABLE_TAG_SUFFIX)) {
+        nodeName += PRESSABLE_TAG_SUFFIX
+      }
+    }
   }
 
   const tag: Tag = {
-    name: node.name,
+    name: nodeName,
     isText: node.type === 'TEXT' || node.name.startsWith(TEXT_TAG_PREFIX),
     textCharacters: node.type === 'TEXT' ? node.characters : null,
     isImg,

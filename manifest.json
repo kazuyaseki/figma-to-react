@@ -1,8 +1,12 @@
 {
-  "name": "Figma to React Native",
-  "id": "1053790655021729426",
   "api": "1.0.0",
+  "editorType": ["figma"],
+  "id": "1053790655021729426",
   "main": "dist/code.js",
-  "ui": "dist/ui.html",
-  "editorType": ["figma"]
+  "menu": [
+    { "name": "Open Plugin", "command": "open" },
+    { "name": "Erase Document Data", "command": "erase" }
+  ],
+  "name": "Figma to React Native",
+  "ui": "dist/ui.html"
 }
