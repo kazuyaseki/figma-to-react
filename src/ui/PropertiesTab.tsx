@@ -5,12 +5,11 @@ import { messageTypes } from '../model/messagesTypes'
 import { updateSharedPluginData } from '../core/updateSharedPluginData'
 import { useStore } from '../hooks/useStore'
 import * as _ from 'lodash'
-import { getConvertedValue } from '../utils/unitTypeUtils'
+import { getConvertedValue, isDarkColor, rgbaToHex } from '../utils/unitTypeUtils'
 import { Store } from '../model/Store'
+import { getFigmaObjectAsString } from '../utils/isImageNode'
 
 export const renderPropertiesTab = (nodeProperties: any, parent: any) => {
-  const [changedRows, setChangedRows] = React.useState([])
-
   const designTokens = useStore((state) => state.designTokens)
   const properties = useStore((state) => state.properties)
 
@@ -31,6 +30,46 @@ export const renderPropertiesTab = (nodeProperties: any, parent: any) => {
       headerName: 'Property Value',
       width: 150,
       renderCell: (params: GridRenderCellParams) => {
+        const tokenValue: any = params?.value
+        if (_.isObject(tokenValue)) {
+          let result = ''
+          const objectKeys = Object.keys(tokenValue)
+          const figmaObject: any = tokenValue
+
+          //          console.log('figmaObject: ')
+          //          console.log(figmaObject)
+
+          if (figmaObject.visible && figmaObject.type === 'SOLID' && !_.isEmpty(figmaObject.color) && figmaObject.opacity) {
+            const rgbValue = [Math.floor(figmaObject.color.r * 255), Math.floor(figmaObject.color.g * 255), Math.floor(figmaObject.color.b * 255)]
+
+            let textColor = 'black'
+
+            if (isDarkColor(rgbValue)) {
+              textColor = 'white'
+            }
+
+            const opacityValue = figmaObject.opacity?.toFixed(2) || 1.0
+            const rgbaString = `rgba(${rgbValue[0]}, ${rgbValue[1]}, ${rgbValue[2]}, ${opacityValue})`
+            result += rgbaToHex(rgbaString).toUpperCase()
+
+            return (
+              <div>
+                <span style={{ backgroundColor: String(rgbaString), color: textColor }}>{result}</span>
+              </div>
+            )
+          } else {
+            objectKeys.map((key) => {
+              const value = tokenValue && tokenValue[key as keyof unknown]
+              if (_.isObject(value)) {
+                result += getFigmaObjectAsString(key, value)
+              } else {
+                result += `${key}: ${value}\n`
+              }
+            })
+            return <div style={{ fontSize: '9px', lineHeight: '10px', whiteSpace: 'pre-line' }}>{result}</div>
+          }
+        }
+
         const currentKey = params.row.id
         const currentValueString = String(params.row.value)
         if (currentValueString !== String(nodeProperties[currentKey])) {
@@ -108,11 +147,13 @@ export const renderPropertiesTab = (nodeProperties: any, parent: any) => {
         const designToken = getLinkedToken(nodeId, key)
         const newValue = designToken?.tokenValue || value
         updateProperty(nodeId, key, newValue)
-        const property = {
-          nodeId,
+        let property: any = {
           id: key,
-          value: newValue,
-          linkedToken: designToken ? designToken.tokenName : undefined
+          nodeId,
+          value: newValue
+        }
+        if (designToken) {
+          property = { ...property, linkedToken: designToken.tokenName }
         }
         const updatedData: Store = {
           properties: [property]

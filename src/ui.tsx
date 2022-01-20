@@ -116,6 +116,8 @@ const App: React.VFC = () => {
     }
 
     if (properties) {
+      //      console.log('updateStoreFromSharedPluginData properties:')
+      //      console.log(properties)
       setProperties(properties)
     }
   }

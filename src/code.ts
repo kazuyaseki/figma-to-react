@@ -52,15 +52,34 @@ figma.ui.onmessage = (msg: messageTypes) => {
     figma.clientStorage.setAsync(STORAGE_KEYS.UPDATE_ALL_LINKED_PROPERTIES_KEY, msg.linkedProperties)
     updateAllLinkedProperties(msg.linkedProperties)
   } else if (msg.type === 'update-node-properties') {
-    figma.clientStorage.setAsync(STORAGE_KEYS.UPDATE_NODE_PROPERTIES_KEY, msg.nodeProperties)
-    updateNode(selectedNodes[0], msg.nodeProperties)
+    const nodeProperties = msg.nodeProperties
+    figma.clientStorage.setAsync(STORAGE_KEYS.UPDATE_NODE_PROPERTIES_KEY, nodeProperties)
+    updateNode(selectedNodes[0], nodeProperties)
   } else if (msg.type === 'set-shared-plugin-data') {
     if (msg.key === 'properties') {
       const sharedPluginDataProperties = figmaDocument.getSharedPluginData('ftrn', 'properties')
       const currentProperties = _.isEmpty(sharedPluginDataProperties) ? [] : JSON.parse(sharedPluginDataProperties)
       const newProperties = JSON.parse(msg.value)
+
+      if (_.isObject(newProperties[0].value)) {
+        const property = newProperties[0]
+        const figmaStyleId = property.value.styleId
+        if (figmaStyleId) {
+          const figmaStyle = figma.getStyleById(figmaStyleId)
+          const figmaStyleName = figmaStyle?.name
+
+          if (figmaStyleName) {
+            const propertiesByNodeId = currentProperties.filter((currentProperty: any) => currentProperty.nodeId === property.nodeId)
+            const propertyByName = propertiesByNodeId.find((currentProperty: any) => currentProperty.id === property.id)
+            propertyByName['linkedToken'] = figmaStyleName
+            newProperties[0] = { ...propertyByName }
+          }
+        }
+      }
+
       const result = _.unionWith(newProperties, currentProperties, (first: any, second: any) => first.nodeId === second.nodeId && first.id === second.id)
       const newValue = JSON.stringify(result)
+
       figmaDocument.setSharedPluginData('ftrn', msg.key, newValue)
     } else {
       figmaDocument.setSharedPluginData('ftrn', msg.key, msg.value)

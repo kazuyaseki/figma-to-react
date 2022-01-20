@@ -103,7 +103,5 @@ export const buildRestyleThemeObject = (designTokensJson: any) => {
     })
   }
 
-  console.log('Restyle Theme Object:')
-  console.log(themeObject)
   return themeObject
 }

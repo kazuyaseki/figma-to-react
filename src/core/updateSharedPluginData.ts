@@ -3,9 +3,6 @@ import { messageTypes } from '../model/messagesTypes'
 import { Store } from '../model/Store'
 
 export const updateSharedPluginData = (parent: any, updatedData: Store) => {
-  console.log('updateSharedPluginData()')
-  console.log(updatedData)
-
   const { designTokens, designTokensCounter, designTokensGroups, designTokensGroupsCounter, nodes, properties } = updatedData
 
   if (designTokens && designTokensCounter) {

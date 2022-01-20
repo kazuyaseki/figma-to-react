@@ -240,14 +240,7 @@ export const renderDesignTokensTab = (parent: any) => {
   const onPressUpdateAllLinkedProperties = () => {
     const selectedDesignToken = getDesignTokenById(selectionModel[0])
 
-    console.log('propertiesLinkedToSelectedDesignToken:')
-    console.log(propertiesLinkedToSelectedDesignToken)
-
     for (let index = 0; index < propertiesLinkedToSelectedDesignToken.length; index++) {
-      console.log('element.propertyValue: ')
-      console.log(propertiesLinkedToSelectedDesignToken[index].propertyValue)
-      console.log('selectedDesignToken.tokenValue: ')
-      console.log(selectedDesignToken.tokenValue)
       propertiesLinkedToSelectedDesignToken[index].propertyValue = selectedDesignToken.tokenValue
     }
 

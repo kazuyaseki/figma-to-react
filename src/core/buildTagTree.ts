@@ -110,6 +110,18 @@ export function buildTagTree(node: SceneNode, unitType: UnitType, textCount: Tex
           properties.push({ name: 'height', value: Math.floor(node.height) + 'px' })
           properties.push({ name: 'width', value: Math.floor(node.width) + 'px' })
         }
+
+        /* FIXME: border and color stuff
+        if ((node.fills as Paint[]).length > 0 && (node.fills as Paint[])[0].type !== 'IMAGE') {
+          const paint = (node.fills as Paint[])[0]
+          properties.push({ name: 'background-color', value: buildColorString(paint) })
+        }
+
+        if ((node.strokes as Paint[]).length > 0) {
+          const paint = (node.strokes as Paint[])[0]
+          properties.push({ name: 'border', value: `${buildSizeStringByUnit(node.strokeWeight, unitType)} solid ${buildColorString(paint)}` })
+        } 
+        */
       }
 
       // ... tons of other types of node ...

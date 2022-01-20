@@ -1,3 +1,4 @@
+import * as _ from 'lodash'
 import { getConvertedValue } from '../utils/unitTypeUtils'
 
 export function getUpdateableProperties(node: SceneNode) {
@@ -8,7 +9,24 @@ export function getUpdateableProperties(node: SceneNode) {
     width: node.width
   }
 
-  if (node.type === 'FRAME' || node.type === 'COMPONENT' || node.type === 'COMPONENT_SET' || node.type === 'INSTANCE') {
+  if (node.type === 'TEXT') {
+    if ((node.fills as Paint[]).length > 0 && (node.fills as Paint[])[0].type !== 'IMAGE') {
+      const paint = (node.fills as Paint[])[0]
+      const styleId = node.fillStyleId
+      const colorProperties = {
+        color: _.isEmpty(styleId) ? paint : { ...paint, styleId }
+      }
+      updateableProperties = { ...updateableProperties, ...colorProperties }
+    }
+  } else if (node.type === 'FRAME' || node.type === 'COMPONENT' || node.type === 'COMPONENT_SET' || node.type === 'INSTANCE') {
+    if ((node.fills as Paint[]).length > 0 && (node.fills as Paint[])[0].type !== 'IMAGE') {
+      const paint = (node.fills as Paint[])[0]
+      const styleId = node.fillStyleId
+      const colorProperties = {
+        backgroundColor: _.isEmpty(styleId) ? paint : { ...paint, styleId }
+      }
+      updateableProperties = { ...updateableProperties, ...colorProperties }
+    }
     if (node.layoutMode !== 'NONE') {
       const layoutProperties = {
         itemSpacing: node.itemSpacing,
@@ -27,8 +45,8 @@ export function getUpdateableProperties(node: SceneNode) {
 export function updateNode(node: SceneNode, properties: any) {
   const updatedProperties = getUpdatedPluginProperties(node, properties)
 
-  console.log('updateNode() updatedProperties')
-  console.log(updatedProperties)
+  //  console.log('updateNode() updatedProperties')
+  //  console.log(updatedProperties)
 
   // RESIZE NODE IF NEEDED
   if (node.type === 'FRAME' || node.type === 'COMPONENT' || node.type === 'COMPONENT_SET' || node.type === 'INSTANCE') {
