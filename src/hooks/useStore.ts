@@ -1,5 +1,8 @@
 import create from 'zustand'
 import * as _ from 'lodash'
+import { DesignTokenType } from '../model/DesignToken'
+import { COLOR_STYLES_GROUP_NAME, isFigmaStyleGroup } from '../model/FigmaStyleGroup'
+import { isHex, isNotANumber } from '../utils/unitTypeUtils'
 
 export const useStore = create((set: any, get: any) => ({
   designTokensCounter: 0,
@@ -49,6 +52,18 @@ export const useStore = create((set: any, get: any) => ({
     const designTokens = get().designTokens
     const designToken = designTokens.find((designToken: any) => designToken.tokenName === tokenName)
     return designToken
+  },
+  getDesignTokensByType: (type: DesignTokenType) => {
+    const designTokens = get().designTokens
+    if (type === DesignTokenType.Color) {
+      const colorDesignTokens = designTokens.filter((designToken: any) => designToken.tokenGroup === COLOR_STYLES_GROUP_NAME || isHex(designToken.tokenValue))
+      return colorDesignTokens
+    }
+    if (type === DesignTokenType.Number) {
+      const numberDesignTokens = designTokens.filter((designToken: any) => !isFigmaStyleGroup(designToken.tokenGroup) && !isNotANumber(designToken.tokenValue))
+      return numberDesignTokens
+    }
+    return []
   },
   getLinkedToken: (nodeId: string, propertyName: string) => {
     const designTokens = get().designTokens

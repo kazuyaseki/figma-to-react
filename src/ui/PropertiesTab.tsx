@@ -5,15 +5,17 @@ import { messageTypes } from '../model/messagesTypes'
 import { updateSharedPluginData } from '../core/updateSharedPluginData'
 import { useStore } from '../hooks/useStore'
 import * as _ from 'lodash'
-import { getConvertedValue, isDarkColor, rgbaToHex } from '../utils/unitTypeUtils'
+import { getConvertedValue, hexToRgb, isDarkColor, isHex, rgbaToHex } from '../utils/unitTypeUtils'
 import { Store } from '../model/Store'
 import { getFigmaObjectAsString } from '../utils/isImageNode'
+import { FigmaProperties, FigmaProperty } from '../model/FigmaProperties'
 
 export const renderPropertiesTab = (nodeProperties: any, parent: any) => {
   const designTokens = useStore((state) => state.designTokens)
   const properties = useStore((state) => state.properties)
 
   const getDesignTokenByName = useStore((state) => state.getDesignTokenByName)
+  const getDesignTokensByType = useStore((state) => state.getDesignTokensByType)
   const getLinkedToken = useStore((state) => state.getLinkedToken)
   const getPropertiesByNodeId = useStore((state) => state.getPropertiesByNodeId)
   const getPropertyByName = useStore((state) => state.getPropertyByName)
@@ -31,14 +33,26 @@ export const renderPropertiesTab = (nodeProperties: any, parent: any) => {
       width: 150,
       renderCell: (params: GridRenderCellParams) => {
         const tokenValue: any = params?.value
+
+        console.log('tokenValue: ')
+        console.log(tokenValue)
+
+        if (isHex(tokenValue)) {
+          let textColor = 'black'
+          const rgbValue = hexToRgb(tokenValue)
+          if (rgbValue && isDarkColor(rgbValue)) {
+            textColor = 'white'
+          }
+          return (
+            <div>
+              <span style={{ backgroundColor: String(tokenValue), color: textColor }}>{tokenValue}</span>
+            </div>
+          )
+        }
         if (_.isObject(tokenValue)) {
           let result = ''
           const objectKeys = Object.keys(tokenValue)
           const figmaObject: any = tokenValue
-
-          //          console.log('figmaObject: ')
-          //          console.log(figmaObject)
-
           if (figmaObject.visible && figmaObject.type === 'SOLID' && !_.isEmpty(figmaObject.color) && figmaObject.opacity) {
             const rgbValue = [Math.floor(figmaObject.color.r * 255), Math.floor(figmaObject.color.g * 255), Math.floor(figmaObject.color.b * 255)]
 
@@ -72,6 +86,7 @@ export const renderPropertiesTab = (nodeProperties: any, parent: any) => {
 
         const currentKey = params.row.id
         const currentValueString = String(params.row.value)
+
         if (currentValueString !== String(nodeProperties[currentKey])) {
           return (
             <div>
@@ -79,6 +94,7 @@ export const renderPropertiesTab = (nodeProperties: any, parent: any) => {
             </div>
           )
         }
+
         return <div>{currentValueString}</div>
       }
     },
@@ -93,7 +109,7 @@ export const renderPropertiesTab = (nodeProperties: any, parent: any) => {
             const row = params.row
             onChangeLinkedToken(row, newValue)
           }}
-          options={designTokens.map((designToken: any) => designToken.tokenName)}
+          options={getDesignTokensCombo(params)}
           renderInput={(params) => <TextField {...params} />}
           sx={{ width: 250 }}
           value={getAutocompleteValue(params)}
@@ -102,10 +118,21 @@ export const renderPropertiesTab = (nodeProperties: any, parent: any) => {
     }
   ]
 
-  const getAutocompleteValue = (params: any) => {
+  const getAutocompleteValue = (params: GridRenderCellParams) => {
     const row = params.row
     const property: any = properties.find((property: any) => property.nodeId === row.nodeId && property.id === row.id)
     return property?.linkedToken || null
+  }
+
+  const getDesignTokensCombo = (params: GridRenderCellParams) => {
+    const row = params.row
+    const tokenName = row.id
+    const property = FigmaProperties.find((figmaProperty: FigmaProperty) => figmaProperty.name === tokenName)
+    if (property) {
+      const designTokensByType = getDesignTokensByType(property.type)
+      return designTokensByType.map((designToken: any) => designToken.tokenName)
+    }
+    return designTokens.map((designToken: any) => designToken.tokenName)
   }
 
   const onChangeLinkedToken = (row: GridRowModel, linkedToken: any) => {
