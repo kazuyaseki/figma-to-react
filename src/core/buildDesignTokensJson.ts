@@ -2,6 +2,7 @@ import * as _ from 'lodash'
 import { DesignToken } from '../model/DesignToken'
 import { DesignTokenGroup } from '../model/DesignTokenGroup'
 import { COLOR_STYLES_GROUP_NAME, TEXT_STYLES_GROUP_NAME } from '../model/FigmaStyleGroup'
+import { getConvertedValue } from '../utils/unitTypeUtils'
 
 type DesignTokensJson = {
   [key: string]: any
@@ -19,7 +20,7 @@ export const buildDesignTokensJson = (designTokens: DesignToken[], designTokensG
     const designTokensByGroupObject: DesignTokensJson = {}
     designTokensByGroup.forEach((designToken: DesignToken) => {
       const designTokenName = designToken.tokenName
-      const designTokenValue = designToken.tokenValue
+      const designTokenValue = getConvertedValue(designToken.tokenValue)
       designTokensByGroupObject[designTokenName] = designTokenValue
     })
     designTokensObject[groupName] = designTokensByGroupObject
