@@ -1,4 +1,5 @@
 import * as _ from 'lodash'
+import { CustomTextStyleProperty } from '../model/FigmaProperties'
 import { getConvertedValue } from '../utils/unitTypeUtils'
 
 export function getUpdateableProperties(node: SceneNode) {
@@ -12,11 +13,35 @@ export function getUpdateableProperties(node: SceneNode) {
   if (node.type === 'TEXT') {
     if ((node.fills as Paint[]).length > 0 && (node.fills as Paint[])[0].type !== 'IMAGE') {
       const paint = (node.fills as Paint[])[0]
-      const styleId = node.fillStyleId
+      const fillStyleId = node.fillStyleId
+      const textStyleId = node.textStyleId
+
       const colorProperties = {
-        color: _.isEmpty(styleId) ? paint : { ...paint, styleId }
+        color: _.isEmpty(fillStyleId) ? paint : { ...paint, styleId: fillStyleId }
       }
-      updateableProperties = { ...updateableProperties, ...colorProperties }
+
+      const fontSize = node.fontSize as number
+      const fontName = node.fontName as FontName
+      const letterSpacing = node.letterSpacing as LetterSpacing
+      const lineHeight = node.lineHeight as LineHeight
+
+      const textStyle: CustomTextStyleProperty = {
+        fontFamily: fontName ? fontName.family : '',
+        fontSize: fontSize,
+        fontWeight: fontName ? fontName.style : 'normal',
+        letterSpacing: letterSpacing ? letterSpacing.value : 0,
+        lineHeight: lineHeight && lineHeight.unit === 'PIXELS' ? lineHeight.value : 32
+        //restyle: fontStyle,textAlign,textDecorationLine,textDecorationStyle,textTransform
+        //node.textAlignHorizontal: "CENTER"
+        //node.textAlignVertical: "CENTER"
+        //node.textDecoration: "NONE"
+      }
+
+      const textProperties = {
+        textStyle: _.isEmpty(textStyleId) ? textStyle : { ...textStyle, styleId: textStyleId }
+      }
+
+      updateableProperties = { ...updateableProperties, ...colorProperties, ...textProperties }
     }
   } else if (node.type === 'FRAME' || node.type === 'COMPONENT' || node.type === 'COMPONENT_SET' || node.type === 'INSTANCE') {
     if ((node.fills as Paint[]).length > 0 && (node.fills as Paint[])[0].type !== 'IMAGE') {
@@ -44,9 +69,6 @@ export function getUpdateableProperties(node: SceneNode) {
 
 export function updateNode(node: SceneNode, properties: any) {
   const updatedProperties = getUpdatedPluginProperties(node, properties)
-
-  //  console.log('updateNode() updatedProperties')
-  //  console.log(updatedProperties)
 
   // RESIZE NODE IF NEEDED
   if (node.type === 'FRAME' || node.type === 'COMPONENT' || node.type === 'COMPONENT_SET' || node.type === 'INSTANCE') {

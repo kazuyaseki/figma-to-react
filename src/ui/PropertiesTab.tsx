@@ -34,9 +34,6 @@ export const renderPropertiesTab = (nodeProperties: any, parent: any) => {
       renderCell: (params: GridRenderCellParams) => {
         const tokenValue: any = params?.value
 
-        console.log('tokenValue: ')
-        console.log(tokenValue)
-
         if (isHex(tokenValue)) {
           let textColor = 'black'
           const rgbValue = hexToRgb(tokenValue)
@@ -80,7 +77,7 @@ export const renderPropertiesTab = (nodeProperties: any, parent: any) => {
                 result += `${key}: ${value}\n`
               }
             })
-            return <div style={{ fontSize: '9px', lineHeight: '10px', whiteSpace: 'pre-line' }}>{result}</div>
+            return <div style={{ fontSize: '9px', lineHeight: '10px', paddingBottom: 10, paddingTop: 10, whiteSpace: 'pre-line' }}>{result}</div>
           }
         }
 

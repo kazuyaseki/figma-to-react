@@ -1,7 +1,7 @@
 import create from 'zustand'
 import * as _ from 'lodash'
 import { DesignTokenType } from '../model/DesignToken'
-import { COLOR_STYLES_GROUP_NAME, isFigmaStyleGroup } from '../model/FigmaStyleGroup'
+import { COLOR_STYLES_GROUP_NAME, isFigmaStyleGroup, TEXT_STYLES_GROUP_NAME } from '../model/FigmaStyleGroup'
 import { isHex, isNotANumber } from '../utils/unitTypeUtils'
 
 export const useStore = create((set: any, get: any) => ({
@@ -63,6 +63,10 @@ export const useStore = create((set: any, get: any) => ({
       const numberDesignTokens = designTokens.filter((designToken: any) => !isFigmaStyleGroup(designToken.tokenGroup) && !isNotANumber(designToken.tokenValue))
       return numberDesignTokens
     }
+    if (type === DesignTokenType.Text) {
+      const textDesignTokens = designTokens.filter((designToken: any) => designToken.tokenGroup === TEXT_STYLES_GROUP_NAME)
+      return textDesignTokens
+    }
     return []
   },
   getLinkedToken: (nodeId: string, propertyName: string) => {
@@ -87,7 +91,7 @@ export const useStore = create((set: any, get: any) => ({
   },
   getPropertiesByLinkedToken: (linkedToken: string) => {
     const properties = get().properties
-    const propertiesByLinkedToken = properties.filter((property: any) => property.linkedToken === linkedToken)
+    const propertiesByLinkedToken = properties.filter((property: any) => property?.linkedToken === linkedToken)
     return propertiesByLinkedToken
   },
   getPropertiesByNodeId: (nodeId: string) => {

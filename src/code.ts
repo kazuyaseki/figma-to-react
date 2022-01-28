@@ -11,6 +11,7 @@ import { getUpdateableProperties, updateNode } from './core/updateFigma'
 import { Store } from './model/Store'
 import { updateColorsTokensFromFigmaStyles, updateEffectsTokensFromFigmaStyles, updateGridsTokensFromFigmaStyles, updateTextsTokensFromFigmaStyles } from './core/handleFigmaStyles'
 import * as _ from 'lodash'
+import { isCustomTextStyleProperty } from './model/FigmaProperties'
 
 const figmaDocument = figma.root
 
@@ -71,8 +72,10 @@ figma.ui.onmessage = (msg: messageTypes) => {
           if (figmaStyleName) {
             const propertiesByNodeId = currentProperties.filter((currentProperty: any) => currentProperty.nodeId === property.nodeId)
             const propertyByName = propertiesByNodeId.find((currentProperty: any) => currentProperty.id === property.id)
-            propertyByName['linkedToken'] = figmaStyleName
-            newProperties[0] = { ...propertyByName }
+            if (propertyByName) {
+              propertyByName['linkedToken'] = figmaStyleName
+              newProperties[0] = { ...propertyByName }
+            }
           }
         }
       }
