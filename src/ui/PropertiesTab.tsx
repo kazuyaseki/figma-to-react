@@ -99,19 +99,31 @@ export const renderPropertiesTab = (nodeProperties: any, parent: any) => {
       field: 'linkedToken',
       headerName: 'Linked Token',
       width: 250,
-      renderCell: (params: GridRenderCellParams) => (
-        <Autocomplete
-          id="combo-design-tokens"
-          onChange={(event, newValue) => {
-            const row = params.row
-            onChangeLinkedToken(row, newValue)
-          }}
-          options={getDesignTokensCombo(params)}
-          renderInput={(params) => <TextField {...params} />}
-          sx={{ width: 250 }}
-          value={getAutocompleteValue(params)}
-        />
-      )
+      renderCell: (params: GridRenderCellParams) => {
+        const row = params.row
+
+        console.log('row:')
+        console.log(row)
+
+        // Shouldn't render Autocomplete if it is a Figma Style token
+        if (row.linkedToken && _.isObject(row.value) && !_.isEmpty(row.value.styleId)) {
+          return <p style={{ fontWeight: 'bold' }}> {row.linkedToken}</p>
+        }
+
+        return (
+          <Autocomplete
+            id="combo-design-tokens"
+            onChange={(event, newValue) => {
+              const row = params.row
+              onChangeLinkedToken(row, newValue)
+            }}
+            options={getDesignTokensCombo(params)}
+            renderInput={(params) => <TextField {...params} />}
+            sx={{ width: 250 }}
+            value={getAutocompleteValue(params)}
+          />
+        )
+      }
     }
   ]
 

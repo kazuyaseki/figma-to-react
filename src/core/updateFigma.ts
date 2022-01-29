@@ -13,6 +13,7 @@ export function getUpdateableProperties(node: SceneNode) {
   if (node.type === 'TEXT') {
     if ((node.fills as Paint[]).length > 0 && (node.fills as Paint[])[0].type !== 'IMAGE') {
       const paint = (node.fills as Paint[])[0]
+
       const fillStyleId = node.fillStyleId
       const textStyleId = node.textStyleId
 
@@ -63,6 +64,9 @@ export function getUpdateableProperties(node: SceneNode) {
       updateableProperties = { ...updateableProperties, ...layoutProperties }
     }
   }
+
+  console.log('updateableProperties:')
+  console.log(updateableProperties)
 
   return updateableProperties
 }

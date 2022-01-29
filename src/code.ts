@@ -11,7 +11,7 @@ import { getUpdateableProperties, updateNode } from './core/updateFigma'
 import { Store } from './model/Store'
 import { updateColorsTokensFromFigmaStyles, updateEffectsTokensFromFigmaStyles, updateGridsTokensFromFigmaStyles, updateTextsTokensFromFigmaStyles } from './core/handleFigmaStyles'
 import * as _ from 'lodash'
-import { isCustomTextStyleProperty } from './model/FigmaProperties'
+import { COLOR_STYLES_GROUP_NAME } from './model/FigmaStyleGroup'
 
 const figmaDocument = figma.root
 
@@ -76,6 +76,18 @@ figma.ui.onmessage = (msg: messageTypes) => {
               propertyByName['linkedToken'] = figmaStyleName
               newProperties[0] = { ...propertyByName }
             }
+
+            /* TODO: add figma style to design tokens if it doesn't exist there
+            const sharedPluginDataTokens = figmaDocument.getSharedPluginData('ftrn', 'designTokens')
+            const currentDesignTokens: [] = _.isEmpty(sharedPluginDataTokens) ? [] : JSON.parse(sharedPluginDataTokens)
+            const tokenByName = currentDesignTokens.find((designToken: any) => designToken.tokenName === figmaStyleName && designToken.tokenGroup === COLOR_STYLES_GROUP_NAME)
+            if (!tokenByName) {
+              const sharedPluginDataTokensCounter = figmaDocument.getSharedPluginData('ftrn', 'designTokensCounter')
+              const currentDesignTokensCounter = Number(sharedPluginDataTokensCounter)
+              const newToken = { id: currentDesignTokensCounter + 1, tokenName: figmaStyleName, tokenValue: ?, tokenGroup: COLOR_STYLES_GROUP_NAME}
+              // setSharedPluginData
+            }
+            */
           }
         }
       }
