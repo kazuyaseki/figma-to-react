@@ -94,7 +94,7 @@ export function getBorderRadiusString(node: FrameNode | RectangleNode | Componen
 
 export function getBoxShadowString(node: FrameNode | RectangleNode | ComponentNode | InstanceNode, unitType: UnitType) {
   if (node.effects.length > 0 && node.effects[0].type === 'DROP_SHADOW') {
-    const dropShadowEffect = node.effects[0] as ShadowEffect
+    const dropShadowEffect = node.effects[0]
 
     let resultString = ''
 
@@ -125,9 +125,9 @@ export function buildColorString(source: any) {
     return `#${rgbValueToHex(solidPaint.color.r)}${rgbValueToHex(solidPaint.color.g)}${rgbValueToHex(solidPaint.color.b)}`
   }
 
-  const isDropShadow = (source as ShadowEffect).type === 'DROP_SHADOW'
+  const isDropShadow = source.type === 'DROP_SHADOW'
   if (isDropShadow) {
-    const shadowEffect = source as ShadowEffect
+    const shadowEffect = source
     if (shadowEffect.color.a !== undefined && shadowEffect.color.a < 1) {
       return `rgba(${Math.floor(shadowEffect.color.r * 255)}, ${Math.floor(shadowEffect.color.g * 255)}, ${Math.floor(shadowEffect.color.b * 255)}, ${Number(
         shadowEffect.color.a
