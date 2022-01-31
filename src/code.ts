@@ -11,7 +11,6 @@ import { getUpdateableProperties, updateNode } from './core/updateFigma'
 import { Store } from './model/Store'
 import { updateColorsTokensFromFigmaStyles, updateEffectsTokensFromFigmaStyles, updateGridsTokensFromFigmaStyles, updateTextsTokensFromFigmaStyles } from './core/handleFigmaStyles'
 import * as _ from 'lodash'
-import { COLOR_STYLES_GROUP_NAME } from './model/FigmaStyleGroup'
 
 const figmaDocument = figma.root
 
@@ -20,7 +19,7 @@ let selectedNodes = figma.currentPage.selection
 function init() {
   const sharedPluginData = getSharedPluginData()
   updateNodes(sharedPluginData)
-  updateTokensFromFigmaStyles(sharedPluginData)
+  updateTokensFromFigmaStyles(true, sharedPluginData)
 
   figma.showUI(__html__, { width: 640, height: 1080 })
 
@@ -76,8 +75,7 @@ figma.ui.onmessage = (msg: messageTypes) => {
               propertyByName['linkedToken'] = figmaStyleName
               newProperties[0] = { ...propertyByName }
             }
-
-            /* TODO: add figma style to design tokens if it doesn't exist there
+            /* TODO: MAYBE NOT NEEDED add figma style to design tokens if it doesn't exist there 
             const sharedPluginDataTokens = figmaDocument.getSharedPluginData('ftrn', 'designTokens')
             const currentDesignTokens: [] = _.isEmpty(sharedPluginDataTokens) ? [] : JSON.parse(sharedPluginDataTokens)
             const tokenByName = currentDesignTokens.find((designToken: any) => designToken.tokenName === figmaStyleName && designToken.tokenGroup === COLOR_STYLES_GROUP_NAME)
@@ -112,7 +110,7 @@ figma.on('selectionchange', () => {
   } else if (selectedNodes.length === 0) {
     const sharedPluginData = getSharedPluginData()
     updateNodes(sharedPluginData)
-    updateTokensFromFigmaStyles(sharedPluginData)
+    updateTokensFromFigmaStyles(false, sharedPluginData)
     figma.ui.postMessage({ nodeProperties: {}, sharedPluginData })
   } else {
     generate(selectedNodes[0], {})
@@ -149,7 +147,7 @@ async function generate(node: SceneNode, config: { cssStyle?: CssStyle; unitType
   const sharedPluginData = getSharedPluginData()
 
   updateNodes(sharedPluginData)
-  updateTokensFromFigmaStyles(sharedPluginData)
+  updateTokensFromFigmaStyles(false, sharedPluginData)
 
   const originalTagTree = buildTagTree(node, unitType, textCount, cssStyle, sharedPluginData)
   if (originalTagTree === null) {
@@ -211,11 +209,48 @@ function updateNodes(sharedPluginData: Store) {
   sharedPluginData.nodes = nodesInfos
 }
 
-function updateTokensFromFigmaStyles(sharedPluginData: Store) {
-  updateTextsTokensFromFigmaStyles(sharedPluginData, figma.getLocalTextStyles())
-  updateGridsTokensFromFigmaStyles(sharedPluginData, figma.getLocalGridStyles())
-  updateEffectsTokensFromFigmaStyles(sharedPluginData, figma.getLocalEffectStyles())
-  updateColorsTokensFromFigmaStyles(sharedPluginData, figma.getLocalPaintStyles())
+function updateTokensFromFigmaStyles(init: boolean, sharedPluginData: Store) {
+  figma.skipInvisibleInstanceChildren = true
+
+  const localEffectStyles = figma.getLocalEffectStyles()
+  const localGridStyles = figma.getLocalGridStyles()
+  const paintStyles = figma.getLocalPaintStyles()
+  const textStyles = figma.getLocalTextStyles()
+
+  if (init) {
+    const initialTimestamp = Date.now()
+    const nodes = figmaDocument.findAllWithCriteria({
+      types: ['TEXT']
+    })
+    nodes.forEach((node: TextNode) => {
+      const fillStyleId = node.fillStyleId as string
+      const textStyleId = node.textStyleId as string
+      if (!_.isEmpty(fillStyleId)) {
+        const currentPaintStyle = paintStyles.find((paintStyle) => paintStyle.id === node.fillStyleId)
+        if (!currentPaintStyle) {
+          const paintStyleById = figma.getStyleById(fillStyleId) as PaintStyle
+          paintStyles.push(paintStyleById)
+        }
+      }
+      if (!_.isEmpty(textStyleId)) {
+        const currentTextStyle = textStyles.find((textStyle) => textStyle.id === node.textStyleId)
+        if (!currentTextStyle) {
+          const textStyleById = figma.getStyleById(textStyleId) as TextStyle
+          textStyles.push(textStyleById)
+        }
+      }
+    })
+    const finalTimestamp = Date.now()
+    const timeDifference = finalTimestamp - initialTimestamp
+    console.log('Loading time (in milisseconds): ' + timeDifference)
+  }
+
+  updateEffectsTokensFromFigmaStyles(sharedPluginData, localEffectStyles)
+  updateGridsTokensFromFigmaStyles(sharedPluginData, localGridStyles)
+  updateColorsTokensFromFigmaStyles(sharedPluginData, paintStyles)
+  updateTextsTokensFromFigmaStyles(sharedPluginData, textStyles)
+
+  figma.skipInvisibleInstanceChildren = false
 }
 
 function getNodePage(node: any) {

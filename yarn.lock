@@ -1043,10 +1043,10 @@
     minimatch "^3.0.4"
     strip-json-comments "^3.1.1"
 
-"@figma/plugin-typings@1.33.0":
-  version "1.33.0"
-  resolved "https://registry.yarnpkg.com/@figma/plugin-typings/-/plugin-typings-1.33.0.tgz#dd9d22aaec1126b6cba73079c9d0da8e2de890c4"
-  integrity sha512-k0YazDJqo5daYznnH+PKJJ32MGv8ftimFp1x+flH4k4lFwtH8UQ/tUGFBClZHDXZWX3rdr1GvUzhbUMdZhN3ug==
+"@figma/plugin-typings@1.41.0":
+  version "1.41.0"
+  resolved "https://registry.yarnpkg.com/@figma/plugin-typings/-/plugin-typings-1.41.0.tgz#d426b32bc9bc7cd271ab3c9bd6866d748d2ab025"
+  integrity sha512-hae/prXKEx6p5Q1QMf03Q+ZYYcGJbzGqFlx3xLb+wAxDindsdYKX/QkfzvgDuwKEHIzpgk0Ru6/4EnYCLGZDIw==
 
 "@istanbuljs/load-nyc-config@^1.0.0":
   version "1.1.0"
