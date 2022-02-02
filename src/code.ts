@@ -212,19 +212,29 @@ function updateNodes(sharedPluginData: Store) {
 function updateTokensFromFigmaStyles(init: boolean, sharedPluginData: Store) {
   figma.skipInvisibleInstanceChildren = true
 
-  const localEffectStyles = figma.getLocalEffectStyles()
+  const effectStyles = figma.getLocalEffectStyles()
   const localGridStyles = figma.getLocalGridStyles()
   const paintStyles = figma.getLocalPaintStyles()
   const textStyles = figma.getLocalTextStyles()
 
   if (init) {
     const initialTimestamp = Date.now()
+
     const nodes = figmaDocument.findAllWithCriteria({
-      types: ['TEXT']
+      types: ['COMPONENT', 'COMPONENT_SET', 'FRAME', 'INSTANCE', 'TEXT']
     })
-    nodes.forEach((node: TextNode) => {
+
+    nodes.forEach((node: ComponentNode | ComponentSetNode | FrameNode | InstanceNode | TextNode) => {
+      // TODO: also need to add external grid styles
+      const effectStyleId = node.effectStyleId as string
       const fillStyleId = node.fillStyleId as string
-      const textStyleId = node.textStyleId as string
+      if (!_.isEmpty(effectStyleId)) {
+        const currentEffectStyle = effectStyles.find((effectStyle) => effectStyle.id === node.effectStyleId)
+        if (!currentEffectStyle) {
+          const effectStyleById = figma.getStyleById(effectStyleId) as EffectStyle
+          effectStyles.push(effectStyleById)
+        }
+      }
       if (!_.isEmpty(fillStyleId)) {
         const currentPaintStyle = paintStyles.find((paintStyle) => paintStyle.id === node.fillStyleId)
         if (!currentPaintStyle) {
@@ -232,20 +242,25 @@ function updateTokensFromFigmaStyles(init: boolean, sharedPluginData: Store) {
           paintStyles.push(paintStyleById)
         }
       }
-      if (!_.isEmpty(textStyleId)) {
-        const currentTextStyle = textStyles.find((textStyle) => textStyle.id === node.textStyleId)
-        if (!currentTextStyle) {
-          const textStyleById = figma.getStyleById(textStyleId) as TextStyle
-          textStyles.push(textStyleById)
+      if (node.type === 'TEXT') {
+        const textStyleId = node.textStyleId as string
+        if (!_.isEmpty(textStyleId)) {
+          const currentTextStyle = textStyles.find((textStyle) => textStyle.id === node.textStyleId)
+          if (!currentTextStyle) {
+            const textStyleById = figma.getStyleById(textStyleId) as TextStyle
+            textStyles.push(textStyleById)
+          }
         }
       }
     })
+
     const finalTimestamp = Date.now()
     const timeDifference = finalTimestamp - initialTimestamp
-    console.log('Loading time (in milisseconds): ' + timeDifference)
+
+    console.log('updateTokensFromFigmaStyles init time (in milisseconds): ' + timeDifference)
   }
 
-  updateEffectsTokensFromFigmaStyles(sharedPluginData, localEffectStyles)
+  updateEffectsTokensFromFigmaStyles(sharedPluginData, effectStyles)
   updateGridsTokensFromFigmaStyles(sharedPluginData, localGridStyles)
   updateColorsTokensFromFigmaStyles(sharedPluginData, paintStyles)
   updateTextsTokensFromFigmaStyles(sharedPluginData, textStyles)
