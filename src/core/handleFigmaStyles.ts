@@ -1,10 +1,11 @@
+import * as _ from 'lodash'
 import { DesignToken } from '../model/DesignToken'
 import { DesignTokenGroup } from '../model/DesignTokenGroup'
 import { COLOR_STYLES_GROUP_NAME, EFFECT_STYLES_GROUP_NAME, GRID_STYLES_GROUP_NAME, TEXT_STYLES_GROUP_NAME } from '../model/FigmaStyleGroup'
 import { Store } from '../model/Store'
 import { rgbaToHex } from '../utils/unitTypeUtils'
 
-export function updateColorsTokensFromFigmaStyles(sharedPluginData: Store, localPaintStyles: PaintStyle[]) {
+export function updateColorsTokensFromFigmaStyles(sharedPluginData: Store, localPaintStyles: PaintStyle[], settings: any) {
   if (localPaintStyles.length > 0) {
     const figmaColorsGroup = sharedPluginData.designTokensGroups?.find((designTokenGroup: DesignTokenGroup) => designTokenGroup.groupName === COLOR_STYLES_GROUP_NAME)
 
@@ -33,13 +34,13 @@ export function updateColorsTokensFromFigmaStyles(sharedPluginData: Store, local
           const rgbaString = `rgba(${redValue}, ${greenValue}, ${blueValue}, ${opacityValue})`
 
           if (figmaColorDesignToken) {
-            figmaColorDesignToken.tokenName = colorName
+            figmaColorDesignToken.tokenName = settings?.camelCase ? _.camelCase(colorName) : colorName
             figmaColorDesignToken.tokenValue = rgbaToHex(rgbaString).toUpperCase()
           } else {
             // Add new Figma Color
             sharedPluginData.designTokens?.unshift({
               id: colorId,
-              tokenName: colorName,
+              tokenName: settings?.camelCase ? _.camelCase(colorName) : colorName,
               tokenValue: rgbaToHex(rgbaString).toUpperCase(),
               tokenGroup: COLOR_STYLES_GROUP_NAME
             })
@@ -53,7 +54,7 @@ export function updateColorsTokensFromFigmaStyles(sharedPluginData: Store, local
   }
 }
 
-export function updateEffectsTokensFromFigmaStyles(sharedPluginData: Store, localEffectStyles: EffectStyle[]) {
+export function updateEffectsTokensFromFigmaStyles(sharedPluginData: Store, localEffectStyles: EffectStyle[], settings: any) {
   if (localEffectStyles.length > 0) {
     const figmaEffectsGroup = sharedPluginData.designTokensGroups?.find((designTokenGroup: DesignTokenGroup) => designTokenGroup.groupName === EFFECT_STYLES_GROUP_NAME)
 
@@ -90,13 +91,13 @@ export function updateEffectsTokensFromFigmaStyles(sharedPluginData: Store, loca
           )
 
           if (figmaEffectDesignToken) {
-            figmaEffectDesignToken.tokenName = effectName
+            figmaEffectDesignToken.tokenName = settings?.camelCase ? _.camelCase(effectName) : effectName
             figmaEffectDesignToken.tokenValue = effectValue
           } else {
             // Add new Figma Effect
             sharedPluginData.designTokens?.unshift({
               id: effectId,
-              tokenName: effectName,
+              tokenName: settings?.camelCase ? _.camelCase(effectName) : effectName,
               tokenValue: effectValue,
               tokenGroup: EFFECT_STYLES_GROUP_NAME
             })
@@ -110,7 +111,7 @@ export function updateEffectsTokensFromFigmaStyles(sharedPluginData: Store, loca
   }
 }
 
-export function updateGridsTokensFromFigmaStyles(sharedPluginData: Store, localGridStyles: GridStyle[]) {
+export function updateGridsTokensFromFigmaStyles(sharedPluginData: Store, localGridStyles: GridStyle[], settings: any) {
   if (localGridStyles.length > 0) {
     const figmaGridsGroup = sharedPluginData.designTokensGroups?.find((designTokenGroup: DesignTokenGroup) => designTokenGroup.groupName === GRID_STYLES_GROUP_NAME)
 
@@ -139,13 +140,13 @@ export function updateGridsTokensFromFigmaStyles(sharedPluginData: Store, localG
           )
 
           if (figmaGridDesignToken) {
-            figmaGridDesignToken.tokenName = gridName
+            figmaGridDesignToken.tokenName = settings?.camelCase ? _.camelCase(gridName) : gridName
             figmaGridDesignToken.tokenValue = gridValue
           } else {
             // Add new Figma Grid
             sharedPluginData.designTokens?.unshift({
               id: gridId,
-              tokenName: gridName,
+              tokenName: settings?.camelCase ? _.camelCase(gridName) : gridName,
               tokenValue: gridValue,
               tokenGroup: GRID_STYLES_GROUP_NAME
             })
@@ -159,7 +160,7 @@ export function updateGridsTokensFromFigmaStyles(sharedPluginData: Store, localG
   }
 }
 
-export function updateTextsTokensFromFigmaStyles(sharedPluginData: Store, localTextStyles: TextStyle[]) {
+export function updateTextsTokensFromFigmaStyles(sharedPluginData: Store, localTextStyles: TextStyle[], settings: any) {
   if (localTextStyles.length > 0) {
     const figmaTextsGroup = sharedPluginData.designTokensGroups?.find((designTokenGroup: DesignTokenGroup) => designTokenGroup.groupName === TEXT_STYLES_GROUP_NAME)
 
@@ -190,13 +191,13 @@ export function updateTextsTokensFromFigmaStyles(sharedPluginData: Store, localT
       const figmaTextDesignToken = sharedPluginData.designTokens?.find((designToken: DesignToken) => designToken.tokenGroup === TEXT_STYLES_GROUP_NAME && designToken.id === textId)
 
       if (figmaTextDesignToken) {
-        figmaTextDesignToken.tokenName = textName
+        figmaTextDesignToken.tokenName = settings?.camelCase ? _.camelCase(textName) : textName
         figmaTextDesignToken.tokenValue = textValue
       } else {
         // Add new Figma Text Design Tokens
         sharedPluginData.designTokens?.unshift({
           id: textId,
-          tokenName: textName,
+          tokenName: settings?.camelCase ? _.camelCase(textName) : textName,
           tokenValue: textValue,
           tokenGroup: TEXT_STYLES_GROUP_NAME
         })

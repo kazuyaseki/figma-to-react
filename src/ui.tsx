@@ -10,15 +10,17 @@ import UserComponentSettingList from './ui/UserComponentSettingList'
 import { UserComponentSetting } from './model/userComponentSetting'
 
 import Box from '@material-ui/core/Box'
-import Tabs from '@material-ui/core/Tabs'
 import Tab from '@material-ui/core/Tab'
+import Tabs from '@material-ui/core/Tabs'
+
+import * as _ from 'lodash'
 
 import { renderDesignTokensTab } from './ui/DesignTokensTab'
 import { renderPropertiesTab } from './ui/PropertiesTab'
-import * as _ from 'lodash'
 import { useStore } from './hooks/useStore'
 import { Store } from './model/Store'
 import { renderSyncTab } from './ui/SyncTab'
+import { SettingsTab } from './ui/SettingsTab'
 
 function escapeHtml(str: string) {
   str = str.replace(/&/g, '&amp;')
@@ -69,6 +71,7 @@ const App: React.VFC = () => {
   const [providerSettings, setProviderSettings] = React.useState({})
   const [selectedCssStyle, setCssStyle] = React.useState<CssStyle>('css')
   const [selectedUnitType, setUnitType] = React.useState<UnitType>('px')
+  const [settings, setSettings] = React.useState({})
   const [tabValue, setTabValue] = React.useState(0)
   const [userComponentSettings, setUserComponentSettings] = React.useState<UserComponentSetting[]>([])
   const textRef = React.useRef<HTMLTextAreaElement>(null)
@@ -81,21 +84,25 @@ const App: React.VFC = () => {
   // set initial values taken from figma storage
   React.useEffect(() => {
     onmessage = (event) => {
-      setCssStyle(event.data.pluginMessage.cssStyle)
-      setUnitType(event.data.pluginMessage.unitType)
       const codeStr = event.data.pluginMessage.generatedCodeStr + '\n\n' + event.data.pluginMessage.cssString
       setCode(codeStr)
-      setUserComponentSettings(event.data.pluginMessage.userComponentSettings)
+
+      setCssStyle(event.data.pluginMessage.cssStyle)
       setNodeProperties(event.data.pluginMessage.nodeProperties)
+      setUnitType(event.data.pluginMessage.unitType)
+      setUserComponentSettings(event.data.pluginMessage.userComponentSettings)
+
+      const settings = event.data.pluginMessage.settings
+      if (settings) {
+        setSettings(settings)
+      }
 
       const pluginMessageProviderSettings = event.data.pluginMessage.providerSettings
-
       if (pluginMessageProviderSettings) {
         setProviderSettings(pluginMessageProviderSettings)
       }
 
       const { sharedPluginData } = event.data.pluginMessage
-
       if (sharedPluginData) {
         updateStoreFromSharedPluginData(sharedPluginData)
       }
@@ -104,7 +111,6 @@ const App: React.VFC = () => {
 
   const updateStoreFromSharedPluginData = (sharedPluginData: Store) => {
     const { designTokens, designTokensCounter, designTokensGroups, designTokensGroupsCounter, nodes, properties } = sharedPluginData
-
     if (designTokens && designTokensCounter) {
       setDesignTokens(designTokens, designTokensCounter)
     }
@@ -114,10 +120,7 @@ const App: React.VFC = () => {
     if (!_.isEmpty(nodes)) {
       setNodes(nodes)
     }
-
     if (properties) {
-      //      console.log('updateStoreFromSharedPluginData properties:')
-      //      console.log(properties)
       setProperties(properties)
     }
   }
@@ -130,7 +133,6 @@ const App: React.VFC = () => {
     if (textRef.current) {
       textRef.current.select()
       document.execCommand('copy')
-
       const msg: messageTypes = { type: 'notify-copy-success' }
       parent.postMessage(msg, '*')
     }
@@ -175,6 +177,7 @@ const App: React.VFC = () => {
           <Tab label="Properties" />
           <Tab label="Code" />
           <Tab label="Sync" />
+          <Tab label="Settings" />
         </Tabs>
       </Box>
       <TabPanel value={tabValue} index={0}>
@@ -256,6 +259,9 @@ const App: React.VFC = () => {
       </TabPanel>
       <TabPanel value={tabValue} index={3}>
         {renderSyncTab(providerSettings, parent)}
+      </TabPanel>
+      <TabPanel value={tabValue} index={4}>
+        <SettingsTab parent={parent} settings={settings} />
       </TabPanel>
     </Box>
   )

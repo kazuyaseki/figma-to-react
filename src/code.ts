@@ -11,6 +11,7 @@ import { getUpdateableProperties, updateNode } from './core/updateFigma'
 import { Store } from './model/Store'
 import { updateColorsTokensFromFigmaStyles, updateEffectsTokensFromFigmaStyles, updateGridsTokensFromFigmaStyles, updateTextsTokensFromFigmaStyles } from './core/handleFigmaStyles'
 import * as _ from 'lodash'
+import { loadDefaultSettings } from './model/Settings'
 
 const figmaDocument = figma.root
 
@@ -48,6 +49,9 @@ figma.ui.onmessage = (msg: messageTypes) => {
   } else if (msg.type === 'update-user-component-settings') {
     figma.clientStorage.setAsync(STORAGE_KEYS.USER_COMPONENT_SETTINGS_KEY, msg.userComponentSettings)
     generate(selectedNodes[0], {})
+  } else if (msg.type === 'update-settings') {
+    figma.clientStorage.setAsync(STORAGE_KEYS.UPDATE_SETTINGS_KEY, msg.settings)
+    figma.ui.postMessage({ nodeProperties: {}, settings: msg.settings })
   } else if (msg.type === 'update-all-linked-properties') {
     figma.clientStorage.setAsync(STORAGE_KEYS.UPDATE_ALL_LINKED_PROPERTIES_KEY, msg.linkedProperties)
     updateAllLinkedProperties(msg.linkedProperties)
@@ -121,35 +125,29 @@ async function generate(node: SceneNode, config: { cssStyle?: CssStyle; unitType
   if (!node) {
     return
   }
-
   let cssStyle = config.cssStyle
   if (!cssStyle) {
     cssStyle = await figma.clientStorage.getAsync(STORAGE_KEYS.CSS_STYLE_KEY)
-
     if (!cssStyle) {
       cssStyle = 'css'
     }
   }
-
   let unitType = config.unitType
   if (!unitType) {
     unitType = await figma.clientStorage.getAsync(STORAGE_KEYS.UNIT_TYPE_KEY)
-
     if (!unitType) {
       unitType = 'px'
     }
   }
-
   const userComponentSettings: UserComponentSetting[] = (await figma.clientStorage.getAsync(STORAGE_KEYS.USER_COMPONENT_SETTINGS_KEY)) || []
-
   const textCount = new TextCount()
-
   const sharedPluginData = getSharedPluginData()
 
   updateNodes(sharedPluginData)
   updateTokensFromFigmaStyles(false, sharedPluginData)
 
   const originalTagTree = buildTagTree(node, unitType, textCount, cssStyle, sharedPluginData)
+
   if (originalTagTree === null) {
     figma.notify('Please select a visible node')
     return
@@ -158,7 +156,6 @@ async function generate(node: SceneNode, config: { cssStyle?: CssStyle; unitType
   const tag = await modifyTreeForComponent(originalTagTree, figma)
   const generatedCodeStr = buildCode(tag, cssStyle)
   const cssString = buildCssString(tag, cssStyle, sharedPluginData)
-
   const updateableProperties = getUpdateableProperties(node)
 
   figma.ui.postMessage({ generatedCodeStr, cssString, cssStyle, unitType, userComponentSettings, nodeProperties: updateableProperties, sharedPluginData })
@@ -205,21 +202,19 @@ function updateNodes(sharedPluginData: Store) {
       }
     }
   })
-
   sharedPluginData.nodes = nodesInfos
 }
 
-function updateTokensFromFigmaStyles(init: boolean, sharedPluginData: Store) {
-  figma.skipInvisibleInstanceChildren = true
-
-  const effectStyles = figma.getLocalEffectStyles()
-  const localGridStyles = figma.getLocalGridStyles()
-  const paintStyles = figma.getLocalPaintStyles()
-  const textStyles = figma.getLocalTextStyles()
-
+async function updateTokensFromFigmaStyles(init: boolean, sharedPluginData: Store) {
   if (init) {
-    const initialTimestamp = Date.now()
+    figma.skipInvisibleInstanceChildren = true
 
+    const effectStyles = figma.getLocalEffectStyles()
+    const gridStyles = figma.getLocalGridStyles()
+    const paintStyles = figma.getLocalPaintStyles()
+    const textStyles = figma.getLocalTextStyles()
+
+    const initialTimestamp = Date.now()
     const nodes = figmaDocument.findAllWithCriteria({
       types: ['COMPONENT', 'COMPONENT_SET', 'FRAME', 'INSTANCE', 'TEXT']
     })
@@ -254,18 +249,25 @@ function updateTokensFromFigmaStyles(init: boolean, sharedPluginData: Store) {
       }
     })
 
+    const clientStorageSettings = await figma.clientStorage.getAsync(STORAGE_KEYS.UPDATE_SETTINGS_KEY)
+    let settings = clientStorageSettings
+
+    if (_.isEmpty(settings)) {
+      settings = loadDefaultSettings()
+    }
+
+    updateEffectsTokensFromFigmaStyles(sharedPluginData, effectStyles, settings)
+    updateGridsTokensFromFigmaStyles(sharedPluginData, gridStyles, settings)
+    updateColorsTokensFromFigmaStyles(sharedPluginData, paintStyles, settings)
+    updateTextsTokensFromFigmaStyles(sharedPluginData, textStyles, settings)
+
+    figma.skipInvisibleInstanceChildren = false
+
     const finalTimestamp = Date.now()
     const timeDifference = finalTimestamp - initialTimestamp
 
     console.log('updateTokensFromFigmaStyles init time (in milisseconds): ' + timeDifference)
   }
-
-  updateEffectsTokensFromFigmaStyles(sharedPluginData, effectStyles)
-  updateGridsTokensFromFigmaStyles(sharedPluginData, localGridStyles)
-  updateColorsTokensFromFigmaStyles(sharedPluginData, paintStyles)
-  updateTextsTokensFromFigmaStyles(sharedPluginData, textStyles)
-
-  figma.skipInvisibleInstanceChildren = false
 }
 
 function getNodePage(node: any) {
