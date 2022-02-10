@@ -103,10 +103,11 @@ export const PropertiesTab = ({ nodeProperties, parent, settings }) => {
       renderCell: (params: GridRenderCellParams) => {
         const row = params.row
         const linkedTokenName = _.isEmpty(settings) || settings.camelCase ? _.camelCase(row.linkedToken) : row.linkedToken
-        // Shouldn't render Autocomplete if it is a Figma Style token or a color property
+        // Shouldn't render Autocomplete if it is a Figma Style token
+        /* FIXME: perhaps shouldn't allow design tokens attribution to color properties
         if (row.id === 'backgroundColor') {
           return <p style={{ fontWeight: 'bold' }}> {linkedTokenName}</p>
-        }
+        } */
         if (!_.isEmpty(linkedTokenName)) {
           const hasStyleId = _.isObject(row.value) && !_.isEmpty(row.value.styleId)
           if (hasStyleId || isFigmaStyle(linkedTokenName)) {
