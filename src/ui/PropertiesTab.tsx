@@ -10,7 +10,7 @@ import { Store } from '../model/Store'
 import { getFigmaObjectAsString } from '../utils/isImageNode'
 import { FigmaProperties, FigmaProperty } from '../model/FigmaProperties'
 
-export const PropertiesTab = ({ nodeProperties, parent, settings }) => {
+export const PropertiesTab = ({ nodeProperties, parent, settings }: any) => {
   const designTokens = useStore((state) => state.designTokens)
   const properties = useStore((state) => state.properties)
 
