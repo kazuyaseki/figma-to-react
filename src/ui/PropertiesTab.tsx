@@ -10,7 +10,7 @@ import { Store } from '../model/Store'
 import { getFigmaObjectAsString } from '../utils/isImageNode'
 import { FigmaProperties, FigmaProperty } from '../model/FigmaProperties'
 
-export const renderPropertiesTab = (nodeProperties: any, parent: any) => {
+export const PropertiesTab = ({ nodeProperties, parent, settings }) => {
   const designTokens = useStore((state) => state.designTokens)
   const properties = useStore((state) => state.properties)
 
@@ -19,6 +19,7 @@ export const renderPropertiesTab = (nodeProperties: any, parent: any) => {
   const getLinkedToken = useStore((state) => state.getLinkedToken)
   const getPropertiesByNodeId = useStore((state) => state.getPropertiesByNodeId)
   const getPropertyByName = useStore((state) => state.getPropertyByName)
+  const isFigmaStyle = useStore((state) => state.isFigmaStyle)
   const updateProperty = useStore((state) => state.updateProperty)
 
   React.useEffect(() => {
@@ -50,7 +51,7 @@ export const renderPropertiesTab = (nodeProperties: any, parent: any) => {
           let result = ''
           const objectKeys = Object.keys(tokenValue)
           const figmaObject: any = tokenValue
-          if (figmaObject.visible && figmaObject.type === 'SOLID' && !_.isEmpty(figmaObject.color) && figmaObject.opacity) {
+          if (figmaObject.type === 'SOLID' && !_.isEmpty(figmaObject.color) && figmaObject.opacity) {
             const rgbValue = [Math.floor(figmaObject.color.r * 255), Math.floor(figmaObject.color.g * 255), Math.floor(figmaObject.color.b * 255)]
 
             let textColor = 'black'
@@ -101,15 +102,17 @@ export const renderPropertiesTab = (nodeProperties: any, parent: any) => {
       width: 250,
       renderCell: (params: GridRenderCellParams) => {
         const row = params.row
-
-        console.log('row:')
-        console.log(row)
-
-        // Shouldn't render Autocomplete if it is a Figma Style token
-        if (row.linkedToken && _.isObject(row.value) && !_.isEmpty(row.value.styleId)) {
-          return <p style={{ fontWeight: 'bold' }}> {row.linkedToken}</p>
+        const linkedTokenName = _.isEmpty(settings) || settings.camelCase ? _.camelCase(row.linkedToken) : row.linkedToken
+        // Shouldn't render Autocomplete if it is a Figma Style token or a color property
+        if (row.id === 'backgroundColor') {
+          return <p style={{ fontWeight: 'bold' }}> {linkedTokenName}</p>
         }
-
+        if (!_.isEmpty(linkedTokenName)) {
+          const hasStyleId = _.isObject(row.value) && !_.isEmpty(row.value.styleId)
+          if (hasStyleId || isFigmaStyle(linkedTokenName)) {
+            return <p style={{ fontWeight: 'bold' }}> {linkedTokenName}</p>
+          }
+        }
         return (
           <Autocomplete
             id="combo-design-tokens"

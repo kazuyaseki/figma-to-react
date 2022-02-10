@@ -1,7 +1,7 @@
 import create from 'zustand'
 import * as _ from 'lodash'
 import { DesignTokenType } from '../model/DesignToken'
-import { COLOR_STYLES_GROUP_NAME, isFigmaStyleGroup, TEXT_STYLES_GROUP_NAME } from '../model/FigmaStyleGroup'
+import { COLOR_STYLES_GROUP_NAME, EFFECT_STYLES_GROUP_NAME, GRID_STYLES_GROUP_NAME, isFigmaStyleGroup, TEXT_STYLES_GROUP_NAME } from '../model/FigmaStyleGroup'
 import { isHex, isNotANumber } from '../utils/unitTypeUtils'
 
 export const useStore = create((set: any, get: any) => ({
@@ -98,6 +98,18 @@ export const useStore = create((set: any, get: any) => ({
     const properties = get().properties
     const propertiesByNodeId = properties.filter((property: any) => property.nodeId === nodeId)
     return propertiesByNodeId
+  },
+  isFigmaStyle: (tokenName: string) => {
+    const designToken = get().getDesignTokenByName(tokenName)
+    if (designToken && !_.isEmpty(designToken.tokenGroup)) {
+      return (
+        designToken.tokenGroup === COLOR_STYLES_GROUP_NAME ||
+        designToken.tokenGroup === EFFECT_STYLES_GROUP_NAME ||
+        designToken.tokenGroup === GRID_STYLES_GROUP_NAME ||
+        designToken.tokenGroup === TEXT_STYLES_GROUP_NAME
+      )
+    }
+    return false
   },
   setDesignTokens: (designTokens: any, designTokensCounter: number) =>
     set((state: any) => ({

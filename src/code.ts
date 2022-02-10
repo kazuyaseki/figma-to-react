@@ -20,7 +20,6 @@ let selectedNodes = figma.currentPage.selection
 function init() {
   const sharedPluginData = getSharedPluginData()
   updateNodes(sharedPluginData)
-  updateTokensFromFigmaStyles(true, sharedPluginData)
 
   figma.showUI(__html__, { width: 640, height: 1080 })
 
@@ -28,6 +27,9 @@ function init() {
     figma.notify('Figma To React Native - Please select only 1 node')
     figma.closePlugin()
   } else {
+    getSettings().then((settings) => {
+      updateTokensFromFigmaStyles(sharedPluginData, settings)
+    })
     getProviderSettings().then((providerSettings) => {
       figma.ui.postMessage({ providerSettings, nodeProperties: {}, sharedPluginData })
       if (selectedNodes.length === 1) {
@@ -114,7 +116,7 @@ figma.on('selectionchange', () => {
   } else if (selectedNodes.length === 0) {
     const sharedPluginData = getSharedPluginData()
     updateNodes(sharedPluginData)
-    updateTokensFromFigmaStyles(false, sharedPluginData)
+    // FIXME: might be needed    updateTokensFromFigmaStyles(sharedPluginData)
     figma.ui.postMessage({ nodeProperties: {}, sharedPluginData })
   } else {
     generate(selectedNodes[0], {})
@@ -144,7 +146,7 @@ async function generate(node: SceneNode, config: { cssStyle?: CssStyle; unitType
   const sharedPluginData = getSharedPluginData()
 
   updateNodes(sharedPluginData)
-  updateTokensFromFigmaStyles(false, sharedPluginData)
+  // FIXME: might be needed updateTokensFromFigmaStyles(sharedPluginData)
 
   const originalTagTree = buildTagTree(node, unitType, textCount, cssStyle, sharedPluginData)
 
@@ -159,6 +161,11 @@ async function generate(node: SceneNode, config: { cssStyle?: CssStyle; unitType
   const updateableProperties = getUpdateableProperties(node)
 
   figma.ui.postMessage({ generatedCodeStr, cssString, cssStyle, unitType, userComponentSettings, nodeProperties: updateableProperties, sharedPluginData })
+}
+
+async function getSettings() {
+  const settings = await figma.clientStorage.getAsync(STORAGE_KEYS.UPDATE_SETTINGS_KEY)
+  return settings
 }
 
 async function getProviderSettings() {
@@ -205,69 +212,68 @@ function updateNodes(sharedPluginData: Store) {
   sharedPluginData.nodes = nodesInfos
 }
 
-async function updateTokensFromFigmaStyles(init: boolean, sharedPluginData: Store) {
-  if (init) {
-    figma.skipInvisibleInstanceChildren = true
+async function updateTokensFromFigmaStyles(sharedPluginData: Store, settings?: any) {
+  figma.skipInvisibleInstanceChildren = true
 
-    const effectStyles = figma.getLocalEffectStyles()
-    const gridStyles = figma.getLocalGridStyles()
-    const paintStyles = figma.getLocalPaintStyles()
-    const textStyles = figma.getLocalTextStyles()
+  const effectStyles = figma.getLocalEffectStyles()
+  const gridStyles = figma.getLocalGridStyles()
+  const paintStyles = figma.getLocalPaintStyles()
+  const textStyles = figma.getLocalTextStyles()
 
-    const initialTimestamp = Date.now()
-    const nodes = figmaDocument.findAllWithCriteria({
-      types: ['COMPONENT', 'COMPONENT_SET', 'FRAME', 'INSTANCE', 'TEXT']
-    })
+  const initialTimestamp = Date.now()
+  const nodes = figmaDocument.findAllWithCriteria({
+    types: ['COMPONENT', 'COMPONENT_SET', 'FRAME', 'INSTANCE', 'TEXT']
+  })
 
-    nodes.forEach((node: ComponentNode | ComponentSetNode | FrameNode | InstanceNode | TextNode) => {
-      // TODO: also need to add external grid styles
-      const effectStyleId = node.effectStyleId as string
-      const fillStyleId = node.fillStyleId as string
-      if (!_.isEmpty(effectStyleId)) {
-        const currentEffectStyle = effectStyles.find((effectStyle) => effectStyle.id === node.effectStyleId)
-        if (!currentEffectStyle) {
-          const effectStyleById = figma.getStyleById(effectStyleId) as EffectStyle
-          effectStyles.push(effectStyleById)
-        }
-      }
-      if (!_.isEmpty(fillStyleId)) {
-        const currentPaintStyle = paintStyles.find((paintStyle) => paintStyle.id === node.fillStyleId)
-        if (!currentPaintStyle) {
-          const paintStyleById = figma.getStyleById(fillStyleId) as PaintStyle
-          paintStyles.push(paintStyleById)
-        }
-      }
-      if (node.type === 'TEXT') {
-        const textStyleId = node.textStyleId as string
-        if (!_.isEmpty(textStyleId)) {
-          const currentTextStyle = textStyles.find((textStyle) => textStyle.id === node.textStyleId)
-          if (!currentTextStyle) {
-            const textStyleById = figma.getStyleById(textStyleId) as TextStyle
-            textStyles.push(textStyleById)
-          }
-        }
-      }
-    })
-
-    const clientStorageSettings = await figma.clientStorage.getAsync(STORAGE_KEYS.UPDATE_SETTINGS_KEY)
-    let settings = clientStorageSettings
-
-    if (_.isEmpty(settings)) {
-      settings = loadDefaultSettings()
-    }
-
-    updateEffectsTokensFromFigmaStyles(sharedPluginData, effectStyles, settings)
-    updateGridsTokensFromFigmaStyles(sharedPluginData, gridStyles, settings)
-    updateColorsTokensFromFigmaStyles(sharedPluginData, paintStyles, settings)
-    updateTextsTokensFromFigmaStyles(sharedPluginData, textStyles, settings)
-
-    figma.skipInvisibleInstanceChildren = false
-
-    const finalTimestamp = Date.now()
-    const timeDifference = finalTimestamp - initialTimestamp
-
-    console.log('updateTokensFromFigmaStyles init time (in milisseconds): ' + timeDifference)
+  let clientStorageSettings = settings
+  if (_.isEmpty(clientStorageSettings)) {
+    clientStorageSettings = loadDefaultSettings()
   }
+
+  nodes.forEach((node: ComponentNode | ComponentSetNode | FrameNode | InstanceNode | TextNode) => {
+    // TODO: also need to add external grid styles
+    const effectStyleId = node.effectStyleId as string
+    const fillStyleId = node.fillStyleId as string
+    if (!_.isEmpty(effectStyleId)) {
+      const effectStyleById = figma.getStyleById(effectStyleId) as EffectStyle
+      const effectStyleByIdName = settings.camelCase ? _.camelCase(effectStyleById.name) : effectStyleById.name
+      const currentEffectStyle = effectStyles.find((effectStyle) => effectStyle.id === node.effectStyleId || effectStyle.name === effectStyleByIdName)
+      if (!currentEffectStyle) {
+        effectStyles.push(effectStyleById)
+      }
+    }
+    if (!_.isEmpty(fillStyleId)) {
+      const paintStyleById = figma.getStyleById(fillStyleId) as PaintStyle
+      const paintStyleByIdName = settings.camelCase ? _.camelCase(paintStyleById.name) : paintStyleById.name
+      const currentPaintStyle = paintStyles.find((paintStyle) => paintStyle.id === node.fillStyleId || paintStyle.name === paintStyleByIdName)
+      if (!currentPaintStyle) {
+        paintStyles.push(paintStyleById)
+      }
+    }
+    if (node.type === 'TEXT') {
+      const textStyleId = node.textStyleId as string
+      if (!_.isEmpty(textStyleId)) {
+        const textStyleById = figma.getStyleById(textStyleId) as TextStyle
+        const textStyleByIdName = settings.camelCase ? _.camelCase(textStyleById.name) : textStyleById.name
+        const currentTextStyle = textStyles.find((textStyle) => textStyle.id === node.textStyleId || textStyle.name === textStyleByIdName)
+        if (!currentTextStyle) {
+          textStyles.push(textStyleById)
+        }
+      }
+    }
+  })
+
+  updateEffectsTokensFromFigmaStyles(sharedPluginData, effectStyles, clientStorageSettings)
+  updateGridsTokensFromFigmaStyles(sharedPluginData, gridStyles, clientStorageSettings)
+  updateColorsTokensFromFigmaStyles(sharedPluginData, paintStyles, clientStorageSettings)
+  updateTextsTokensFromFigmaStyles(sharedPluginData, textStyles, clientStorageSettings)
+
+  figma.skipInvisibleInstanceChildren = false
+
+  const finalTimestamp = Date.now()
+  const timeDifference = finalTimestamp - initialTimestamp
+
+  console.log('updateTokensFromFigmaStyles init time (in milisseconds): ' + timeDifference)
 }
 
 function getNodePage(node: any) {

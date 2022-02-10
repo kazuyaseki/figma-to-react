@@ -16,7 +16,7 @@ import Tabs from '@material-ui/core/Tabs'
 import * as _ from 'lodash'
 
 import { renderDesignTokensTab } from './ui/DesignTokensTab'
-import { renderPropertiesTab } from './ui/PropertiesTab'
+import { PropertiesTab } from './ui/PropertiesTab'
 import { useStore } from './hooks/useStore'
 import { Store } from './model/Store'
 import { renderSyncTab } from './ui/SyncTab'
@@ -184,7 +184,7 @@ const App: React.VFC = () => {
         {renderDesignTokensTab(parent)}
       </TabPanel>
       <TabPanel value={tabValue} index={1}>
-        {renderPropertiesTab(nodeProperties, parent)}
+        <PropertiesTab nodeProperties={nodeProperties} parent={parent} settings={settings} />
       </TabPanel>
       <TabPanel value={tabValue} index={2}>
         {_.isEmpty(nodeProperties) ? (
