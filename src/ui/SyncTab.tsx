@@ -296,6 +296,17 @@ export default theme;
                 />
               </div>
             </div>
+            <div style={{ textAlign: 'center' }}>
+              This provider needs a GitHub workflow created. See{' '}
+              <a href="https://docs.github.com/en/actions/learn-github-actions/understanding-github-actions#create-an-example-workflow" target="_blank">
+                instructions
+              </a>{' '}
+              and{' '}
+              <a href="https://gist.github.com/erisvaldojunior/47bd8bf5eca8efa8ea6874a90bf161fc" target="_blank">
+                figma.yml
+              </a>{' '}
+              example file
+            </div>
             <div style={{ display: 'flex', gap: '20px', justifyContent: 'center' }}>
               <Button variant="outlined" onClick={onPressStoreSettings}>
                 SAVE
