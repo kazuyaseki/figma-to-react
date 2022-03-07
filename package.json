@@ -35,7 +35,7 @@
     "babel-jest": "27.0.6",
     "css-loader": "5.2.5",
     "eslint": "7.23.0",
-    "eslint-config-prettier": "8.1.0",
+    "eslint-config-prettier": "8.5.0",
     "figma-api-stub": "0.0.48",
     "jest": "27.0.6",
     "prettier": "2.2.1",
