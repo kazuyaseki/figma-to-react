@@ -28,6 +28,8 @@ function init() {
     figma.closePlugin()
   } else {
     getSettings().then((settings) => {
+      console.log('init() settings:')
+      console.log(settings)
       updateTokensFromFigmaStyles(sharedPluginData, settings)
     })
     getProviderSettings().then((providerSettings) => {
@@ -221,11 +223,13 @@ async function updateTokensFromFigmaStyles(sharedPluginData: Store, settings?: a
   const textStyles = figma.getLocalTextStyles()
 
   const initialTimestamp = Date.now()
+
   const nodes = figmaDocument.findAllWithCriteria({
     types: ['COMPONENT', 'COMPONENT_SET', 'FRAME', 'INSTANCE', 'TEXT']
   })
 
   let clientStorageSettings = settings
+
   if (_.isEmpty(clientStorageSettings)) {
     clientStorageSettings = loadDefaultSettings()
   }
@@ -236,7 +240,7 @@ async function updateTokensFromFigmaStyles(sharedPluginData: Store, settings?: a
     const fillStyleId = node.fillStyleId as string
     if (!_.isEmpty(effectStyleId)) {
       const effectStyleById = figma.getStyleById(effectStyleId) as EffectStyle
-      const effectStyleByIdName = settings.camelCase ? _.camelCase(effectStyleById.name) : effectStyleById.name
+      const effectStyleByIdName = clientStorageSettings.camelCase ? _.camelCase(effectStyleById.name) : effectStyleById.name
       const currentEffectStyle = effectStyles.find((effectStyle) => effectStyle.id === node.effectStyleId || effectStyle.name === effectStyleByIdName)
       if (!currentEffectStyle) {
         effectStyles.push(effectStyleById)
@@ -244,7 +248,7 @@ async function updateTokensFromFigmaStyles(sharedPluginData: Store, settings?: a
     }
     if (!_.isEmpty(fillStyleId)) {
       const paintStyleById = figma.getStyleById(fillStyleId) as PaintStyle
-      const paintStyleByIdName = settings.camelCase ? _.camelCase(paintStyleById.name) : paintStyleById.name
+      const paintStyleByIdName = clientStorageSettings.camelCase ? _.camelCase(paintStyleById.name) : paintStyleById.name
       const currentPaintStyle = paintStyles.find((paintStyle) => paintStyle.id === node.fillStyleId || paintStyle.name === paintStyleByIdName)
       if (!currentPaintStyle) {
         paintStyles.push(paintStyleById)
@@ -254,7 +258,7 @@ async function updateTokensFromFigmaStyles(sharedPluginData: Store, settings?: a
       const textStyleId = node.textStyleId as string
       if (!_.isEmpty(textStyleId)) {
         const textStyleById = figma.getStyleById(textStyleId) as TextStyle
-        const textStyleByIdName = settings.camelCase ? _.camelCase(textStyleById.name) : textStyleById.name
+        const textStyleByIdName = clientStorageSettings.camelCase ? _.camelCase(textStyleById.name) : textStyleById.name
         const currentTextStyle = textStyles.find((textStyle) => textStyle.id === node.textStyleId || textStyle.name === textStyleByIdName)
         if (!currentTextStyle) {
           textStyles.push(textStyleById)
