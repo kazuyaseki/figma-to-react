@@ -11,7 +11,7 @@ import { getUpdateableProperties, updateNode } from './core/updateFigma'
 import { Store } from './model/Store'
 import { updateColorsTokensFromFigmaStyles, updateEffectsTokensFromFigmaStyles, updateGridsTokensFromFigmaStyles, updateTextsTokensFromFigmaStyles } from './core/handleFigmaStyles'
 import * as _ from 'lodash'
-import { loadDefaultSettings } from './model/Settings'
+import { getDefaultSettings } from './model/Settings'
 
 const figmaDocument = figma.root
 
@@ -28,8 +28,7 @@ function init() {
     figma.closePlugin()
   } else {
     getSettings().then((settings) => {
-      console.log('init() settings:')
-      console.log(settings)
+      figma.ui.postMessage({ settings, nodeProperties: {}, sharedPluginData })
       updateTokensFromFigmaStyles(sharedPluginData, settings)
     })
     getProviderSettings().then((providerSettings) => {
@@ -231,7 +230,7 @@ async function updateTokensFromFigmaStyles(sharedPluginData: Store, settings?: a
   let clientStorageSettings = settings
 
   if (_.isEmpty(clientStorageSettings)) {
-    clientStorageSettings = loadDefaultSettings()
+    clientStorageSettings = getDefaultSettings()
   }
 
   nodes.forEach((node: ComponentNode | ComponentSetNode | FrameNode | InstanceNode | TextNode) => {

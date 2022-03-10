@@ -7,7 +7,7 @@ import Spacer from './Spacer'
 import { buildDesignTokensJson, buildRestyleThemeObject } from '../core/buildDesignTokensJson'
 import { Autocomplete, Button, TextField } from '@material-ui/core'
 
-export const renderSyncTab = (storedProviderSettings: any, parent: any) => {
+export const SyncTab = ({ parent, providerSettings }: any) => {
   const [branchField, setBranchField] = React.useState('')
   const [designTokensCode, setDesignTokensCode] = React.useState('')
   const [repositoryField, setRepositoryField] = React.useState('')
@@ -24,15 +24,15 @@ export const renderSyncTab = (storedProviderSettings: any, parent: any) => {
   const getDesignTokensByGroup = useStore((state) => state.getDesignTokensByGroup)
 
   React.useEffect(() => {
-    if (!_.isEmpty(storedProviderSettings)) {
-      const { branch, repo, token, user, workflow } = storedProviderSettings
+    if (!_.isEmpty(providerSettings)) {
+      const { branch, repo, token, user, workflow } = providerSettings
       setBranchField(branch)
       setRepositoryField(repo)
       setTokenField(token)
       setUsernameField(user)
       setWorkflowField(workflow)
     }
-  }, [storedProviderSettings])
+  }, [providerSettings])
 
   React.useEffect(() => {
     const designTokensJson = buildDesignTokensJson(designTokens, designTokensGroups, getDesignTokensByGroup)
@@ -133,7 +133,7 @@ export default theme;
   }
 
   const onPressStoreSettings = () => {
-    const providerSettings = {
+    const currentProviderSettings = {
       branch: branchField,
       user: usernameField,
       repo: repositoryField,
@@ -141,7 +141,7 @@ export default theme;
       workflow: workflowField
     }
 
-    const msg: messageTypes = { type: 'store-provider-settings', providerSettings }
+    const msg: messageTypes = { type: 'store-provider-settings', providerSettings: currentProviderSettings }
     parent.postMessage({ pluginMessage: msg }, '*')
   }
 

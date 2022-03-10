@@ -206,7 +206,7 @@ export const PropertiesTab = ({ nodeProperties, parent, settings }: any) => {
   return (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
       {_.isEmpty(nodeProperties) ? (
-        <span style={{ fontWeight: 'bold' }}>No Figma Node selected.</span>
+        <span style={{ fontWeight: 'bold', textAlign: 'center', marginTop: '20px' }}>No Figma Node selected.</span>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column' }}>
           <div>

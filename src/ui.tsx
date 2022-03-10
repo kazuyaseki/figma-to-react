@@ -19,8 +19,9 @@ import { renderDesignTokensTab } from './ui/DesignTokensTab'
 import { PropertiesTab } from './ui/PropertiesTab'
 import { useStore } from './hooks/useStore'
 import { Store } from './model/Store'
-import { renderSyncTab } from './ui/SyncTab'
 import { SettingsTab } from './ui/SettingsTab'
+import { SyncTab } from './ui/SyncTab'
+import { getDefaultSettings } from './model/Settings'
 
 function escapeHtml(str: string) {
   str = str.replace(/&/g, '&amp;')
@@ -84,6 +85,9 @@ const App: React.VFC = () => {
   // set initial values taken from figma storage
   React.useEffect(() => {
     onmessage = (event) => {
+      console.log('UI event data pluginMessage:')
+      console.log(event.data.pluginMessage)
+
       const codeStr = event.data.pluginMessage.generatedCodeStr + '\n\n' + event.data.pluginMessage.cssString
       setCode(codeStr)
 
@@ -93,6 +97,7 @@ const App: React.VFC = () => {
       setUserComponentSettings(event.data.pluginMessage.userComponentSettings)
 
       const settings = event.data.pluginMessage.settings
+
       if (settings) {
         setSettings(settings)
       }
@@ -188,7 +193,9 @@ const App: React.VFC = () => {
       </TabPanel>
       <TabPanel value={tabValue} index={2}>
         {_.isEmpty(nodeProperties) ? (
-          <p className={styles.generatedCode}>// No Figma Node selected</p>
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <span style={{ fontWeight: 'bold', textAlign: 'center', marginTop: '20px' }}>No Figma Node selected.</span>
+          </div>
         ) : (
           <div>
             <div className={styles.container}>
@@ -258,7 +265,7 @@ const App: React.VFC = () => {
         )}
       </TabPanel>
       <TabPanel value={tabValue} index={3}>
-        {renderSyncTab(providerSettings, parent)}
+        <SyncTab parent={parent} providerSettings={providerSettings} />
       </TabPanel>
       <TabPanel value={tabValue} index={4}>
         <SettingsTab parent={parent} settings={settings} />
