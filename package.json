@@ -38,7 +38,7 @@
     "eslint-config-prettier": "8.1.0",
     "figma-api-stub": "0.0.48",
     "jest": "27.0.6",
-    "prettier": "2.2.1",
+    "prettier": "2.7.1",
     "style-loader": "2.0.0",
     "ts-loader": "8.0.17",
     "ts-node": "9.1.1",
