@@ -149,12 +149,22 @@ export function getCssDataForTag(node: SceneNode, unitType: UnitType, textCount:
       properties.push({ name: 'text-align', value: textAlignCssValues[node.textAlignHorizontal] })
       properties.push({ name: 'vertical-align', value: textVerticalAlignCssValues[node.textAlignVertical] })
 
-      if (node.textStyleId && typeof node.textStyleId === 'string') {
-        const style = figma.getStyleById(node.textStyleId)
-        properties.push({
-          name: 'typography',
-          value: `$${style?.name.split('/').join('-').split(' ').join('-').toLowerCase()}`
-        })
+      if (node.textStyleId) {
+        if (typeof node.textStyleId === 'string') {
+          const style = figma.getStyleById(node.textStyleId)
+          properties.push({
+            name: 'typography',
+            value: `$${style?.name.split('/').join('-').split(' ').join('-').toLowerCase()}`
+          })
+        } else {
+          // 混合スタイルのテキストの場合
+          const styledId = node.getRangeTextStyleId(0, 1)
+          const style = figma.getStyleById(styledId as string)
+          properties.push({
+            name: 'typography',
+            value: `$${style?.name.split('/').join('-').split(' ').join('-').toLowerCase()}`
+          })
+        }
       } else {
         properties.push({ name: 'font-size', value: `${node.fontSize as number}px` })
         properties.push({ name: 'font-family', value: (node.fontName as FontName).family })
