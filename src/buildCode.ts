@@ -2,7 +2,7 @@ import { capitalizeFirstLetter } from './utils/stringUtils'
 import { Tag } from './buildTagTree'
 import { buildClassName } from './utils/cssUtils'
 
-type CssStyle = 'css' | 'styled-components'
+type CssStyle = 'css' | 'styled-components' | 'stitches'
 
 function buildSpaces(baseSpaces: number, level: number) {
   let spacesStr = ''
@@ -41,7 +41,7 @@ function getTagName(tag: Tag, cssStyle: CssStyle) {
     }
     return guessTagName(tag.name)
   }
-  return tag.isText ? 'Text' : tag.name.replace(/\s/g, '')
+  return tag.isText ? 'Text' : capitalizeFirstLetter(tag.name.replace(/\s/g, ''))
 }
 
 function getClassName(tag: Tag, cssStyle: CssStyle) {
@@ -72,6 +72,7 @@ function buildJsxString(tag: Tag, cssStyle: CssStyle, level: number) {
   if (!tag) {
     return ''
   }
+
   const spaceString = buildSpaces(4, level)
   const hasChildren = tag.children.length > 0
 
@@ -86,8 +87,35 @@ function buildJsxString(tag: Tag, cssStyle: CssStyle, level: number) {
   return openingTag + childTags + closingTag
 }
 
-export function buildCode(tag: Tag, css: CssStyle): string {
-  return `const ${capitalizeFirstLetter(tag.name.replace(/\s/g, ''))}: React.VFC = () => {
+function isBoolean(values: string[]) {
+  return values.length === 2 && values.find((val) => val === 'true') && values.find((val) => val === 'false')
+}
+
+export function buildCode(
+  tag: Tag,
+  css: CssStyle,
+  props: string[],
+  variantGroupProperties: {
+    [property: string]: {
+      values: string[]
+    }
+  }
+): string {
+  return `import { styled } from '@/styles/stitches.config';
+
+type Props = {
+  ${props
+    .map(
+      (prop) =>
+        `${prop
+          .split(' ')
+          .map((s, index) => (index === 0 ? s.toLowerCase() : capitalizeFirstLetter(s)))
+          .join('')}: ${isBoolean(variantGroupProperties[prop].values) ? 'boolean' : variantGroupProperties[prop].values.map((val) => `"${val}"`).join(' | ')}`
+    )
+    .join(',\n  ')}
+}
+  
+const ${capitalizeFirstLetter(tag.name.replace(/\s/g, ''))}: React.FC = (props: Props) => {
   return (
 ${buildJsxString(tag, css, 0)}
   )

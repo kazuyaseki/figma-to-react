@@ -7,6 +7,7 @@ import { buildTagTree } from './buildTagTree'
 import { buildCssString, CssStyle } from './buildCssString'
 import { UserComponentSetting } from './userComponentSetting'
 import { TextCount } from './getCssDataForTag'
+import { capitalizeFirstLetter } from './utils/stringUtils'
 
 figma.showUI(__html__, { width: 480, height: 480 })
 
@@ -42,10 +43,44 @@ async function generate(node: SceneNode, config: { cssStyle?: CssStyle; unitType
   }
 
   const tag = await modifyTreeForComponent(originalTagTree, figma)
-  const generatedCodeStr = buildCode(tag, cssStyle)
+
+  const component = tag.node.parent
+  let variantGroupProperties: {
+    [property: string]: {
+      values: string[]
+    }
+  } = {}
+  let props: string[] = []
+  if (component?.type === 'COMPONENT_SET') {
+    tag.name = capitalizeFirstLetter(component.name)
+    variantGroupProperties = component.variantGroupProperties
+    props = Object.keys(variantGroupProperties)
+  }
+  const generatedCodeStr = buildCode(tag, cssStyle, props, variantGroupProperties)
   const cssString = buildCssString(tag, cssStyle)
 
-  figma.ui.postMessage({ generatedCodeStr, cssString, cssStyle, unitType, userComponentSettings })
+  const storyString = `import { ComponentMeta, ComponentStory } from '@storybook/react';
+import { ${tag.name} } from '.';
+
+export default {
+  title: '${tag.name}',
+  component: ${tag.name},
+  argTypes: {
+    ${props
+      .map(
+        (prop) => `${prop}: {
+      options: [${variantGroupProperties[prop].values.map((val) => `"${val}"`).join(',')}],
+      control: { type: 'radio' },
+    }`
+      )
+      .join(',\n    ')}
+  },
+} as ComponentMeta<typeof ${tag.name}>;
+
+const Template: ComponentStory<typeof ${tag.name}> = (args) => <${tag.name} {...args} />;
+`
+
+  figma.ui.postMessage({ generatedCodeStr, cssString, cssStyle, unitType, userComponentSettings, storyString, componentName: tag.name })
 }
 
 if (selectedNodes.length > 1) {

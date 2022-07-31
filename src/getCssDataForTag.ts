@@ -30,7 +30,8 @@ const justifyContentCssValues = {
 const alignItemsCssValues = {
   MIN: 'flex-start',
   MAX: 'flex-end',
-  CENTER: 'center'
+  CENTER: 'center',
+  BASELINE: 'center'
 }
 
 const textAlignCssValues = {

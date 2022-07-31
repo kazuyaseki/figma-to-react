@@ -2,6 +2,7 @@ import * as React from 'react'
 import * as ReactDom from 'react-dom'
 import { CssStyle } from './buildCssString'
 import { UnitType } from './buildSizeStringByUnit'
+import { generatePR } from './generatePR'
 import { messageTypes } from './messagesTypes'
 import styles from './ui.css'
 import Spacer from './ui/Spacer'
@@ -52,6 +53,8 @@ const unitTypes: { value: UnitType; label: string }[] = [
 
 const App: React.VFC = () => {
   const [code, setCode] = React.useState('')
+  const [storyString, setStoryString] = React.useState('')
+  const [componentName, setComponentName] = React.useState('')
   const [selectedCssStyle, setCssStyle] = React.useState<CssStyle>('css')
   const [selectedUnitType, setUnitType] = React.useState<UnitType>('px')
   const [userComponentSettings, setUserComponentSettings] = React.useState<UserComponentSetting[]>([])
@@ -103,6 +106,8 @@ const App: React.VFC = () => {
     onmessage = (event) => {
       setCssStyle(event.data.pluginMessage.cssStyle)
       setUnitType(event.data.pluginMessage.unitType)
+      setStoryString(event.data.pluginMessage.storyString)
+      setComponentName(event.data.pluginMessage.componentName)
       const codeStr = event.data.pluginMessage.generatedCodeStr + '\n\n' + event.data.pluginMessage.cssString
       setCode(codeStr)
       setUserComponentSettings(event.data.pluginMessage.userComponentSettings)
@@ -117,9 +122,15 @@ const App: React.VFC = () => {
 
         <Spacer axis="vertical" size={12} />
 
-        <div className={styles.buttonLayout}>
+        {/* <div className={styles.buttonLayout}>
           <button className={styles.copyButton} onClick={copyToClipboard}>
             Copy to clipboard
+          </button>
+        </div> */}
+
+        <div className={styles.buttonLayout}>
+          <button className={styles.copyButton} onClick={() => generatePR(componentName, code, storyString)}>
+            Create Pull Request
           </button>
         </div>
       </div>
