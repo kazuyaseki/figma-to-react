@@ -102,12 +102,26 @@ export function getCssDataForTag(node: SceneNode, unitType: UnitType, textCount:
 
       if ((node.fills as Paint[]).length > 0 && (node.fills as Paint[])[0].type !== 'IMAGE') {
         const paint = (node.fills as Paint[])[0]
-        properties.push({ name: 'background-color', value: buildColorString(paint) })
+        if (typeof node.fillStyleId === 'string') {
+          const style = figma.getStyleById(node.fillStyleId)
+          properties.push({ name: 'background-color', value: `$${style?.name.split('/').join('-').split(' ').join('-').toLowerCase()}` })
+        } else {
+          properties.push({ name: 'background-color', value: buildColorString(paint) })
+        }
       }
 
       if ((node.strokes as Paint[]).length > 0) {
         const paint = (node.strokes as Paint[])[0]
-        properties.push({ name: 'border', value: `${buildSizeStringByUnit(node.strokeWeight, unitType)} solid ${buildColorString(paint)}` })
+
+        if (typeof node.strokeStyleId === 'string') {
+          const style = figma.getStyleById(node.strokeStyleId)
+          properties.push({
+            name: 'border',
+            value: `${buildSizeStringByUnit(node.strokeWeight, unitType)} solid ${`$${style?.name.split('/').join('-').split(' ').join('-').toLowerCase()}`}`
+          })
+        } else {
+          properties.push({ name: 'border', value: `${buildSizeStringByUnit(node.strokeWeight, unitType)} solid ${buildColorString(paint)}` })
+        }
       }
     }
 
@@ -134,35 +148,49 @@ export function getCssDataForTag(node: SceneNode, unitType: UnitType, textCount:
     if (node.type === 'TEXT') {
       properties.push({ name: 'text-align', value: textAlignCssValues[node.textAlignHorizontal] })
       properties.push({ name: 'vertical-align', value: textVerticalAlignCssValues[node.textAlignVertical] })
-      properties.push({ name: 'font-size', value: `${node.fontSize as number}px` })
-      properties.push({ name: 'font-family', value: (node.fontName as FontName).family })
 
-      const letterSpacing = node.letterSpacing as LetterSpacing
-      if (letterSpacing.value !== 0) {
-        properties.push({ name: 'letter-spacing', value: letterSpacing.unit === 'PIXELS' ? buildSizeStringByUnit(letterSpacing.value, unitType) : letterSpacing.value + '%' })
+      if (node.textStyleId && typeof node.textStyleId === 'string') {
+        const style = figma.getStyleById(node.textStyleId)
+        properties.push({
+          name: 'typography',
+          value: `$${style?.name.split('/').join('-').split(' ').join('-').toLowerCase()}`
+        })
+      } else {
+        properties.push({ name: 'font-size', value: `${node.fontSize as number}px` })
+        properties.push({ name: 'font-family', value: (node.fontName as FontName).family })
+
+        const letterSpacing = node.letterSpacing as LetterSpacing
+        if (letterSpacing.value !== 0) {
+          properties.push({ name: 'letter-spacing', value: letterSpacing.unit === 'PIXELS' ? buildSizeStringByUnit(letterSpacing.value, unitType) : letterSpacing.value + '%' })
+        }
+
+        type LineHeightWithValue = {
+          readonly value: number
+          readonly unit: 'PIXELS' | 'PERCENT'
+        }
+
+        properties.push({
+          name: 'line-height',
+          value:
+            (node.lineHeight as LineHeight).unit === 'AUTO'
+              ? 'auto'
+              : (node.letterSpacing as LetterSpacing).unit === 'PIXELS'
+              ? buildSizeStringByUnit((node.lineHeight as LineHeightWithValue).value, unitType)
+              : (node.lineHeight as LineHeightWithValue).value + '%'
+        })
       }
-
-      type LineHeightWithValue = {
-        readonly value: number
-        readonly unit: 'PIXELS' | 'PERCENT'
-      }
-
-      properties.push({
-        name: 'line-height',
-        value:
-          (node.lineHeight as LineHeight).unit === 'AUTO'
-            ? 'auto'
-            : (node.letterSpacing as LetterSpacing).unit === 'PIXELS'
-            ? buildSizeStringByUnit((node.lineHeight as LineHeightWithValue).value, unitType)
-            : (node.lineHeight as LineHeightWithValue).value + '%'
-      })
 
       if (node.textDecoration === 'STRIKETHROUGH' || node.textDecoration === 'UNDERLINE') {
         properties.push({ name: 'text-decoration', value: textDecorationCssValues[node.textDecoration] })
       }
       if ((node.fills as Paint[]).length > 0) {
-        const paint = (node.fills as Paint[])[0]
-        properties.push({ name: 'color', value: buildColorString(paint) })
+        if (typeof node.fillStyleId === 'string') {
+          const style = figma.getStyleById(node.fillStyleId)
+          properties.push({ name: 'color', value: `$${style?.name.split('/').join('-').split(' ').join('-').toLowerCase()}` })
+        } else {
+          const paint = (node.fills as Paint[])[0]
+          properties.push({ name: 'color', value: buildColorString(paint) })
+        }
       }
     }
 
