@@ -24,6 +24,31 @@ const components: ComponentSetting[] = [
       tag.isComponent = true
       return tag
     }
+  },
+  {
+    name: 'Icon',
+    matcher: (node: SceneNode) => {
+      return node.name.includes('icon / ')
+    },
+    modifyFunc: (tag: Tag) => {
+      const iconType = tag.node.name
+        .replace('icon / ', '')
+        .replace(/[0-9]/g, '')
+        .split('/')
+        .map((s) => s.trim())
+        .join('-')
+        .split(' ')
+        .join('-')
+      tag.name = 'Icon'
+      tag.properties = [{ name: 'type', value: iconType }]
+
+      tag.children = []
+      tag.isComponent = true
+      tag.isImg = false
+      tag.css = { className: '', properties: [] }
+
+      return tag
+    }
   }
 ]
 
@@ -115,9 +140,9 @@ export async function modifyTreeForComponent(tree: Tag, _figma: PluginAPI) {
   const newTag = await modify(tree, _figma)
 
   if (newTag) {
-    newTag.children.forEach(async (child, index) => {
-      newTag.children[index] = await modifyTreeForComponent(child, _figma)
-    })
+    for (let i = 0; i < newTag.children.length; i++) {
+      newTag.children[i] = await modifyTreeForComponent(newTag.children[i], _figma)
+    }
   }
 
   return newTag
