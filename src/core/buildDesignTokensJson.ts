@@ -62,6 +62,21 @@ export const buildRestyleThemeObject = (designTokensJson: any) => {
           themeObject['breakpoints'][key] = `tokens.${groupKey}.${key}`
         })
       }
+    } else if (groupKey.toLocaleLowerCase() === 'figmaeffects') {
+      const effectValues = designTokensJson && designTokensJson[groupKey as keyof unknown]
+      if (!_.isEmpty(effectValues)) {
+        if (!themeObject['shadows']) {
+          themeObject['shadows'] = {}
+        }
+        Object.keys(effectValues).map((key) => {
+          themeObject['shadows'][key] = { 
+            color: `tokens.${groupKey}.${key}.color`,
+            offsetX: `tokens.${groupKey}.${key}.offset.x`,
+            offsetY: `tokens.${groupKey}.${key}.offset.y`,
+            radius: `tokens.${groupKey}.${key}.radius`
+          }
+        })
+      }
     }
   })
   // Get figma colors styles and add them to theme 'colors' key

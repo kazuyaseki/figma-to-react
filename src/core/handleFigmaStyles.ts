@@ -185,7 +185,7 @@ export function updateTextsTokensFromFigmaStyles(sharedPluginData: Store, localT
       }
 
       if (textStyle.letterSpacing && textStyle.letterSpacing.unit === 'PIXELS') {
-        textValue['letterSpacing'] = textStyle.letterSpacing.value
+        textValue['letterSpacing'] = +textStyle.letterSpacing.value.toFixed(2)
       }
 
       const figmaTextDesignToken = sharedPluginData.designTokens?.find((designToken: DesignToken) => designToken.tokenGroup === TEXT_STYLES_GROUP_NAME && designToken.id === textId)
